@@ -1,0 +1,6 @@
+.make.state
+safe/
+test1
+unittest
+*.swp
+.make*

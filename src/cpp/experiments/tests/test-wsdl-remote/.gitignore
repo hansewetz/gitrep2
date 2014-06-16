@@ -1,0 +1,12 @@
+soapServerLib.c
+soapServer.c
+client
+quote.h
+soapC.c
+soapH.h
+soapStub.h
+StockQuoteSoapBinding.GetLastTradePrice.req.xml
+StockQuoteSoapBinding.GetLastTradePrice.res.xml
+StockQuoteSoapBinding.nsmap
+soapClient.c
+soapClientLib.c

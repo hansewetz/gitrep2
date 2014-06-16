@@ -1,0 +1,193 @@
+===============================
+<<<<<<< machine: maffei@mtdata >>>>>>>
+<<<<<<< machine: diadem@mtdata >>>>>>>
+===============================
+
+----------------------
+Installation overview:
+----------------------
+xterm
+vim 7.3
+bison
+gmp-5.0.5
+mpfr-2.4.2
+mpc-0.8.1
+gcc-4.8-20121104
+boost_1_53_0
+boost-log-2.0
+instantclient_11_2 (C++ occi)
+boost dir_monito
+boost process
+cmake-2.8.9
+zlib-1.2.8
+openssl-1.0.1e
+libssh-0.5.3
+
+------------------------
+Notes:
+	(1)
+	when building TMDIR must be set correctly:
+	export TMPDIR=/tmp
+
+------------------------
+Tue Oct 15 08:13:41 CEST 2013
+	added '~mtdata/.vimrc' file containing the text 'syntax on'
+
+------------------------
+
+Tue Oct 15 08:13:41 CEST 2013
+        #installed xterm from RPM (xterm-215-8.el5_4.1.x86_64.rpm) under ~mtdata/installs
+        #1. copy the attached file on the machine in a new dir, let's say HANS (mkdir HANS)
+        #2. cd HANS
+        #   rpm2cpio xterm* > temp_file
+        #3. cpio -id <temp_file
+        #
+        #directory structure starting with 'usr/...' contains xterm
+------------------------
+
+
+Tue Oct 15 08:13:41 CEST 2013
+        #installed vim 7.3 in ~mtdata/installs
+        #./configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs
+        #make
+        #make install
+
+------------------------
+Tue Oct 15 08:13:41 CEST 2013
+	#installed bison (needed in order to compile gmp)
+	cd bison-3.0
+	mkdir build; cd build
+	.././configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs
+	make
+	make install
+
+------------------------
+
+Tue Oct 15 08:13:41 CEST 2013
+	#installed  gmp-5.0.5
+	cd gmp-5.0.5/
+	mkdir build; cd build
+	.././configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs
+	make
+	make check
+	make install
+------------------------
+
+
+Tue Oct 15 08:13:41 CEST 2013
+	#installed mpfr-2.4.2
+	cd mpfr-2.4.2
+	mkdir build; cd build
+	.././configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs --disable-shared --enable-static --with-gmp=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs
+	make
+	make check
+	make install
+------------------------
+
+
+Tue Oct 15 08:13:41 CEST 2013
+	#installed mpc-0.8.1
+	cd mpc-0.8.1
+	mkdir build;cd build
+	.././configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs  --disable-shared --enable-static --with-gmp=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs --with-mpfr=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs
+	make
+	make check
+	make install
+------------------------
+
+
+Tue Oct 15 08:13:41 CEST 2013
+	#installed gcc-4.8-20121104
+	cd gcc-4.8-20121104
+	mkdir build; cd build
+ 	.././configure ABI=64 --prefix=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs --with-gmp=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs --with-mpfr=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs --with-mpc=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs --enable-languages=c,c++ --disable-multilib --enable-libstdcxx-time
+	make
+	make install
+------------------------
+
+
+Tue Oct 15 08:13:41 CEST 2013
+	#installed boost_1_53_0
+	cd boost_1_53_0
+	./bootstrap.sh 
+	./b2 install --prefix=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs
+------------------------
+
+Tue Oct 15 08:13:41 CEST 2013
+	#installed boost-log-2.0
+	(see: http://mytechnotebook.wordpress.com/2011/01/04/how-to-build-and-install-boost-log)
+	cd boost-log-2.0
+	cd boost
+	cp -R log ~/installs/include/boost
+------------------------
+
+Tue Oct 15 08:13:41 CEST 2013
+        # installed C++ occi
+        # install file is called: instantclient_11_2
+        # it does not install automatically.
+        # Create 2 directories: installs/lib/occi, installs/include/occi
+        # copy all *.so* files into lib/occi and all *.h files into include/occi
+        # create the following links for libs:
+        #       ln -s libocci.so.11.1 libocci.so
+        #       ln -s libclntsh.so.11.1 libclntsh.s
+
+	
+------------------------
+
+Tue Oct 15 08:13:41 CEST 2013
+	#installed boost dir_monitor
+        unzip dir_monitor.zip
+        cd ~/installs/include/boost
+        cp -R ~/downloads/dir_monitor/src/* .
+
+
+------------------------
+
+Tue Oct 15 08:13:41 CEST 2013
+        #installed boost process (not an official boost version yet)
+        in download directory: unzip process.zip
+        there will be two directories: boost, lib
+        copy the stuff under boost into $INSTALL_ROOT/include/boost
+        no libraries, only header files
+
+------------------------
+Fri Oct 25 10:02:33 CEST 2013
+        installed cmake
+        tar xvf cmake-2.8.9.t
+        cd cmake-2.8.9
+         ./bootstrap --prefix=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs/
+        make
+        make install
+
+------------------------
+Fri Oct 25 10:12:23 CEST 2013
+        Installed zlib-1.2.8 (needed for cmake when compiling openssl)
+        cd zlib-1.2.8
+        ./configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs/
+        make
+        make install
+
+------------------------
+Fri Oct 25 10:12:23 CEST 2013
+        installed openssl-1.0.1e (neded to build libssh)
+        ./config --prefix=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs/ --shared
+        make
+        make install
+
+------------------------
+Fri Oct 25 10:20:58 CEST 2013
+        installed libssh-0.5.3
+        mkdir build; cd build
+        cmake -DCMAKE_INSTALL_PREFIX=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs  -DCMAKE_BUILD_TYPE=Debug ..
+        make
+        make install
+
+------------------------
+Tue Apr  8 10:08:36 CEST 2014
+	installed libboost_iostreams.so (needed for moses)
+	cd /ec/prod/exodus/dgt/local/exodus/user/mtdata/installs/lib64
+	ln -s /usr/lib64/libbz2.so.1 libbz2.so
+	cd ~mtdata/downloads/boost_1_53_0/libs/iostreams/build
+	../../../b2 install --prefix=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs/
+
+------------------------

@@ -1,0 +1,56 @@
+SUBDIRS =  \
+	fast-median \
+	find-cycle-list \
+	first-nonrepeating-char \
+	graph-ctor \
+	heap-siftdown \
+	heap-siftup \
+	isort \
+	max-profit \
+	merge-sort \
+	merge-streams \
+	node-append \
+	partition \
+	partition-template \
+	qsort \
+	qsort-lambda \
+	remove-chars-from-strings \
+	running-median \
+	running-median-simple-code \
+	selection-sort \
+	string_permutations \
+	string-reverse-part-of-string \
+	string-reverse-words \
+	str-reverse \
+	telephone-number-words \
+	track-m-smallest-numbers \
+	word2telephone-number \
+	string-replace-pattern-with-char \
+	string-rotate \
+	merge-sort-list \
+	swap-vars \
+	add-ints-bits \
+	subtract-ints-bits \
+	split-list \
+	kth-smallest \
+	tower-hanoi-recurse \
+	tower-hanoi-iterative \
+	little-endian \
+	selection-sort-recursive \
+	heap-create-linear \
+	sort-with-2-stacks \
+	tree-eval-prefix-expr \
+	tree-traversal \
+	tree-copy \
+	binary-search-logn \
+	find-first-1 \
+	test-find-longest-increasing-path-of-items \
+	generate-subsets \
+	string-permutations-upper-lower-case \
+	partitioned-timed \
+	random-select-m-n \
+	print-tree \
+	check-sum-equal-x
+
+include $(PROJECT_ROOT)/env/makerules/subdirs.rules
+

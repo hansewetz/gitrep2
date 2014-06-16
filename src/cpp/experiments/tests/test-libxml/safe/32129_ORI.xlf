@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.1" version="1.1">
+  <file original="ENTR-2010-00378-00-00-EN-ORI-00.odt" source-language="en" datatype="plaintext">
+    <body>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[2]/text:span[4]/text:span[0]/text:note[0]/text:note-citation[0]">
+        <source>1</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[2]/text:span[4]/text:span[0]/text:note[0]/text:note-body[0]/text:p[0]">
+        <source><g id="0"/>As defined in Annex 7 of the Consolidated Resolution on the Construction of Vehicles (R.E.3) (TRANS/WP.29/78/Rev.1/Amend.2, as last amended by Amend.4).</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[2]/text:span[6]/text:span[0]/text:note[0]/text:note-citation[0]">
+        <source>2</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[4]">
+        <source><g id="1"/>For the purposes of this Regulation, spare wheel and tyre substitute units in the form of run-flat tyres or a run-flat system in a totally deflated condition, are to be treated as being temporary use spare units as defined in paragraph 2.10. of the Regulation.</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[30]">
+        <source>2.2.1.8.<g id="2"/>the type and design of any tyre <g id="3"/>pressure monitoring system fitted to the vehicle,</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[36]">
+        <source>2.2.2.1.<g id="4"/>the manufacturer’s trade name or mark,</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[38]">
+        <source><x id="5" xid="office:document-content[0]/office:body[0]/office:text[0]/text:p[38]/text:soft-page-break[0]"/>2.2.2.2.<g id="6"/>vehicle features which significantly influence the performances of the tyre pressure monitoring system,</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[40]">
+        <source>2.2.2.3.<g id="7"/>the type and design of the tyre pressure monitoring system</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[45]">
+        <source>2.3.1.<g id="8"/>"Wheel size designation" means a designation comprising at least the nominal rim diameter, the nominal rim width and the rim profile;</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[47]">
+        <source>2.3.2.<g id="9"/>"Wheel offset" means the distance from the hub abutment face to the centre line of the rim.</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[50]">
+        <source>2.4.1.<g id="10"/>"Normal tyre" being a tyre that is suitable for all normal, on-road, conditions of use;</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[52]">
+        <source>2.4.2.<g id="11"/>"Temporary use spare tyre" being a tyre that is specifically designed to be different from a normal tyre and intended only for temporary use under restricted driving conditions;</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[64]">
+        <source>2.8.<g id="12"/>"Tyre structure" means the technical characteristics of the tyre's carcass. <g id="13"/>This may be bias ply (diagonal or cross ply), bias-belted, radial ply or run flat tyre as further defined in Regulation No. 30.</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[66]">
+        <source><x id="14" xid="office:document-content[0]/office:body[0]/office:text[0]/text:p[66]/text:soft-page-break[0]"/>2.9.<g id="15"/>"Standard spare unit" means an assembly of a wheel and tyre identical in terms of wheel and tyre size designations, wheel offset and tyre structure to that fitted in the same axle position and to the particular model or version of the vehicle for normal operation. <g id="16"/>It includes the case of a wheel that is produced from a different material, for example, steel instead of aluminium alloy, that may use different wheel fixing nut or bolt designs but which is otherwise identical to the wheel intended for normal operation.</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[68]">
+        <source>2.10.<g id="17"/>"Temporary use spare unit" means an assembly of any wheel and tyre that is not within that defined as a "Standard spare unit" in paragraph 2.9. <g id="18"/>Temporary use spare units may be of the following types:</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[70]">
+        <source>2.10.1.<g id="19"/>Type 1</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[71]">
+        <source><g id="20"/>An assembly in which the tyre is a temporary use spare tyre as defined in paragraph 2.4.2.;</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[73]">
+        <source>2.10.2.<g id="21"/>Type 2</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[74]">
+        <source><g id="22"/>An assembly in which the wheel has a different offset from that of the wheel fitted in the same axle position for normal operation of the vehicle;</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[76]">
+        <source>2.10.3.<g id="23"/>Type 3</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[77]">
+        <source><g id="24"/>An assembly in which the tyre is of a different structure from that fitted in the same axle position for normal operation of the vehicle;</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[79]">
+        <source>2.10.4.<g id="25"/>Type 4</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[80]">
+        <source><g id="26"/>An assembly in which the tyre is a normal tyre as defined in paragraph 2.4.1. but where the size designation of the wheel or the tyre or both, differ from those of the wheel or tyre fitted in the same axle position for normal operation of the vehicle;</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[82]">
+        <source>2.10.5.<g id="27"/>Type 5</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[83]">
+        <source><g id="28"/>An assembly in which a wheel and tyre unit as defined in paragraph 2.4.3. or 2.4.4. is fitted to the vehicle for normal, long term road use, but used in an emergency in a totally deflated condition;</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve" id="office:document-content[0]/office:body[0]/office:text[0]/text:p[91]">
+        <source>2.14.<g id="29"/>Tyre Pressure Monitoring System (TPMS)" means a system fitted on a vehicle, able to perform a function to evaluate the inflation pressure of the tyres or the variation of this inflation pressure over time and to transmit corresponding information to the user while the vehicle is running.</source>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

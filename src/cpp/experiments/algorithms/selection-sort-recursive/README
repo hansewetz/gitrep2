@@ -1,0 +1,15 @@
+- write graph ctor
+- write some dfs graph algorithms (print all vertices in each connected graphi, count all dijoints part of a graph))
+- write some bfs graph algorithms (print shortest path from one vertex to another)
+
+- write solution to knapsack problem
+- write a function checking two sets intersect (at least 3 solutions - pick the fastest one)
+
+- Write a method that takes a pointer to a Node structure as a parameter and returns a complete copy of the passed-in data structure. 
+The Node structure contains two pointers to other Node structures (from interview book)
+
+- string:       convert string to integer
+- list:/clever: split list into two list at middle
+- list/median:  median for list of numbers
+
+

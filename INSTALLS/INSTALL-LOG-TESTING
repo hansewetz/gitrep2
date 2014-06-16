@@ -1,0 +1,154 @@
+Tue Oct 15 18:02:10 CEST 2013
+	installed berkeley db
+	untar db-5.3.15.tar
+	cd to untared directory
+	cd to build_unix
+	 ../dist/configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/ --enable-compat185 --enable-dbm       --disable-static   --enable-cxx --enable-stl
+	make
+	make install
+
+Tue Oct 15 18:02:10 CEST 2013
+	installed cmake
+	tar xvf cmake-2.8.9.t
+	cd cmake-2.8.9
+	 ./bootstrap --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/
+	make
+	make install
+	
+
+Tue Oct 15 18:02:10 CEST 2013
+	Installed zlib-1.2.8 (needed for cmake when compiling openssl)
+	cd zlib-1.2.8
+	./configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/
+	make
+	make install
+
+
+Tue Oct 15 17:47:31 CEST 2013
+	installed openssl-1.0.1e (neded to build libssh)
+	./config --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/ --shared
+	make
+	make install
+
+
+Tue Oct 15 18:01:24 CEST 2013
+	installed libssh-0.5.3
+	mkdir build; cd build
+	cmake -DCMAKE_INSTALL_PREFIX=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs  -DCMAKE_BUILD_TYPE=Debug ..
+	make
+	make install
+
+
+Tue Oct 15 18:30:30 CEST 2013
+	installed xerces-c-3.1.1
+	mkdir build; cd build
+	.././configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/
+	make
+	make install
+
+
+Thu Oct 17 08:23:38 CEST 2013
+	installed clucene-core-2.3.3.4
+        cd clucene-core-2.3.3.4
+        mkdir build; cd build
+        cmake -DCMAKE_INSTALL_PREFIX:PATH=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/ ..
+        make
+        make install
+
+
+Thu Oct 17 09:18:15 CEST 2013
+        Install xml beans
+        tar xvf xsd-3.3.0-x86_64-linux-gnu.tar.tar
+        cd xsd-3.3.0-x86_64-linux-gnu
+        # code is precompiled
+        cd ~/installs
+        cd bin; cp ~/downloads/bin/xsd .
+        cd ~installs/include
+        cp -R ~/downloads/xsd-3.3.0-x86_64-linux-gnu/libxsd/ .
+
+
+Thu Oct 17 16:32:49 CEST 2013
+	NOTE! qhen compiling package 3.3 we get warning/error for signal in boost
+	installed wt-3.2.2-p1
+        mkdir build; cd build
+	cmake   -DBOOST_ROOT=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs -DCONFIGDIR=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/wt/etc/wt -DRUNDIR=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/wt/usr/wt -DCMAKE_INSTALL_PREFIX=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/ ../.
+	#NOTE! Make sure that the variable 'WT_NO_BOOST_RANDOM' is set to OFF in 'CMakeCache.txt'
+	make
+	make install
+
+Wed Apr 16 17:01:35 CEST 2014
+	installed ctags under ~ewetzha/installs
+
+Mon May  5 15:23:06 CEST 2014
+	installed ruby: ruby-2.1.1 (needed for qpid C++ - not yet installed)
+	cd ruby-2.1.1
+	./configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs
+	make install
+
+Mon May  5 16:34:27 CEST 2014
+	installed libuuid.
+	download from: https://www.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.42.9/
+	mkdir build; cd build
+	../configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs --enable-elf-shlibs
+	manually copy libuuid* and uuid.h to ~ewetzha/installs/{lib|include} - it builds lots of other libraries also
+
+Tue May  6 09:04:26 CEST 2014
+	installed apache qpid broker and API: qpid-cpp-0.26.tar.gz
+	<complicated installation>
+
+	requires: ruby + libuuid (see above)
+		automatic install: broker (qpidd) is installed) in ~/installs/sbin
+		manual install: spout drain command line programs are manually installed in ~/installs/bin
+	Need to do when compiling:
+		in build/../src/CMakeLists.txt add this in the file:
+			# NOTE!
+			link_directories( /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/lib )
+			include_directories( /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/include )
+			...
+			# there are problems finding the uuid.h file.
+			#CHECK_LIBRARY_EXISTS (uuid uuid_compare "" HAVE_UUID)
+			CHECK_INCLUDE_FILES(/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/include/uuid.h HAVE_UUID_H)
+
+			# hack one of the C++ files which includes uuid.h to include it with absolute path
+			# (see when compilation error occurs)
+	mkdir build; cd build
+	cmake -DCMAKE_INSTALL_PREFIX=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs ..
+	make
+	make test
+	make install
+
+Tue May  6 09:04:26 CEST 2014
+	installed qpid command line tools
+	<complicated installation>
+
+	the command line tools are python based + we must download several packages
+		QMF
+		C++ broker Commandline Tools (actually implemented in Python)
+		qpid Messaging API Python
+		(qpid-0.26  qpid-qmf-0.26  qpid-tools-0.26)
+	in each directory:
+		find the 'setup.py file and execute: 'python setup.py build'
+		go the the build directory and down to the lib directory
+		cp -R * ~/installs/python-lib
+	in 'qpid-0.26/python/build/scripts-2.7'
+		cp * ~/installs/bin
+	Notice that somewhere we must do:
+		export PYTHONPATH=~/installs/python-lib
+
+Mon Jun  2 14:54:49 CEST 2014
+	installed gSoap
+	- get gsoap_2.8.17.zip
+	- unzip it in downloads
+	- cd gsoap_2.8.17
+	- ./configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs
+	- make
+	- make install
+
+Fri Jun 13 14:56:45 CEST 2014
+	install libxml2-2.7.2.tar
+	tar xvf libxml2-2.7.2.tar
+	cd libxml2-2.7.2
+	mkdir build;cd build
+	../configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs
+	make
+	make install

@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:okp="okapi-framework:xliff-extensions" xmlns:its="http://www.w3.org/2005/11/its">
+<file original="test1.odt/content.xml" source-language="fr" target-language="fr" datatype="x-undefined" okp:inputEncoding="UTF-8">
+<body>
+<trans-unit id="1" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><g id="2"></g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2"></g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><g id="2"></g></g></mrk></target>
+</trans-unit>
+<trans-unit id="2" restype="x-text:p">
+<source xml:lang="fr">Gestion de la demande</source>
+<seg-source><mrk mid="0" mtype="seg">Gestion de la demande</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">Gestion de la demande</mrk></target>
+</trans-unit>
+<trans-unit id="3" restype="x-text:h">
+<source xml:lang="fr">Mission de l'unité </source>
+<seg-source><mrk mid="0" mtype="seg">Mission de l'unité </mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">Mission de l'unité </mrk></target>
+</trans-unit>
+<trans-unit id="4" restype="x-text:p">
+<source xml:lang="fr"><g id="1">La mission essentielle du Planning </g><g id="2">(</g><g id="3"><g id="4">DGT.S.1)</g></g><g id="5"> est:</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">La mission essentielle du Planning </g><g id="2">(</g><g id="3"><g id="4">DGT.S.1)</g></g><g id="5"> est:</g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">La mission essentielle du Planning </g><g id="2">(</g><g id="3"><g id="4">DGT.S.1)</g></g><g id="5"> est:</g></mrk></target>
+</trans-unit>
+<trans-unit id="5" restype="x-text:p">
+<source xml:lang="fr">l'application de la stratégie établie dans ce domaine par la Commission pour l'année 2007 et au-delà, </source>
+<seg-source><mrk mid="0" mtype="seg">l'application de la stratégie établie dans ce domaine par la Commission pour l'année </mrk><mrk mid="1" mtype="seg">2007 et au-delà, </mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">l'application de la stratégie établie dans ce domaine par la Commission pour l'année </mrk><mrk mid="1" mtype="seg">2007 et au-delà, </mrk></target>
+</trans-unit>
+<trans-unit id="6" restype="x-text:p">
+<source xml:lang="fr">la programmation des demandes de traduction, en coopération avec les Directions Générales et Services, pour permettre à la Commission de mener à terme son programme législatif et de travail, ainsi que remplir ses obligations en matière de communication multilingue, </source>
+<seg-source><mrk mid="0" mtype="seg">la programmation des demandes de traduction, en coopération avec les Directions Générales et Services, pour permettre à la Commission de mener à terme son programme législatif et de travail, ainsi que remplir ses obligations en matière de communication multilingue, </mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">la programmation des demandes de traduction, en coopération avec les Directions Générales et Services, pour permettre à la Commission de mener à terme son programme législatif et de travail, ainsi que remplir ses obligations en matière de communication multilingue, </mrk></target>
+</trans-unit>
+<trans-unit id="7" restype="x-text:p">
+<source xml:lang="fr">l'acceptation de demandes de traduction et leur assignation aux unités traduisantes après vérification de leur conformité avec la stratégie et la programmation, </source>
+<seg-source><mrk mid="0" mtype="seg">l'acceptation de demandes de traduction et leur assignation aux unités traduisantes après vérification de leur conformité avec la stratégie et la programmation, </mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">l'acceptation de demandes de traduction et leur assignation aux unités traduisantes après vérification de leur conformité avec la stratégie et la programmation, </mrk></target>
+</trans-unit>
+<trans-unit id="8" restype="x-text:p">
+<source xml:lang="fr"><bx id="1"/>l'organisation et la réalisation de toute autre action visant à l'équilibre entre offre et demande de traduction. <ex id="1"/></source>
+<seg-source><mrk mid="0" mtype="seg"><bx id="1"/>l'organisation et la réalisation de toute autre action visant à l'équilibre entre offre et demande de traduction.</mrk><mrk mid="1" mtype="seg"> <ex id="1"/></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><bx id="1"/>l'organisation et la réalisation de toute autre action visant à l'équilibre entre offre et demande de traduction.</mrk><mrk mid="1" mtype="seg"> <ex id="1"/></mrk></target>
+</trans-unit>
+<trans-unit id="9" restype="x-text:p">
+<source xml:lang="fr"><g id="1">Les démarches et actions quotidiennes des membres de </g><g id="2">l'unité doivent viser à atteindre ce but.</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Les démarches et actions quotidiennes des membres de </g><g id="2">l'unité doivent viser à atteindre ce but.</g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">Les démarches et actions quotidiennes des membres de </g><g id="2">l'unité doivent viser à atteindre ce but.</g></mrk></target>
+</trans-unit>
+<trans-unit id="10" restype="x-text:p">
+<source xml:lang="fr"><g id="1">Le document qui fixe le principal cadre de référence est la </g><g id="2">communication à la Commission (</g><bx id="3"/><bx id="4"/>SEC/2006/1489<ex id="4"/><ex id="3"/><bx id="5"/>) intitulée «La traduction à la Commission – Faire face aux défis en 2007 et au delà<ex id="5"/><g id="6">.</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Le document qui fixe le principal cadre de référence est la </g><g id="2">communication à la Commission (</g><bx id="3"/><bx id="4"/>SEC/</mrk><mrk mid="1" mtype="seg">2006/</mrk><mrk mid="2" mtype="seg">1489<ex id="4"/><ex id="3"/><bx id="5"/>) intitulée «La traduction à la Commission – Faire face aux défis en </mrk><mrk mid="3" mtype="seg">2007 et au delà<ex id="5"/><g id="6">.</g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">Le document qui fixe le principal cadre de référence est la </g><g id="2">communication à la Commission (</g><bx id="3"/><bx id="4"/>SEC/</mrk><mrk mid="1" mtype="seg">2006/</mrk><mrk mid="2" mtype="seg">1489<ex id="4"/><ex id="3"/><bx id="5"/>) intitulée «La traduction à la Commission – Faire face aux défis en </mrk><mrk mid="3" mtype="seg">2007 et au delà<ex id="5"/><g id="6">.</g></mrk></target>
+</trans-unit>
+<trans-unit id="11" restype="x-text:p">
+<source xml:lang="fr"></source>
+<seg-source><mrk mid="0" mtype="seg"></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"></mrk></target>
+</trans-unit>
+<trans-unit id="12" restype="x-text:p">
+<source xml:lang="fr">Personnes de contact:</source>
+<seg-source><mrk mid="0" mtype="seg">Personnes de contact:</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">Personnes de contact:</mrk></target>
+</trans-unit>
+<trans-unit id="13" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><g id="2">qui fait quoi dans l’unité DGT-S.1</g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2">qui fait quoi dans l’unité DGT-S.1</g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><g id="2">qui fait quoi dans l’unité DGT-S.1</g></g></mrk></target>
+</trans-unit>
+<trans-unit id="14" restype="x-text:p">
+<source xml:lang="fr"></source>
+<seg-source><mrk mid="0" mtype="seg"></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"></mrk></target>
+</trans-unit>
+<trans-unit id="15" restype="x-text:p">
+<source xml:lang="fr">Plus d’informations:</source>
+<seg-source><mrk mid="0" mtype="seg">Plus d’informations:</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">Plus d’informations:</mrk></target>
+</trans-unit>
+<trans-unit id="16" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><g id="2">Site web de l’unité DGT.S.1</g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2">Site web de l’unité DGT.S.1</g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><g id="2">Site web de l’unité DGT.S.1</g></g></mrk></target>
+</trans-unit>
+<trans-unit id="17" restype="x-text:p">
+<source xml:lang="fr"></source>
+<target xml:lang="fr"></target>
+</trans-unit>
+<trans-unit id="18" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><x id="2"/><g id="3"></g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><x id="2"/><g id="3"></g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><x id="2"/><g id="3"></g></g></mrk></target>
+</trans-unit>
+<trans-unit id="19" restype="x-text:h">
+<source xml:lang="fr"><bx id="1"/>L'interface avec les demandeurs. P<ex id="1"/><g id="2">oetry </g></source>
+<seg-source><mrk mid="0" mtype="seg"><bx id="1"/>L'interface avec les demandeurs.</mrk><mrk mid="1" mtype="seg"> P<ex id="1"/><g id="2">oetry </g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><bx id="1"/>L'interface avec les demandeurs.</mrk><mrk mid="1" mtype="seg"> P<ex id="1"/><g id="2">oetry </g></mrk></target>
+</trans-unit>
+<trans-unit id="20" restype="x-text:p">
+<source xml:lang="fr"><g id="1">Les services demandeurs introduisent leurs demandes de tradu</g><g id="2">ction via l’application Web appelée </g><g id="3"><g id="4">Poetry</g></g><bx id="5"/>. Les différents produits proposés par la DGT sont:<ex id="5"/></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Les services demandeurs introduisent leurs demandes de tradu</g><g id="2">ction via l’application Web appelée </g><g id="3"><g id="4">Poetry</g></g><bx id="5"/>.</mrk><mrk mid="1" mtype="seg"> Les différents produits proposés par la DGT sont:<ex id="5"/></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">Les services demandeurs introduisent leurs demandes de tradu</g><g id="2">ction via l’application Web appelée </g><g id="3"><g id="4">Poetry</g></g><bx id="5"/>.</mrk><mrk mid="1" mtype="seg"> Les différents produits proposés par la DGT sont:<ex id="5"/></mrk></target>
+</trans-unit>
+<trans-unit id="21" restype="x-text:p">
+<source xml:lang="fr">la traduction (TRA), </source>
+<seg-source><mrk mid="0" mtype="seg">la traduction (TRA), </mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">la traduction (TRA), </mrk></target>
+</trans-unit>
+<trans-unit id="22" restype="x-text:p">
+<source xml:lang="fr">le résumé écrit (RSE), </source>
+<seg-source><mrk mid="0" mtype="seg">le résumé écrit (RSE), </mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">le résumé écrit (RSE), </mrk></target>
+</trans-unit>
+<trans-unit id="23" restype="x-text:p">
+<source xml:lang="fr">le résumé oral (RSO), </source>
+<seg-source><mrk mid="0" mtype="seg">le résumé oral (RSO), </mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">le résumé oral (RSO), </mrk></target>
+</trans-unit>
+<trans-unit id="24" restype="x-text:p">
+<source xml:lang="fr">a révision linguistique (REV), </source>
+<seg-source><mrk mid="0" mtype="seg">a révision linguistique (REV), </mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">a révision linguistique (REV), </mrk></target>
+</trans-unit>
+<trans-unit id="25" restype="x-text:p">
+<source xml:lang="fr">la post-édition rapide (PER) et </source>
+<seg-source><mrk mid="0" mtype="seg">la post-édition rapide (PER) et </mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">la post-édition rapide (PER) et </mrk></target>
+</trans-unit>
+<trans-unit id="26" restype="x-text:p">
+<source xml:lang="fr">la traduction de phrases ou de termes isolés via la Hotline. </source>
+<seg-source><mrk mid="0" mtype="seg">la traduction de phrases ou de termes isolés via la Hotline. </mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">la traduction de phrases ou de termes isolés via la Hotline. </mrk></target>
+</trans-unit>
+<trans-unit id="27" restype="x-text:p">
+<source xml:lang="fr"><g id="1">Les demandes de </g><g id="2">TRA</g><g id="3">, </g><g id="4">RSO</g><g id="5">, </g><g id="6">RSO</g><g id="7"> et </g><g id="8">REV</g><bx id="9"/> arrivent aux secteurs 1 à 3 via Poetry. <ex id="9"/></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Les demandes de </g><g id="2">TRA</g><g id="3">, </g><g id="4">RSO</g><g id="5">, </g><g id="6">RSO</g><g id="7"> et </g><g id="8">REV</g><bx id="9"/> arrivent aux secteurs 1 à 3 via Poetry.</mrk><mrk mid="1" mtype="seg"> <ex id="9"/></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">Les demandes de </g><g id="2">TRA</g><g id="3">, </g><g id="4">RSO</g><g id="5">, </g><g id="6">RSO</g><g id="7"> et </g><g id="8">REV</g><bx id="9"/> arrivent aux secteurs 1 à 3 via Poetry.</mrk><mrk mid="1" mtype="seg"> <ex id="9"/></mrk></target>
+</trans-unit>
+<trans-unit id="28" restype="x-text:p">
+<source xml:lang="fr"><g id="1"></g><g id="2">Les demandes </g><g id="3">PER </g><g id="4">arrivent aussi via Poetry mais à l’unité </g><g id="5"><g id="6">S.2 «Traduction externe</g></g><bx id="7"/>», où elles sont entièrement prises en charge de l’acceptation de la demande jusqu’à l’envoi des traductions post-éditées au demandeur. <ex id="7"/></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"></g><g id="2">Les demandes </g><g id="3">PER </g><g id="4">arrivent aussi via Poetry mais à l’unité </g><g id="5"><g id="6">S.2 «Traduction externe</g></g><bx id="7"/>», où elles sont entièrement prises en charge de l’acceptation de la demande jusqu’à l’envoi des traductions post-éditées au demandeur.</mrk><mrk mid="1" mtype="seg"> <ex id="7"/></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"></g><g id="2">Les demandes </g><g id="3">PER </g><g id="4">arrivent aussi via Poetry mais à l’unité </g><g id="5"><g id="6">S.2 «Traduction externe</g></g><bx id="7"/>», où elles sont entièrement prises en charge de l’acceptation de la demande jusqu’à l’envoi des traductions post-éditées au demandeur.</mrk><mrk mid="1" mtype="seg"> <ex id="7"/></mrk></target>
+</trans-unit>
+<trans-unit id="29" restype="x-text:p">
+<source xml:lang="fr"><g id="1">Les demandes de traduction introduites </g><g id="2">par e-mail via la </g><g id="3"><g id="4">Hotline</g></g><g id="5"> sont gérées par l'unité </g><g id="6"><g id="7">D.2</g></g><g id="8"> aussi responsable de la traduction et révision des page du site web Europa.</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Les demandes de traduction introduites </g><g id="2">par e-mail via la </g><g id="3"><g id="4">Hotline</g></g><g id="5"> sont gérées par l'unité </g><g id="6"><g id="7">D.2</g></g><g id="8"> aussi responsable de la traduction et révision des page du site web Europa.</g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">Les demandes de traduction introduites </g><g id="2">par e-mail via la </g><g id="3"><g id="4">Hotline</g></g><g id="5"> sont gérées par l'unité </g><g id="6"><g id="7">D.2</g></g><g id="8"> aussi responsable de la traduction et révision des page du site web Europa.</g></mrk></target>
+</trans-unit>
+<trans-unit id="30" restype="x-text:p">
+<source xml:lang="fr">Toutes les personnes qui ont accès à l’Intranet de la Commission  ont accès à Poetry et peuvent préparer des demandes de traduction. Pour être envoyées à la DGT, elles doivent être validées par un viseur (rôle à attribuer dans Poetry par l’administrateur Poetry de chaque DG).</source>
+<seg-source><mrk mid="0" mtype="seg">Toutes les personnes qui ont accès à l’Intranet de la Commission  ont accès à Poetry et peuvent préparer des demandes de traduction.</mrk><mrk mid="1" mtype="seg"> Pour être envoyées à la DGT, elles doivent être validées par un viseur (rôle à attribuer dans Poetry par l’administrateur Poetry de chaque DG).</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">Toutes les personnes qui ont accès à l’Intranet de la Commission  ont accès à Poetry et peuvent préparer des demandes de traduction.</mrk><mrk mid="1" mtype="seg"> Pour être envoyées à la DGT, elles doivent être validées par un viseur (rôle à attribuer dans Poetry par l’administrateur Poetry de chaque DG).</mrk></target>
+</trans-unit>
+<trans-unit id="31" restype="x-text:p">
+<source xml:lang="fr"><g id="1">Chaque demande Poetry est constituée de </g><bx id="2"/>sept étapes lors desquelles le demandeur encode des informations importantes quant au texte à traduire, à la destination des traductions et aux personnes responsables de la demande.  Il y attache le fichier original à traduire et les documents de référence pouvant éventuellement aider à la traduction. <ex id="2"/></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Chaque demande Poetry est constituée de </g><bx id="2"/>sept étapes lors desquelles le demandeur encode des informations importantes quant au texte à traduire, à la destination des traductions et aux personnes responsables de la demande.</mrk><mrk mid="1" mtype="seg">  Il y attache le fichier original à traduire et les documents de référence pouvant éventuellement aider à la traduction.</mrk><mrk mid="2" mtype="seg"> <ex id="2"/></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">Chaque demande Poetry est constituée de </g><bx id="2"/>sept étapes lors desquelles le demandeur encode des informations importantes quant au texte à traduire, à la destination des traductions et aux personnes responsables de la demande.</mrk><mrk mid="1" mtype="seg">  Il y attache le fichier original à traduire et les documents de référence pouvant éventuellement aider à la traduction.</mrk><mrk mid="2" mtype="seg"> <ex id="2"/></mrk></target>
+</trans-unit>
+<trans-unit id="32" restype="x-text:p">
+<source xml:lang="fr"><g id="1">Du bon encodage des demandes Poetry dépend </g><bx id="2"/>leur traitement rapide et efficace par le Planning.  Les demandeurs peuvent bénéficier d’une formation Poetry, dispensée par le Help Desk de la DGT.<ex id="2"/></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Du bon encodage des demandes Poetry dépend </g><bx id="2"/>leur traitement rapide et efficace par le Planning.</mrk><mrk mid="1" mtype="seg">  Les demandeurs peuvent bénéficier d’une formation Poetry, dispensée par le Help Desk de la DGT.<ex id="2"/></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">Du bon encodage des demandes Poetry dépend </g><bx id="2"/>leur traitement rapide et efficace par le Planning.</mrk><mrk mid="1" mtype="seg">  Les demandeurs peuvent bénéficier d’une formation Poetry, dispensée par le Help Desk de la DGT.<ex id="2"/></mrk></target>
+</trans-unit>
+<trans-unit id="33" restype="x-text:p">
+<source xml:lang="fr"><g id="1">L</g><g id="2">orsqu’une demande de traduction est visée par le service demandeur, elle devient visible dans </g><g id="3"><g id="4"><g id="5">Suivi</g></g></g><bx id="6"/> (application de la DGT pour l'acceptation des demandes de traduction). La demande peut être prise en charge par le planning qui l'analyse, vérifie sa conformité, complète si nécessaire les informations (après contact avec le demandeur) et procède à son acceptation.  <ex id="6"/><g id="7">Suivi génère alors automatiquement un message au demandeur, lui indiquant que sa demande a été enregistrée, les détails relatifs aux langues cibles et aux délais étant visibles dans Poetry, le demandeur peut également y suivre l’état d'avancement des traductions demandées.</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">L</g><g id="2">orsqu’une demande de traduction est visée par le service demandeur, elle devient visible dans </g><g id="3"><g id="4"><g id="5">Suivi</g></g></g><bx id="6"/> (application de la DGT pour l'acceptation des demandes de traduction).</mrk><mrk mid="1" mtype="seg"> La demande peut être prise en charge par le planning qui l'analyse, vérifie sa conformité, complète si nécessaire les informations (après contact avec le demandeur) et procède à son acceptation.</mrk><mrk mid="2" mtype="seg">  <ex id="6"/><g id="7">Suivi génère alors automatiquement un message au demandeur, lui indiquant que sa demande a été enregistrée, les détails relatifs aux langues cibles et aux délais étant visibles dans Poetry, le demandeur peut également y suivre l’état d'avancement des traductions demandées.</g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">L</g><g id="2">orsqu’une demande de traduction est visée par le service demandeur, elle devient visible dans </g><g id="3"><g id="4"><g id="5">Suivi</g></g></g><bx id="6"/> (application de la DGT pour l'acceptation des demandes de traduction).</mrk><mrk mid="1" mtype="seg"> La demande peut être prise en charge par le planning qui l'analyse, vérifie sa conformité, complète si nécessaire les informations (après contact avec le demandeur) et procède à son acceptation.</mrk><mrk mid="2" mtype="seg">  <ex id="6"/><g id="7">Suivi génère alors automatiquement un message au demandeur, lui indiquant que sa demande a été enregistrée, les détails relatifs aux langues cibles et aux délais étant visibles dans Poetry, le demandeur peut également y suivre l’état d'avancement des traductions demandées.</g></mrk></target>
+</trans-unit>
+<trans-unit id="34" restype="x-text:p">
+<source xml:lang="fr"><g id="1">Si la demande </g><g id="2">n’est pas acceptable, elle doit être refusée</g><bx id="3"/>: le gestionnaire prévient le demandeur et indique la raison dans Suivi. Un message reprenant cette information est automatiquement envoyé au demandeur.<ex id="3"/></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Si la demande </g><g id="2">n’est pas acceptable, elle doit être refusée</g><bx id="3"/>:</mrk><mrk mid="1" mtype="seg"> le gestionnaire prévient le demandeur et indique la raison dans Suivi.</mrk><mrk mid="2" mtype="seg"> Un message reprenant cette information est automatiquement envoyé au demandeur.<ex id="3"/></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">Si la demande </g><g id="2">n’est pas acceptable, elle doit être refusée</g><bx id="3"/>:</mrk><mrk mid="1" mtype="seg"> le gestionnaire prévient le demandeur et indique la raison dans Suivi.</mrk><mrk mid="2" mtype="seg"> Un message reprenant cette information est automatiquement envoyé au demandeur.<ex id="3"/></mrk></target>
+</trans-unit>
+<trans-unit id="35" restype="x-text:p">
+<source xml:lang="fr"></source>
+<seg-source><mrk mid="0" mtype="seg"></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"></mrk></target>
+</trans-unit>
+<trans-unit id="36" restype="x-text:p">
+<source xml:lang="fr">Plus d’informations:</source>
+<seg-source><mrk mid="0" mtype="seg">Plus d’informations:</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">Plus d’informations:</mrk></target>
+</trans-unit>
+<trans-unit id="37" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><g id="2">Poetry</g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2">Poetry</g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><g id="2">Poetry</g></g></mrk></target>
+</trans-unit>
+<trans-unit id="38" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><g id="2">Post-édition rapide (PER)</g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2">Post-édition rapide (PER)</g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><g id="2">Post-édition rapide (PER)</g></g></mrk></target>
+</trans-unit>
+<trans-unit id="39" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><g id="2">Hotline</g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2">Hotline</g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><g id="2">Hotline</g></g></mrk></target>
+</trans-unit>
+<trans-unit id="40" restype="x-text:p">
+<source xml:lang="fr"></source>
+<target xml:lang="fr"></target>
+</trans-unit>
+<trans-unit id="41" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><x id="2"/><g id="3"></g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><x id="2"/><g id="3"></g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><x id="2"/><g id="3"></g></g></mrk></target>
+</trans-unit>
+<trans-unit id="42" restype="x-text:h">
+<source xml:lang="fr">Comment le Planning est-il organisé?</source>
+<seg-source><mrk mid="0" mtype="seg">Comment le Planning est-il organisé?</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">Comment le Planning est-il organisé?</mrk></target>
+</trans-unit>
+<trans-unit id="43" restype="x-text:p">
+<source xml:lang="fr"><g id="1">L’unité est organisée en </g><g id="2">quatre secteurs</g><bx id="3"/>: trois secteurs traitant les demandes de traduction des DGs et cabinets selon une répartition thématique et un secteur (e-Greffe) chargé de la gestion et transmission des traductions dans le cadre de e-Greffe, du Workload Balancing ainsi que de la représentation de la DGT après du réseau des coordinateurs législatifs.<ex id="3"/></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">L’unité est organisée en </g><g id="2">quatre secteurs</g><bx id="3"/>:</mrk><mrk mid="1" mtype="seg"> trois secteurs traitant les demandes de traduction des DGs et cabinets selon une répartition thématique et un secteur (e-Greffe) chargé de la gestion et transmission des traductions dans le cadre de e-Greffe, du Workload Balancing ainsi que de la représentation de la DGT après du réseau des coordinateurs législatifs.<ex id="3"/></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">L’unité est organisée en </g><g id="2">quatre secteurs</g><bx id="3"/>:</mrk><mrk mid="1" mtype="seg"> trois secteurs traitant les demandes de traduction des DGs et cabinets selon une répartition thématique et un secteur (e-Greffe) chargé de la gestion et transmission des traductions dans le cadre de e-Greffe, du Workload Balancing ainsi que de la représentation de la DGT après du réseau des coordinateurs législatifs.<ex id="3"/></mrk></target>
+</trans-unit>
+<trans-unit id="44" restype="x-text:p">
+<source xml:lang="fr">Chaque chef de secteur est responsable des aspects opérationnels (gestion des demandes de traduction) et administratifs de son secteur. Il est secondé par des administrateurs, un coordinateur et des gestionnaires. </source>
+<seg-source><mrk mid="0" mtype="seg">Chaque chef de secteur est responsable des aspects opérationnels (gestion des demandes de traduction) et administratifs de son secteur.</mrk><mrk mid="1" mtype="seg"> Il est secondé par des administrateurs, un coordinateur et des gestionnaires. </mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">Chaque chef de secteur est responsable des aspects opérationnels (gestion des demandes de traduction) et administratifs de son secteur.</mrk><mrk mid="1" mtype="seg"> Il est secondé par des administrateurs, un coordinateur et des gestionnaires. </mrk></target>
+</trans-unit>
+<trans-unit id="45" restype="x-text:p">
+<source xml:lang="fr"><g id="1"></g><g id="2">Un </g><g id="3"><g id="4">vade-mecum</g></g><bx id="5"/> sur la responsabilité respective du planning et des unités linguistiques a été adopté en décembre 2006 et un guide sur les procédures internes du planning est en cours d'élaboration.<ex id="5"/></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"></g><g id="2">Un </g><g id="3"><g id="4">vade-mecum</g></g><bx id="5"/> sur la responsabilité respective du planning et des unités linguistiques a été adopté en décembre </mrk><mrk mid="1" mtype="seg">2006 et un guide sur les procédures internes du planning est en cours d'élaboration.<ex id="5"/></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"></g><g id="2">Un </g><g id="3"><g id="4">vade-mecum</g></g><bx id="5"/> sur la responsabilité respective du planning et des unités linguistiques a été adopté en décembre </mrk><mrk mid="1" mtype="seg">2006 et un guide sur les procédures internes du planning est en cours d'élaboration.<ex id="5"/></mrk></target>
+</trans-unit>
+<trans-unit id="46" restype="x-text:p">
+<source xml:lang="fr">Horaire</source>
+<seg-source><mrk mid="0" mtype="seg">Horaire</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">Horaire</mrk></target>
+</trans-unit>
+<trans-unit id="47" restype="x-text:p">
+<source xml:lang="fr"><bx id="1"/>De 8h30 à 18h<ex id="1"/><g id="2"> une présence est assurée dans chaque secteur du Planning.</g></source>
+<seg-source><mrk mid="0" mtype="seg"><bx id="1"/>De 8h</mrk><mrk mid="1" mtype="seg">30 à </mrk><mrk mid="2" mtype="seg">18h<ex id="1"/><g id="2"> une présence est assurée dans chaque secteur du Planning.</g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><bx id="1"/>De 8h</mrk><mrk mid="1" mtype="seg">30 à </mrk><mrk mid="2" mtype="seg">18h<ex id="1"/><g id="2"> une présence est assurée dans chaque secteur du Planning.</g></mrk></target>
+</trans-unit>
+<trans-unit id="48" restype="x-text:p">
+<source xml:lang="fr"><g id="1">En cas de demande urgente il est fortement recommandé aux demandeurs de prévenir dès que possible par téléphone le </g><g id="2"><g id="3"><g id="4">gestionnaire</g></g></g><g id="5"> ou le </g><g id="6"><g id="7"><g id="8">chef du secteur</g></g></g><bx id="9"/> en charge des traductions de la DG.  Celui-ci transmettra l'information aux chefs d'unités linguistiques et si nécessaire par e-mail aux boîtes fonctionnelles des  secrétariats afin de prévoir les effectifs nécessaires.<ex id="9"/></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">En cas de demande urgente il est fortement recommandé aux demandeurs de prévenir dès que possible par téléphone le </g><g id="2"><g id="3"><g id="4">gestionnaire</g></g></g><g id="5"> ou le </g><g id="6"><g id="7"><g id="8">chef du secteur</g></g></g><bx id="9"/> en charge des traductions de la DG.</mrk><mrk mid="1" mtype="seg">  Celui-ci transmettra l'information aux chefs d'unités linguistiques et si nécessaire par e-mail aux boîtes fonctionnelles des  secrétariats afin de prévoir les effectifs nécessaires.<ex id="9"/></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">En cas de demande urgente il est fortement recommandé aux demandeurs de prévenir dès que possible par téléphone le </g><g id="2"><g id="3"><g id="4">gestionnaire</g></g></g><g id="5"> ou le </g><g id="6"><g id="7"><g id="8">chef du secteur</g></g></g><bx id="9"/> en charge des traductions de la DG.</mrk><mrk mid="1" mtype="seg">  Celui-ci transmettra l'information aux chefs d'unités linguistiques et si nécessaire par e-mail aux boîtes fonctionnelles des  secrétariats afin de prévoir les effectifs nécessaires.<ex id="9"/></mrk></target>
+</trans-unit>
+<trans-unit id="49" restype="x-text:p">
+<source xml:lang="fr"><bx id="1"/>De 18h à 8h30<ex id="1"/><bx id="2"/> ainsi que 24h sur 24 les jours non ouvrables le régime de <ex id="2"/><g id="3"><g id="4"><g id="5">permanence DGT</g></g></g><g id="6"> est applicable.</g></source>
+<seg-source><mrk mid="0" mtype="seg"><bx id="1"/>De </mrk><mrk mid="1" mtype="seg">18h à 8h</mrk><mrk mid="2" mtype="seg">30<ex id="1"/><bx id="2"/> ainsi que </mrk><mrk mid="3" mtype="seg">24h sur </mrk><mrk mid="4" mtype="seg">24 les jours non ouvrables le régime de <ex id="2"/><g id="3"><g id="4"><g id="5">permanence DGT</g></g></g><g id="6"> est applicable.</g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><bx id="1"/>De </mrk><mrk mid="1" mtype="seg">18h à 8h</mrk><mrk mid="2" mtype="seg">30<ex id="1"/><bx id="2"/> ainsi que </mrk><mrk mid="3" mtype="seg">24h sur </mrk><mrk mid="4" mtype="seg">24 les jours non ouvrables le régime de <ex id="2"/><g id="3"><g id="4"><g id="5">permanence DGT</g></g></g><g id="6"> est applicable.</g></mrk></target>
+</trans-unit>
+<trans-unit id="50" restype="x-text:p">
+<source xml:lang="fr"></source>
+<seg-source><mrk mid="0" mtype="seg"></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"></mrk></target>
+</trans-unit>
+<trans-unit id="51" restype="x-text:p">
+<source xml:lang="fr">Personnes de contact:</source>
+<seg-source><mrk mid="0" mtype="seg">Personnes de contact:</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">Personnes de contact:</mrk></target>
+</trans-unit>
+<trans-unit id="52" restype="x-text:p">
+<source xml:lang="fr"><g id="1">Coordinateur secteur 1: </g><g id="2"><g id="3">Vittoria Tebaldi</g></g><g id="4"> </g><g id="5"></g><bx id="6"/> 65827<ex id="6"/></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Coordinateur secteur 1: </g><g id="2"><g id="3">Vittoria Tebaldi</g></g><g id="4"> </g><g id="5"></g><bx id="6"/> </mrk><mrk mid="1" mtype="seg">65827<ex id="6"/></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">Coordinateur secteur 1: </g><g id="2"><g id="3">Vittoria Tebaldi</g></g><g id="4"> </g><g id="5"></g><bx id="6"/> </mrk><mrk mid="1" mtype="seg">65827<ex id="6"/></mrk></target>
+</trans-unit>
+<trans-unit id="53" restype="x-text:p">
+<source xml:lang="fr"><g id="1">Coordinateur secteur 2: </g><g id="2"><g id="3">Margarida Barata</g></g><g id="4"> </g><g id="5"></g><bx id="6"/> 63039<ex id="6"/></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Coordinateur secteur 2: </g><g id="2"><g id="3">Margarida Barata</g></g><g id="4"> </g><g id="5"></g><bx id="6"/> </mrk><mrk mid="1" mtype="seg">63039<ex id="6"/></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">Coordinateur secteur 2: </g><g id="2"><g id="3">Margarida Barata</g></g><g id="4"> </g><g id="5"></g><bx id="6"/> </mrk><mrk mid="1" mtype="seg">63039<ex id="6"/></mrk></target>
+</trans-unit>
+<trans-unit id="54" restype="x-text:p">
+<source xml:lang="fr">Coordinateur secteur 3: <g id="1"><g id="2">Françoise Kolp</g></g> <g id="3"></g><g id="4"></g>32186</source>
+<seg-source><mrk mid="0" mtype="seg">Coordinateur secteur 3: <g id="1"><g id="2">Françoise Kolp</g></g> <g id="3"></g><g id="4"></g></mrk><mrk mid="1" mtype="seg">32186</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">Coordinateur secteur 3: <g id="1"><g id="2">Françoise Kolp</g></g> <g id="3"></g><g id="4"></g></mrk><mrk mid="1" mtype="seg">32186</mrk></target>
+</trans-unit>
+<trans-unit id="55" restype="x-text:p">
+<source xml:lang="fr"></source>
+<target xml:lang="fr"></target>
+</trans-unit>
+<trans-unit id="56" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><x id="2"/><g id="3"></g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><x id="2"/><g id="3"></g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><x id="2"/><g id="3"></g></g></mrk></target>
+</trans-unit>
+<trans-unit id="57" restype="x-text:h">
+<source xml:lang="fr">Prétraitement linguistique</source>
+<seg-source><mrk mid="0" mtype="seg">Prétraitement linguistique</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">Prétraitement linguistique</mrk></target>
+</trans-unit>
+<trans-unit id="58" restype="x-text:p">
+<source xml:lang="fr"><g id="1">Après acceptation intervient le </g><g id="2">prétraitement linguistique (TWB) </g><bx id="3"/>effectué par les gestionnaires de l'unité R.3 et plus précisément du secteur «outils multilingues». <ex id="3"/></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Après acceptation intervient le </g><g id="2">prétraitement linguistique (TWB) </g><bx id="3"/>effectué par les gestionnaires de l'unité R.3 et plus précisément du secteur «outils multilingues».</mrk><mrk mid="1" mtype="seg"> <ex id="3"/></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">Après acceptation intervient le </g><g id="2">prétraitement linguistique (TWB) </g><bx id="3"/>effectué par les gestionnaires de l'unité R.3 et plus précisément du secteur «outils multilingues».</mrk><mrk mid="1" mtype="seg"> <ex id="3"/></mrk></target>
+</trans-unit>
+<trans-unit id="59" restype="x-text:p">
+<source xml:lang="fr"></source>
+<seg-source><mrk mid="0" mtype="seg"></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"></mrk></target>
+</trans-unit>
+<trans-unit id="60" restype="x-text:p">
+<source xml:lang="fr">Personnes de contact:</source>
+<seg-source><mrk mid="0" mtype="seg">Personnes de contact:</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">Personnes de contact:</mrk></target>
+</trans-unit>
+<trans-unit id="61" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><g id="2">Preprocessing team</g></g><g id="3"> </g><g id="4"></g><bx id="5"/> 65631<ex id="5"/></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2">Preprocessing team</g></g><g id="3"> </g><g id="4"></g><bx id="5"/> </mrk><mrk mid="1" mtype="seg">65631<ex id="5"/></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><g id="2">Preprocessing team</g></g><g id="3"> </g><g id="4"></g><bx id="5"/> </mrk><mrk mid="1" mtype="seg">65631<ex id="5"/></mrk></target>
+</trans-unit>
+<trans-unit id="62" restype="x-text:p">
+<source xml:lang="fr"></source>
+<target xml:lang="fr"></target>
+</trans-unit>
+<trans-unit id="63" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><x id="2"/><g id="3"></g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><x id="2"/><g id="3"></g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><x id="2"/><g id="3"></g></g></mrk></target>
+</trans-unit>
+<trans-unit id="64" restype="x-text:h">
+<source xml:lang="fr">Listes des rapports et tableaux d’information</source>
+<seg-source><mrk mid="0" mtype="seg">Listes des rapports et tableaux d’information</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">Listes des rapports et tableaux d’information</mrk></target>
+</trans-unit>
+<trans-unit id="65" restype="x-text:p">
+<source xml:lang="fr"><g id="1">Le Planning produit régulièrement des rapports et des tableaux tels que:</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Le Planning produit régulièrement des rapports et des tableaux tels que:</g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">Le Planning produit régulièrement des rapports et des tableaux tels que:</g></mrk></target>
+</trans-unit>
+<trans-unit id="66" restype="x-text:p">
+<source xml:lang="fr"><g id="1"></g><g id="2"><g id="3">Tableau des priorités</g></g><g id="4"> </g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"></g><g id="2"><g id="3">Tableau des priorités</g></g><g id="4"> </g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"></g><g id="2"><g id="3">Tableau des priorités</g></g><g id="4"> </g></mrk></target>
+</trans-unit>
+<trans-unit id="67" restype="x-text:p">
+<source xml:lang="fr"><g id="1">Suivi du programme de travail de la Commission</g><g id="2"> </g><g id="3"><g id="4">(CLWP)</g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Suivi du programme de travail de la Commission</g><g id="2"> </g><g id="3"><g id="4">(CLWP)</g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">Suivi du programme de travail de la Commission</g><g id="2"> </g><g id="3"><g id="4">(CLWP)</g></g></mrk></target>
+</trans-unit>
+<trans-unit id="68" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><g id="2">Demand management Info</g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2">Demand management Info</g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><g id="2">Demand management Info</g></g></mrk></target>
+</trans-unit>
+<trans-unit id="69" restype="x-text:p">
+<source xml:lang="fr"></source>
+<target xml:lang="fr"></target>
+</trans-unit>
+<trans-unit id="70" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><x id="2"/><g id="3"></g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><x id="2"/><g id="3"></g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><x id="2"/><g id="3"></g></g></mrk></target>
+</trans-unit>
+<trans-unit id="71" restype="x-text:h">
+<source xml:lang="fr"><g id="1">C</g><g id="2">orrespondants de la traduction</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">C</g><g id="2">orrespondants de la traduction</g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">C</g><g id="2">orrespondants de la traduction</g></mrk></target>
+</trans-unit>
+<trans-unit id="72" restype="x-text:p">
+<source xml:lang="fr"><g id="1">Le planning étant le point de contact principal de la DGT avec les DGs, il s'appuie sur un </g><g id="2"><g id="3">réseau de correspondants</g></g><g id="4"> désignés dans chacune d'elles.</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Le planning étant le point de contact principal de la DGT avec les DGs, il s'appuie sur un </g><g id="2"><g id="3">réseau de correspondants</g></g><g id="4"> désignés dans chacune d'elles.</g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1">Le planning étant le point de contact principal de la DGT avec les DGs, il s'appuie sur un </g><g id="2"><g id="3">réseau de correspondants</g></g><g id="4"> désignés dans chacune d'elles.</g></mrk></target>
+</trans-unit>
+<trans-unit id="73" restype="x-text:p">
+<source xml:lang="fr"></source>
+<target xml:lang="fr"></target>
+</trans-unit>
+<trans-unit id="74" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><x id="2"/><g id="3"></g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><x id="2"/><g id="3"></g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><x id="2"/><g id="3"></g></g></mrk></target>
+</trans-unit>
+</body>
+</file>
+<file original="test1.odt/styles.xml" source-language="fr" target-language="fr" datatype="x-undefined" okp:inputEncoding="UTF-8">
+<body>
+<trans-unit id="1" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><g id="2"><g id="3"></g></g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2"><g id="3"></g></g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><g id="2"><g id="3"></g></g></g></mrk></target>
+</trans-unit>
+<trans-unit id="2" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><g id="2"><x id="3"/></g></g>Guide pratique des procédures de la DGT</source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2"><x id="3"/></g></g>Guide pratique des procédures de la DGT</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><g id="2"><x id="3"/></g></g>Guide pratique des procédures de la DGT</mrk></target>
+</trans-unit>
+<trans-unit id="3" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><g id="2"><g id="3"></g></g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2"><g id="3"></g></g></g></mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><g id="2"><g id="3"></g></g></g></mrk></target>
+</trans-unit>
+<trans-unit id="4" restype="x-text:p">
+<source xml:lang="fr"><g id="1"><g id="2"><x id="3"/></g></g>Guide pratique des procédures de la DGT</source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2"><x id="3"/></g></g>Guide pratique des procédures de la DGT</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg"><g id="1"><g id="2"><x id="3"/></g></g>Guide pratique des procédures de la DGT</mrk></target>
+</trans-unit>
+</body>
+</file>
+<file original="test1.odt/meta.xml" source-language="fr" target-language="fr" datatype="x-undefined" okp:inputEncoding="UTF-8">
+<body>
+<trans-unit id="1" restype="x-dc:title">
+<source xml:lang="fr">DROIT DE BASE</source>
+<seg-source><mrk mid="0" mtype="seg">DROIT DE BASE</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">DROIT DE BASE</mrk></target>
+</trans-unit>
+<trans-unit id="2" restype="x-meta:user-defined">
+<source xml:lang="fr">NORMAL</source>
+<seg-source><mrk mid="0" mtype="seg">NORMAL</mrk></seg-source>
+<target xml:lang="fr"><mrk mid="0" mtype="seg">NORMAL</mrk></target>
+</trans-unit>
+</body>
+</file>
+</xliff>

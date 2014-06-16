@@ -1,0 +1,16 @@
+# To be built
+LOCAL_TARGET    =  test1
+LOCAL_SOTARGET  =
+LOCAL_OBJS      = test1.o
+
+# Control.
+LOCAL_LIBS      = -lclucene-core -lclucene-shared
+LOCAL_LIBPATH   = -L$(INSTALL_HOME) -L$(INSTALL_EXTRA_HOME)/lib
+LOCAL_INCPATH   = -I$(INSTALL_EXTRA_HOME)/include
+LOCAL_DEFINES   = -DBOOST_ALL_DYN_LINK -DBOOST_IOSTREAMS_NO_LIB
+LOCAL_CXXFLAGS  =
+LOCAL_CPPFLAGS  = 
+LOCAL_LDFLAGS   =
+LOCAL_LDSOFLAGS =
+
+include $(ENV_ROOT)/makerules/build.rules

@@ -1,0 +1,161 @@
+TODO NOW:
+---------
+
+NOTE!
+  Implement const/non-const iterators as follows:
+    - code a reference_proxy with members:
+        - operator value_type&()
+        - operator value_type const&
+        - operator=(value_type const&)      // we must be able to assign new values.
+        - pass the reference_proxy as reference template parameter
+        - do we need input iterator?
+
+
+
+
+
+PRIORITY: non-const iterators
+        (1) implement non-const iterator
+        (2) update container to return correct iterator type
+        (3) update container to correct iterator type as parameter
+        (4) update container to typedef correct iterator types for non-const iterators
+
+NOTE!>>> use iterator_traits instead of accessing types directly from iterator.
+         (maybe already done)
+
+NOTE!>>> Check exception safety ... have ignored this.
+
+NOTE!:>>> Make ctors explicit
+          <look for other basic things missed>
+
+DOCUMENTATION>>>
+- add DoxyGen comments everywhere.
+
+GENERAL CLEANUP>>>
+- add move enabled constructors to container (i.e. to utfxxstring)
+- remove b2:: namespace qualifier where it's not needed.
+- container ctor may be inefficient
+- Change to use input iterators in container constructors when constructing from either cps or cus.
+- Refactor constructors, they contain all the same code. - use unicode output iterator instead
+    of function object.
+- Implement non-const bidirectional iterator - needed?
+- Possibly support iterator ranges in constructors
+- Write as much as possible on container
+- put in doxygen comments
+
+
+UNITTESTS>>>
+- unit tests for what I have so far.
+
+
+CODEPOINT DATABASE:>>>
+- Build code point properties database
+- Build normalization algorithms operating on ranges
+- build to upper/lower/title algorithm operating on ranges
+- Build a unicode_container<typename Cont> which internally stores text in an adaptee container.
+  Then return iterators which are exactly the same as the current iterator.
+- Possibly store data in container as a begin() and end() iterator (or a boost::range.
+  - This is more efficient than storing a container.
+Write a container containing info about each code point.
+  - make the container serializable from/to file
+  - make it a real container with random access iterator etc.
+  - value type must be a struct containing properties of each code point together with the code point
+  - container must have a built in 'find(cp_t)' function.
+
+
+
+
+CONTAINER:
+----------
+  // The container deals with encoded cps. 
+  // Input and output through container interface are always cps.
+  // The underlying container contains encoded cps.
+  ...
+  // Deal with utf8 encoding.
+  vector<char>v;
+  typedef unicode_container<utf8_tag,vector<char> >utf_string_t;
+  utf8_string_t utf_string;
+  utf_tring_t::const_iterator ustart=utf_string.begin();
+  utf_tring_t::const_iterator uend=utf_string.end();
+  ...
+  // Append a string to another string.
+  vector<cp_t>v(...);
+  utf_string.append(v.begin(),v.end());
+
+
+IDEA:
+-----
+Database for cp props:
+  Have iterator returning rv ref to vector when dereferenced.
+  class csv_const_input_iterator:<boost adaptor>{
+
+  public:
+    ctor(istream&,string const&separators,const string&comment_start);
+    vector<...>&&operator*(){...};
+    ...
+  };
+  Also, make a class having overloaded methods taking a tag parameter representing 
+  the property (can we return different values when overloading method?
+
+
+GENERAL:
+--------
+To efficiently work with cps we should not work with encoded data - but this is a space time issue.
+Write a unicode container storing data in utfxx format.
+Keep all operations on unicode as algorithms and function objects.
+
+
+
+ITER:
+-----
+unicode_container - container adapter holding encoded data in a container.
+                    Container returns iterator
+                    Container have some functions making certain operatins more efficient
+
+ITER:
+-----
+bidirectional read only (takes underlying iter as ctor. arg).
+output iter
+input iterator (so we can read using a stream - one pass reading)
+
+
+
+
+FUNCTIONS:
+----------
+X validation of encoded cps - ALG (should probably be a function).
+  validation in parallel of encoded cps - ALG (should probably be a function).
+X validation of cp - FO
+X #cus of encoded cp - FO
+X #cus to encode cp - FO
+X decode a single encoded cp - FO
+  search of strings (Boyer Moore) - ALG
+X decode encoded cps - FIT
+  encode cps - OIT
+  replace invalid encoding - ALG
+  sync to next encoding - FO
+  sync to prev encoding - FO
+  to upper - ALG (can pass function in specifying if a cp should be converted)
+  to lower - ALG
+  to title - ALG
+  normalize - ALG
+  collation (sorting) - ALG
+
+
+
+
+UTILITIES (can be easily written):
+----------------------------------
+is ascii
+max encode length
+min encode length
+total number of cus to encode a range of cps
+replace invalid decoded cp 
+
+
+
+
+container template:
+-------------------
+http://stackoverflow.com/questions/7758580/writing-your-own-stl-container
+
