@@ -5,23 +5,23 @@ using namespace std;
 namespace xlate{
 
 // ctor
-TranslateRequest::TranslateRequest(string const&slan,string const&tlan,vector<string>const&segs):
-  slan_(slan),tlan_(tlan),id_(utils::generateUuid()),segs_(segs){
+TranslateRequest::TranslateRequest(LanguageCode const&slan,LanguageCode const&tlan,initializer_list<string>segs):
+  TranslateRequest(slan,tlan,vector<string>(segs)){
 }
-// ctor
-TranslateRequest::TranslateRequest(string const&slan,string const&tlan,initializer_list<string>segs):
-  slan_(slan),tlan_(tlan),segs_(segs.begin(),segs.end()),id_(utils::generateUuid()){
+// ctor (re-use ctor taking vector of segments)
+TranslateRequest::TranslateRequest(LanguageCode const&slan,LanguageCode const&tlan,vector<string>const&segs):
+  slan_(slan),tlan_(tlan),id_(utils::generateUuid()),segs_(segs){
 }
 // getters
 string TranslateRequest::id()const{
   return id_;
 }
 // get source language
-string TranslateRequest::srcLan()const{
+LanguageCode const&TranslateRequest::srcLan()const{
   return slan_;
 }
 // get target language
-string TranslateRequest::targLan()const{
+LanguageCode const&TranslateRequest::targLan()const{
   return tlan_;
 }
 // print function
