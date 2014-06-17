@@ -1,4 +1,4 @@
-#include "bpf_utils/fileUtils.h"
+#include "utils/fileUtils.h"
 #include <memory>
 #include <ostream>
 #include <istream>
@@ -7,7 +7,7 @@
 using namespace boost::filesystem;
 using namespace std;
 namespace io=boost::iostreams;
-namespace bpf{
+namespace utils{
 
 // get files ordered by timestamp in a map (with newest file first)
 multimap<time_t,path>getTsOrderedFiles(path const&dirPath){

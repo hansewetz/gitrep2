@@ -1,8 +1,8 @@
 #include "bpf_queue/FdQueue.h"
 #include "bpf_queue/Message.h"
 #include "bpf_queue/Utils.h"
-#include "bpf_utils/utility.h"
-#include "bpf_utils/fileUtils.h"
+#include "utils/utility.h"
+#include "utils/fileUtils.h"
 #include <boost/log/trivial.hpp>
 
 #include <unistd.h>
@@ -138,7 +138,7 @@ shared_ptr<Message>FdQueue::deq(bool block){
 
     // we must have input on fdread here
     if(FD_ISSET(fdread_,&input)){
-      shared_ptr<istream>is{fdistream(fdread_,false)};
+      shared_ptr<istream>is{utils::fdistream(fdread_,false)};
       ret=deserializeXmlMessage(*is);
       break;
     }

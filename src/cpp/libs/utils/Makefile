@@ -1,4 +1,4 @@
-SUBDIRS =  libs apps tests experiments
+SUBDIRS =   src
 
 include $(PROJECT_ROOT)/env/makerules/subdirs.rules
 

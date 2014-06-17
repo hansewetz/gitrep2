@@ -1,13 +1,13 @@
 #ifndef __OCCI_DETAIL_UTILS_H__
 #define __OCCI_DETAIL_UTILS_H__
-#include "type-utils/type_utils.h"
+#include "utils/type_utils.h"
 #include <occiData.h>
 #include <memory>
 #include <tuple>
 #include <type_traits>
 #include <stdexcept>
 
-namespace tutils{
+namespace occi_utils{
 // fetch data from a result set and store in a variable (one struct for each type)
 template<typename T>struct occi_data_fetcher_aux;
 template<>struct occi_data_fetcher_aux<int>{

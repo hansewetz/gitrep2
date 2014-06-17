@@ -6,7 +6,8 @@
 #include <stdexcept>
 #include <algorithm>
 using namespace std;
-using namespace tutils;
+using namespace occi_utils;
+using namespace utils;
 using namespace oracle::occi;
 
 // --- test insert
@@ -31,7 +32,7 @@ void select(occi_auth const&auth){
   // sql statement, row and bind types, bind data
   typedef tuple<int,string,string,string>row_t;
   typedef tuple<string>bind_t;
-  string sql{"select rownum,dbid,tab,cutoff_dt from MT_DBSYNC_CUTOFF_DT where dbid=:1 and rownum<10"};
+  string sql{"select rownum,dbid,matid,languagecode from mt_tmlo where dbid=:1 and rownum<10"};
   bind_t bind{"Policy"};
 
   // read from input collection
@@ -50,7 +51,8 @@ void select1(occi_auth const&auth){
 // --- main test program
 int main(){
   // auth credentials
-  occi_auth const auth{"user","passwd","mydb"};
+  //occi_auth const auth{"user","passwd","mydb"};
+  occi_auth const auth{"sdt02","rjszk#JDKE4239prmsd","MTDADGTP"};
   try {
     select(auth);
     //update(auth);

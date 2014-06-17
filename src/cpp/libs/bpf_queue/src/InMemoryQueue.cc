@@ -1,6 +1,6 @@
 #include "bpf_queue/InMemoryQueue.h"
 #include "bpf_queue/Message.h"
-#include "bpf_utils/utility.h"
+#include "utils/utility.h"
 #include <boost/log/trivial.hpp>
 #include <chrono>
 #include <stdexcept>

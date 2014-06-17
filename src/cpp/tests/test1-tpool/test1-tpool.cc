@@ -1,9 +1,9 @@
-#include "type-utils/tpool.h"
+#include "utils/tpool.h"
 #include <functional>
 #include <iostream>
 
 using namespace std;
-using namespace tutils;
+using namespace utils;
 
 struct Foo{
   Foo(){cout<<"ctor"<<endl;}

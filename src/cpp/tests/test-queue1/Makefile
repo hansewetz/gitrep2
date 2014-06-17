@@ -1,10 +1,10 @@
 # To be built
-LOCAL_TARGET    =  test-dummy
+LOCAL_TARGET    =  test-queue
 LOCAL_SOTARGET  =
-LOCAL_OBJS      = test-dummy.o
+LOCAL_OBJS      = test-queue.o
 
 # Control.
-LOCAL_LIBS      = -lbpfqueue -lbpfutils \
+LOCAL_LIBS      = -lbpfqueue -lutils \
 		  -lpthread \
 		  -lboost_system -lboost_log -lboost_serialization -lboost_iostreams -lboost_thread -lboost_filesystem
 LOCAL_LIBPATH   = -L$(PROJECT_ROOT)/lib

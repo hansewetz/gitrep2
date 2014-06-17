@@ -1,6 +1,6 @@
 #ifndef __ID_H__
 #define __ID_H__
-#include "bpf_utils/utility.h"
+#include "utils/utility.h"
 #include <iosfwd>
 #include <string>
 #include <utility>
@@ -47,7 +47,7 @@ template<typename E,typename V>
 class Id<E,V,true>{
 public:
   // ctors,assign,dtor (copyable and movable)
-  Id():val_(generateUuid()){}
+  Id():val_(utils::generateUuid()){}
   Id(Id const&)=default;
   Id(Id&&)=default;
   Id&operator=(Id const&)=default;

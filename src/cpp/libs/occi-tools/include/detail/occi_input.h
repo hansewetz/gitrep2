@@ -2,16 +2,16 @@
 #define __OCCI_INPUT_H__
 #include "occi_utils.h"
 #include "occi_detail_utils.h"
-#include "type-utils/type_utils.h"
+#include "utils/type_utils.h"
 #include <occiData.h>
 #include <boost/iterator/iterator_facade.hpp>
 #include <memory>
 #include <tuple>
 #include <stdexcept>
-namespace tutils{
+namespace occi_utils{
 
 // input iterator
-template<typename Row,typename Bind=std::tuple<>,typename ILBind=typename make_indlist_from_tuple<Bind>::type>
+template<typename Row,typename Bind=std::tuple<>,typename ILBind=typename utils::make_indlist_from_tuple<Bind>::type>
 class occi_input_iterator:public boost::iterator_facade<occi_input_iterator<Row,Bind>,Row const,boost::single_pass_traversal_tag>{
 friend class boost::iterator_core_access;
 public:
@@ -49,7 +49,7 @@ private:
   // get next row
   void nextrow(){
     if(end_)throw std::runtime_error("occi_input_iterator<>: attempt to step past end iterator");
-    using IL=typename make_indlist_from_tuple<decltype(currentRow_)>::type;
+    using IL=typename utils::make_indlist_from_tuple<decltype(currentRow_)>::type;
     if(fetcher_.getResultSet()->next())apply_ind_tuple_ntimes_with_indlist(IL(),fetcher_,currentRow_);
     else end_=true;
   }

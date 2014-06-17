@@ -1,8 +1,8 @@
 #include "bpf_queue/PolldirQueue.h"
 #include "bpf_queue/Message.h"
 #include "bpf_queue/Utils.h"
-#include "bpf_utils/utility.h"
-#include "bpf_utils/fileUtils.h"
+#include "utils/utility.h"
+#include "utils/fileUtils.h"
 #include <boost/log/trivial.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
@@ -32,7 +32,7 @@ PolldirQueue::PolldirQueue(QueueId const&id,bool start,size_t pollrateMsec,fs::p
     mtx_(ipc::open_or_create,getMutexName(dir).c_str()),cond_(ipc::open_or_create,getCondName(dir).c_str()){
 
   // check that directory exist and that is a directory
-  if(!isDirectory(dir))THROW_RUNTIME("path: "<<dir.string()<<" is not a directory when constructing PolldirQueue: "<<id);
+  if(!utils::isDirectory(dir))THROW_RUNTIME("path: "<<dir.string()<<" is not a directory when constructing PolldirQueue: "<<id);
 }
 // identified of this queue type
 string PolldirQueue::type()const{
@@ -149,7 +149,7 @@ list<fs::path>PolldirQueue::allFiles()const{
 void PolldirQueue::fillCache(bool refill)const{
   // trash cache and re-read it if 'refill' is set or if cache is empty
   if(refill||cache_.empty()){
-    multimap<time_t,fs::path>sortedFiles{getTsOrderedFiles(dir_)};
+    multimap<time_t,fs::path>sortedFiles{utils::getTsOrderedFiles(dir_)};
     cache_.clear();
     for(auto const&f:sortedFiles)cache_.push_back(f.second);
   }

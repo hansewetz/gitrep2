@@ -5,7 +5,7 @@
 #include <string>
 #include <sstream>
 #include <stdexcept>
-namespace bpf{
+namespace utils{
 
 // hash struct for classes having an 'asString() method
 template<typename Key>

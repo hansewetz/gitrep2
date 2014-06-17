@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 #include <iosfwd>
-namespace bpf{
+namespace utils{
 
 // get files ordered by timestamp in a map (with newest file first)
 std::multimap<time_t,boost::filesystem::path>getTsOrderedFiles(boost::filesystem::path const&dirPath);

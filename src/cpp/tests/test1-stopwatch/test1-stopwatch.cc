@@ -1,8 +1,8 @@
-#include "general-tools/stopwatch.h"
+#include "utils/stopwatch.h"
 #include <iostream>
 #include <thread>
 using namespace std;
-using namespace tutils;
+using namespace utils;
 
 #include <sys/times.h>
 
