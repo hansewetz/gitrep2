@@ -3,16 +3,19 @@
 #include "xlate-jobs/LanguageCode.h"
 #include <vector>
 #include <iostream>
+#include <memory>
 using namespace std;
 using namespace xlate;
 
 // main test program
 int main(){
+  // create a request
   LanguageCode src{"en"};
   LanguageCode target{"sv"};
-  TranslateRequest req(src,target,{"Hello","World"});
-  cout<<req<<endl;
+  shared_ptr<TranslateRequest>req{new TranslateRequest(src,target,{"Hello","World"})};
+  cout<<*req<<endl;
 
-  TranslationJob job("12345");
+  // create a job
+  TranslationJob job(req);
   cout<<job<<endl;
 }

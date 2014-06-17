@@ -24,6 +24,10 @@ LanguageCode const&TranslateRequest::srcLan()const{
 LanguageCode const&TranslateRequest::targLan()const{
   return tlan_;
 }
+// get request segments
+vector<string>const&TranslateRequest::segs()const{
+  return segs_;
+}
 // print function
 ostream&TranslateRequest::print(ostream&os)const{
   os<<"id: "<<id_<<"srclan: "<<slan_<<", targetlan: "<<tlan_<<endl;

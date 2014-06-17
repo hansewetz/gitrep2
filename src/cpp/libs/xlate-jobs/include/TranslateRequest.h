@@ -14,6 +14,7 @@ public:
   TranslateRequest(LanguageCode const&slan,LanguageCode const&tlan,std::vector<std::string>const&segs);
   TranslateRequest(TranslateRequest const&)=delete;
   TranslateRequest(TranslateRequest&&)=default;
+  TranslateRequest&operator=(TranslateRequest const&)=delete;
   TranslateRequest&operator=(TranslateRequest&&)=default;
   virtual~TranslateRequest()=default;
 
@@ -21,6 +22,7 @@ public:
   std::string id()const;
   LanguageCode const&srcLan()const;
   LanguageCode const&targLan()const;
+  std::vector<std::string>const&segs()const;
 
   // print function
   std::ostream&print(std::ostream&os)const;
