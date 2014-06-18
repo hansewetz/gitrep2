@@ -1,15 +1,11 @@
 #ifndef __TRANSLATE_REQUEST_H__
 #define __TRANSLATE_REQUEST_H__
 #include "xlate-jobs/LanguageCode.h"
-#include "utils/Id.h"
+#include "xlate-jobs/Identifiers.h"
 #include <string>
 #include <vector>
 #include <iosfwd>
 namespace xlate{
-
-// request id
-class TranslateRequest;
-using TranslateRequestId=utils::Id<TranslateRequest,std::string,true>;
 
 // request to traslate text
 class TranslateRequest{

@@ -12,7 +12,7 @@ string const&LanguageCode::languageCode()const{
 }
 // print function
 ostream&LanguageCode::print(ostream&os)const{
-  return os<<"language-code: "<<lc_;
+  return os<<lc_;
 }
 // print function
 ostream&operator<<(ostream&os,LanguageCode const&lc){

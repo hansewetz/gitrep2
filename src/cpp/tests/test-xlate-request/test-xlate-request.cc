@@ -4,7 +4,7 @@
 #include "xlate-jobs/LanguageCode.h"
 #include <vector>
 #include <iostream>
-#include <memory>
+#include <string>
 using namespace std;
 using namespace xlate;
 
@@ -13,15 +13,14 @@ int main(){
   // create a request
   LanguageCode src{"en"};
   LanguageCode target{"sv"};
-  shared_ptr<TranslateRequest>req{new TranslateRequest(src,target,{"Hello","World"})};
-  cout<<*req<<endl;
+  TranslateRequest req{src,target,{"Hello","World"}};
+  cout<<"REQ: "<<req<<endl;
 
   // create a job
   TranslationJob job(req);
-  cout<<job<<endl;
+  cout<<"JOB: "<<job<<endl;
 
-  // create task
-  string seg{"Hello World"};
-  TranslationTask task{src,target,seg};
-  cout<<task<<endl;
+  // print tasks for job
+  auto tasks(job.tasks());
+  for(auto const t:tasks)cout<<"TASK: "<<*t<<endl;
 }

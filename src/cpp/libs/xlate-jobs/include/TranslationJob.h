@@ -1,33 +1,39 @@
 #ifndef __TRANSLATE_JOB_H__
 #define __TRANSLATE_JOB_H__
-#include "utils/Id.h"
+#include "xlate-jobs/Identifiers.h"
+#include "xlate-jobs/LanguageCode.h"
 #include <string>
 #include <iosfwd>
 #include <memory>
+#include <map>
 #include <vector>
 namespace xlate{
 
 // forward decl
 class TranslateRequest;
 class TranslationTask;
-class TranslationJob;
-
-// job id
-using TranslationJobId=utils::Id<TranslationJob,std::string,true>;
 
 // class representing a translation job (one or more segments together with data specifying what to do)
 class TranslationJob{
 public:
   // ctors, dtor (non-copyable, movable)
-  TranslationJob(std::shared_ptr<TranslateRequest>);
+  TranslationJob(TranslateRequest const&);
   TranslationJob(TranslationJob const&)=delete;
   TranslationJob(TranslationJob&&)=default;
   TranslationJob&operator=(TranslationJob const&)=delete;
   TranslationJob&operator=(TranslationJob&&)=default;
   virtual~TranslationJob()=default;
 
-  // book keeping functions
+  // getters
   TranslationJobId const&id()const;
+  LanguageCode const&srcLan()const;
+  LanguageCode const&targLan()const;
+
+  // get all tasks
+  std::vector<std::shared_ptr<TranslationTask>>tasks()const;
+
+  // book keeping functions
+  std::shared_ptr<TranslationTask>nextTask()const;
   
 
   // NOTE! Book keeping functions */
@@ -39,10 +45,11 @@ public:
   std::ostream&print(std::ostream&os)const;
 private:
   TranslationJobId id_;
-  std::shared_ptr<TranslateRequest>req_;
-  std::vector<bool>translated_;
-  std::vector<std::string>translations_;
+  LanguageCode slan_;
+  LanguageCode tlan_;
+  std::multimap<bool,std::shared_ptr<TranslationTask>>tasks_;
 };
+// print operator
 std::ostream&operator<<(std::ostream&os,TranslationJob const&j);
 }
 #endif

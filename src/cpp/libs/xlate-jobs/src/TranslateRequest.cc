@@ -31,8 +31,8 @@ vector<string>const&TranslateRequest::segs()const{
 // print function
 ostream&TranslateRequest::print(ostream&os)const{
   os<<"id: "<<id_<<"srclan: "<<slan_<<", targetlan: "<<tlan_<<endl;
-  os<<"segs "<<endl;
-  for(auto const&s:segs_)os<<s<<endl;
+  os<<"segs: "<<endl;
+  for(auto const&s:segs_)os<<"\t"<<s<<endl;
   return os;
 }
 // print function
