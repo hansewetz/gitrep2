@@ -1,11 +1,13 @@
 #ifndef __TRANSLATE_JOB_H__
 #define __TRANSLATE_JOB_H__
-#include "xlate-jobs/TranslateRequest.h"
 #include <string>
 #include <iosfwd>
 #include <memory>
 #include <vector>
 namespace xlate{
+
+// forward decl
+class TranslateRequest;
 
 // class representing a translation job (one or more segments together with data specifying what to do)
 class TranslationJob{
@@ -17,6 +19,8 @@ public:
   TranslationJob&operator=(TranslationJob const&)=delete;
   TranslationJob&operator=(TranslationJob&&)=default;
   virtual~TranslationJob()=default;
+
+  // book keeping functions
 
   // NOTE! Book keeping functions */
   //	- add translated segents

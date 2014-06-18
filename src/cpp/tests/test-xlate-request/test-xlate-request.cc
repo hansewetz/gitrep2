@@ -1,5 +1,6 @@
 #include "xlate-jobs/TranslateRequest.h"
 #include "xlate-jobs/TranslationJob.h"
+#include "xlate-jobs/TranslationTask.h"
 #include "xlate-jobs/LanguageCode.h"
 #include <vector>
 #include <iostream>
@@ -18,4 +19,9 @@ int main(){
   // create a job
   TranslationJob job(req);
   cout<<job<<endl;
+
+  // create task
+  string seg{"Hello World"};
+  TranslationTask task{src,target,seg};
+  cout<<task<<endl;
 }

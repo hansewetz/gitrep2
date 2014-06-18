@@ -1,4 +1,5 @@
 #include "xlate-jobs/TranslationJob.h"
+#include "xlate-jobs/TranslateRequest.h"
 #include <iostream>
 using namespace std;
 namespace xlate{
