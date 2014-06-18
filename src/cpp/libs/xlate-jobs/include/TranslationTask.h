@@ -21,7 +21,9 @@ public:
   TranslationTaskId  const&id()const;
   LanguageCode const&srcLan()const;
   LanguageCode const&targLan()const;
-  std::string const&seg()const;
+  std::string const&srcSeg()const;
+  bool hasTargetSeg()const;
+  std::string const&targetSeg()const;
   std::size_t segno()const;
 
   // print function
@@ -30,7 +32,9 @@ private:
   TranslationTaskId id_;
   LanguageCode slan_;
   LanguageCode tlan_;
-  std::string seg_;
+  std::string srcSeg_;
+  std::string targetSeg_;
+  bool hasTargetSeg_;
   std::size_t segno_;
 };
 // print operator
