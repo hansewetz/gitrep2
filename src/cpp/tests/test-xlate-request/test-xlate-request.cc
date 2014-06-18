@@ -21,6 +21,7 @@ int main(){
   cout<<"JOB: "<<job<<endl;
 
   // print tasks for job
-  auto tasks(job.tasks());
-  for(auto const t:tasks)cout<<"TASK: "<<*t<<endl;
+  cout<<"#tasks: "<<job.noUntranslated()<<endl;
+  shared_ptr<TranslationTask>task;
+  while(task=job.nextTask())cout<<*task<<endl;
 }

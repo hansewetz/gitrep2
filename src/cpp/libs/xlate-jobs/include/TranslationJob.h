@@ -5,8 +5,8 @@
 #include <string>
 #include <iosfwd>
 #include <memory>
+#include <list>
 #include <map>
-#include <vector>
 namespace xlate{
 
 // forward decl
@@ -14,6 +14,7 @@ class TranslateRequest;
 class TranslationTask;
 
 // class representing a translation job (one or more segments together with data specifying what to do)
+// (a job keeps tasks in a priority queue where non-ranslated tasks are on top)
 class TranslationJob{
 public:
   // ctors, dtor (non-copyable, movable)
@@ -28,12 +29,12 @@ public:
   TranslationJobId const&id()const;
   LanguageCode const&srcLan()const;
   LanguageCode const&targLan()const;
+  std::size_t noTranslated()const;
+  std::size_t noUntranslated()const;
+  std::size_t noInTranslation()const;
 
-  // get all tasks
-  std::vector<std::shared_ptr<TranslationTask>>tasks()const;
-
-  // book keeping functions
-  std::shared_ptr<TranslationTask>nextTask()const;
+  // task management functions
+  std::shared_ptr<TranslationTask>nextTask();
   
 
   // NOTE! Book keeping functions */
@@ -47,7 +48,12 @@ private:
   TranslationJobId id_;
   LanguageCode slan_;
   LanguageCode tlan_;
-  std::multimap<bool,std::shared_ptr<TranslationTask>>tasks_;
+  std::size_t noTranslated_;
+  std::size_t noUntranslated_;
+  std::size_t noInTranslation_;
+  std::list<std::shared_ptr<TranslationTask>>translated_;
+  std::list<std::shared_ptr<TranslationTask>>nonTranslated_;
+  std::map<std::size_t,std::shared_ptr<TranslationTask>>inTranslation_;
 };
 // print operator
 std::ostream&operator<<(std::ostream&os,TranslationJob const&j);
