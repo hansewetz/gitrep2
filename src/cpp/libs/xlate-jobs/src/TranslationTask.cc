@@ -5,7 +5,11 @@ namespace xlate{
 
 // ctor
 TranslationTask::TranslationTask(LanguageCode const&slan,LanguageCode const&tlan,string const&seg):
-  slan_(slan),tlan_(tlan),seg_(seg){
+  id_(TranslationTaskId()),slan_(slan),tlan_(tlan),seg_(seg){
+}
+// get id of task
+TranslationTaskId  const&TranslationTask::id()const{
+  return id_;
 }
 // get source lan
 LanguageCode const&TranslationTask::srcLan()const{

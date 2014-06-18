@@ -1,9 +1,14 @@
 #ifndef __TRANSLATION_TASK_H__
 #define __TRANSLATION_TASK_H__
 #include "xlate-jobs/LanguageCode.h"
+#include "utils/Id.h"
 #include <iosfwd>
 #include <string>
 namespace xlate{
+
+// request id
+class TranslationTask;
+using TranslationTaskId=utils::Id<TranslationTask,std::string,true>;
 
 // container for translating a single segment
 class TranslationTask{
@@ -17,6 +22,7 @@ public:
   ~TranslationTask()=default;
 
   // getters
+  TranslationTaskId  const&id()const;
   LanguageCode const&srcLan()const;
   LanguageCode const&targLan()const;
   std::string const&seg()const;
@@ -24,6 +30,7 @@ public:
   // print function
   std::ostream&print(std::ostream&os)const;
 private:
+  TranslationTaskId id_;
   LanguageCode slan_;
   LanguageCode tlan_;
   std::string seg_;

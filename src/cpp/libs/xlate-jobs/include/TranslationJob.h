@@ -1,5 +1,6 @@
 #ifndef __TRANSLATE_JOB_H__
 #define __TRANSLATE_JOB_H__
+#include "utils/Id.h"
 #include <string>
 #include <iosfwd>
 #include <memory>
@@ -9,6 +10,10 @@ namespace xlate{
 // forward decl
 class TranslateRequest;
 class TranslationTask;
+class TranslationJob;
+
+// job id
+using TranslationJobId=utils::Id<TranslationJob,std::string,true>;
 
 // class representing a translation job (one or more segments together with data specifying what to do)
 class TranslationJob{
@@ -22,7 +27,7 @@ public:
   virtual~TranslationJob()=default;
 
   // book keeping functions
-  //std::shared_ptr<TranslationTask>nextTask;
+  TranslationJobId const&id()const;
   
 
   // NOTE! Book keeping functions */
@@ -33,6 +38,7 @@ public:
   // print function
   std::ostream&print(std::ostream&os)const;
 private:
+  TranslationJobId id_;
   std::shared_ptr<TranslateRequest>req_;
   std::vector<bool>translated_;
   std::vector<std::string>translations_;
