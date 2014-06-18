@@ -26,6 +26,9 @@ public:
   std::string const&targetSeg()const;
   std::size_t segno()const;
 
+  // setters
+  void setTargetSeg(std::string const&seg);
+
   // print function
   std::ostream&print(std::ostream&os)const;
 private:

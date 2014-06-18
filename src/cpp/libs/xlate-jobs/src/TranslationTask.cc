@@ -37,9 +37,14 @@ string const&TranslationTask::targetSeg()const{
 size_t TranslationTask::segno()const{
   return segno_;
 }
+// setters
+void TranslationTask::setTargetSeg(string const&seg){
+  hasTargetSeg_=true;
+  targetSeg_=seg;
+}
 // print function
 ostream&TranslationTask::print(ostream&os)const{
-  return os<<"id: "<<id_<<", source-lan: "<<slan_<<", target-lan: "<<tlan_<<", srcSeg: \""<<srcSeg_<<"\""<<", target-seg: \""<<targetSeg_<<"\"";
+  return os<<"id: "<<id_<<", source-lan: "<<slan_<<", target-lan: "<<tlan_<<", srcSeg: \""<<srcSeg_<<"\""<<", has target: "<<boolalpha<<hasTargetSeg_<<", target-seg: \""<<targetSeg_<<"\"";
 }
 // print operator
 ostream&operator<<(ostream&os,TranslationTask const&t){
