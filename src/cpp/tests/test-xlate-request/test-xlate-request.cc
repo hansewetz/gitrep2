@@ -18,10 +18,11 @@ int main(){
 
   // create a job
   TranslationJob job(req);
-  cout<<"JOB: "<<job<<endl;
 
-  // print tasks for job
-  cout<<"#tasks: "<<job.noUntranslated()<<endl;
-  shared_ptr<TranslationTask>task;
-  while(task=job.nextTask())cout<<*task<<endl;
+  // do some operations on a a task within a job
+  cout<<"JOB: "<<job<<endl;
+  shared_ptr<TranslationTask>task{job.getNextTask()};
+  cout<<"JOB: "<<job<<endl;
+  job.addTranslatedTask(task);
+  cout<<"JOB: "<<job<<endl;
 }

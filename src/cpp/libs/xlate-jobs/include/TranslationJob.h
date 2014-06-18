@@ -25,16 +25,19 @@ public:
   TranslationJob&operator=(TranslationJob&&)=default;
   virtual~TranslationJob()=default;
 
-  // getters
+  // general getters
   TranslationJobId const&id()const;
   LanguageCode const&srcLan()const;
   LanguageCode const&targLan()const;
+
+  // translation stats
   std::size_t noTranslated()const;
   std::size_t noUntranslated()const;
   std::size_t noInTranslation()const;
 
   // task management functions
-  std::shared_ptr<TranslationTask>nextTask();
+  std::shared_ptr<TranslationTask>getNextTask();
+  void addTranslatedTask(std::shared_ptr<TranslationTask>);
   
 
   // NOTE! Book keeping functions */
@@ -53,7 +56,7 @@ private:
   std::size_t noInTranslation_;
   std::list<std::shared_ptr<TranslationTask>>translated_;
   std::list<std::shared_ptr<TranslationTask>>nonTranslated_;
-  std::map<std::size_t,std::shared_ptr<TranslationTask>>inTranslation_;
+  std::map<TranslationTaskId,std::shared_ptr<TranslationTask>>inTranslation_;
 };
 // print operator
 std::ostream&operator<<(std::ostream&os,TranslationJob const&j);

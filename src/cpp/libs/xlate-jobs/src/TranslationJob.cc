@@ -18,7 +18,8 @@ TranslationJob::TranslationJob(TranslateRequest const&req):
   vector<string>const&segs{req.segs()};
   size_t segcount{0};
   for(auto s:segs){
-    nonTranslated_.push_back(make_shared<TranslationTask>(slan_,tlan_,s,segcount++));
+    auto task=make_shared<TranslationTask>(slan_,tlan_,s,segcount++);
+    nonTranslated_.push_back(task);
   }
 }
 // get job id
@@ -46,24 +47,41 @@ size_t TranslationJob::noInTranslation()const{
   return noInTranslation_;
 }
 // book keeping functions
-shared_ptr<TranslationTask>TranslationJob::nextTask(){
+shared_ptr<TranslationTask>TranslationJob::getNextTask(){
   // check if we have anyhthing to translate
   if(nonTranslated_.size()==0)return shared_ptr<TranslationTask>(nullptr);
 
   // get task to translate
   shared_ptr<TranslationTask>ret{*nonTranslated_.begin()};
   nonTranslated_.pop_front();
+  --noUntranslated_;
 
   // track sements which are in the process of translation
   ++noInTranslation_;
-  size_t segno{ret->segno()};
-  if(inTranslation_.find(segno)!=inTranslation_.end()){
-    THROW_RUNTIME("attempt to insert segmementg in map of segments waiting for translation when segent already exist, segno: "<<segno);
+  TranslationTaskId id{ret->id()};
+  if(inTranslation_.find(id)!=inTranslation_.end()){
+    THROW_RUNTIME("attempt to insert segmementg in map of segments waiting for translation when segent already exist, id: "<<id);
   }
-  inTranslation_[segno]=ret;
+  inTranslation_[id]=ret;
 
   //inTranslation_
   return ret;
+}
+// add a translated task
+void TranslationJob::addTranslatedTask(std::shared_ptr<TranslationTask>task){
+  // make sure the task is waiting for translation
+  TranslationTaskId id{task->id()};
+  decltype(inTranslation_)::const_iterator it{inTranslation_.find(id)};
+  if(it==inTranslation_.end()){
+    THROW_RUNTIME("attempt to insert translated segment in map of segments waiting for translation when segent already does not exists, id: "<<id);
+  }
+  // remove task from tasks waiting for translation
+  inTranslation_.erase(id);
+  --noInTranslation_;
+
+  // add task to translated tasks
+  translated_.push_back(task);
+  ++noTranslated_;
 }
 // print function
 ostream&TranslationJob::print(ostream&os)const{
