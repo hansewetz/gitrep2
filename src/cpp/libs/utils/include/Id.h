@@ -10,7 +10,7 @@
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/serialization/string.hpp>
-namespace bpf{
+namespace utils{
 
 // identifier of an entity
 template<typename E,typename V=std::string,bool UUID=false>

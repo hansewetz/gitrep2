@@ -8,6 +8,7 @@ namespace xlate{
 
 // forward decl
 class TranslateRequest;
+class TranslationTask;
 
 // class representing a translation job (one or more segments together with data specifying what to do)
 class TranslationJob{
@@ -21,6 +22,8 @@ public:
   virtual~TranslationJob()=default;
 
   // book keeping functions
+  //std::shared_ptr<TranslationTask>nextTask;
+  
 
   // NOTE! Book keeping functions */
   //	- add translated segents

@@ -1,10 +1,15 @@
 #ifndef __TRANSLATE_REQUEST_H__
 #define __TRANSLATE_REQUEST_H__
 #include "xlate-jobs/LanguageCode.h"
+#include "utils/Id.h"
 #include <string>
 #include <vector>
 #include <iosfwd>
 namespace xlate{
+
+// request id
+class TranslateRequest;
+using TranslateRequestId=utils::Id<TranslateRequest,std::string,true>;
 
 // request to traslate text
 class TranslateRequest{
@@ -19,7 +24,7 @@ public:
   virtual~TranslateRequest()=default;
 
   // getters
-  std::string id()const;
+  TranslateRequestId const&id()const;
   LanguageCode const&srcLan()const;
   LanguageCode const&targLan()const;
   std::vector<std::string>const&segs()const;
@@ -27,7 +32,7 @@ public:
   // print function
   std::ostream&print(std::ostream&os)const;
 private:
-  std::string id_;
+  TranslateRequestId id_;
   std::vector<std::string>segs_;
   LanguageCode slan_;
   LanguageCode tlan_;

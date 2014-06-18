@@ -10,10 +10,10 @@ TranslateRequest::TranslateRequest(LanguageCode const&slan,LanguageCode const&tl
 }
 // ctor (re-use ctor taking vector of segments)
 TranslateRequest::TranslateRequest(LanguageCode const&slan,LanguageCode const&tlan,vector<string>const&segs):
-  slan_(slan),tlan_(tlan),id_(utils::generateUuid()),segs_(segs){
+  slan_(slan),tlan_(tlan),id_(TranslateRequestId()),segs_(segs){
 }
 // getters
-string TranslateRequest::id()const{
+TranslateRequestId const&TranslateRequest::id()const{
   return id_;
 }
 // get source language

@@ -1,6 +1,6 @@
 #ifndef __QUEUE_H__
 #define __QUEUE_H__
-#include "bpf_utils/Id.h"
+#include "utils/Id.h"
 #include <iosfwd>
 #include <memory>
 #include <functional>
@@ -11,7 +11,7 @@ class Message;
 
 // identifier type for class
 class Queue;
-using QueueId=Id<Queue>;
+using QueueId=utils::Id<Queue>;
 
 // message queue class
 class Queue:public std::enable_shared_from_this<Queue>{

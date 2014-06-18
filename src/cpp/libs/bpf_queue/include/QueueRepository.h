@@ -7,7 +7,7 @@ namespace bpf{
 
 // identifier type for class
 class QueueRepository;
-using QueueRepositoryId=Id<QueueRepository>;
+using QueueRepositoryId=utils::Id<QueueRepository>;
 
 // repository for queue definition
 class QueueRepository{

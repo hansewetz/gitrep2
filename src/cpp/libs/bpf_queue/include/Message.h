@@ -1,6 +1,6 @@
 #ifndef __MESSAGE_H__
 #define __MESSAGE_H__
-#include "bpf_utils/Id.h"
+#include "utils/Id.h"
 #include <iosfwd>
 
 // serialization stuff
@@ -12,7 +12,7 @@ namespace bpf{
 
 // identifier type for class
 class Message;
-using MessageId=Id<Message,std::string,true>;
+using MessageId=utils::Id<Message,std::string,true>;
 
 // message used for communication
 class Message{
