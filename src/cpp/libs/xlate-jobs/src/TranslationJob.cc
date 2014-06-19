@@ -35,22 +35,28 @@ LanguageCode const&TranslationJob::targLan()const{
 }
 // get #of translated segments
 size_t TranslationJob::noTranslated()const{
+  lock_guard<mutex>lock(mtx_);
   return translated_.size();
 }
 // get #of un-translated segments
 size_t TranslationJob::noUntranslated()const{
+  lock_guard<mutex>lock(mtx_);
   return nonTranslated_.size();
 }
 // get #of in translation segments
 size_t TranslationJob::noInTranslation()const{
+  lock_guard<mutex>lock(mtx_);
   return inTranslation_.size();
 }
 // check if we are done translating
 bool TranslationJob::done()const{
-  return noInTranslation()==0&&noUntranslated()==0;
+  lock_guard<mutex>lock(mtx_);
+  return inTranslation_.size()==0&&nonTranslated_.size()==0;
 }
 // book keeping functions
 shared_ptr<TranslationTask>TranslationJob::getNextTask(){
+  lock_guard<mutex>lock(mtx_);
+
   // check if we have anyhthing to translate
   if(nonTranslated_.size()==0)return shared_ptr<TranslationTask>(nullptr);
 
@@ -70,6 +76,8 @@ shared_ptr<TranslationTask>TranslationJob::getNextTask(){
 }
 // add a translated task
 void TranslationJob::addTranslatedTask(std::shared_ptr<TranslationTask>task){
+  lock_guard<mutex>lock(mtx_);
+
   // make sure the task is waiting for translation
   TranslationTaskId id{task->id()};
   decltype(inTranslation_)::const_iterator it{inTranslation_.find(id)};
@@ -84,7 +92,11 @@ void TranslationJob::addTranslatedTask(std::shared_ptr<TranslationTask>task){
 }
 // print function
 ostream&TranslationJob::print(ostream&os)const{
-  return os<<"id: "<<id_<<", source-lan: "<<slan_<<", target-lan: "<<tlan_<<", #translated: "<<noTranslated()<<", #non-translated: "<<noUntranslated()<<", #in-translation: "<<noInTranslation();
+  lock_guard<mutex>lock(mtx_);
+  return os<<"id: "<<id_<<", source-lan: "<<slan_<<", target-lan: "<<tlan_<<
+             ", #translated: "<<translated_.size()<<
+             ", #non-translated: "<<nonTranslated_.size()<<
+             ", #in-translation: "<<inTranslation_.size();
 }
 // print operator
 ostream&operator<<(ostream&os,TranslationJob const&j){

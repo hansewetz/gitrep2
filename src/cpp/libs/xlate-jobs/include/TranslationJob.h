@@ -7,6 +7,7 @@
 #include <memory>
 #include <list>
 #include <map>
+#include <mutex>
 namespace xlate{
 
 // forward decl
@@ -52,6 +53,7 @@ private:
   TranslationJobId id_;
   LanguageCode slan_;
   LanguageCode tlan_;
+  mutable std::mutex mtx_;
   std::list<std::shared_ptr<TranslationTask>>translated_;
   std::list<std::shared_ptr<TranslationTask>>nonTranslated_;
   std::map<TranslationTaskId,std::shared_ptr<TranslationTask>>inTranslation_;
