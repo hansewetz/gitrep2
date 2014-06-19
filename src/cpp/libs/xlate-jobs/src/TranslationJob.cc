@@ -45,6 +45,10 @@ size_t TranslationJob::noUntranslated()const{
 size_t TranslationJob::noInTranslation()const{
   return inTranslation_.size();
 }
+// check if we are done translating
+bool TranslationJob::done()const{
+  return noInTranslation()==0&&noUntranslated()==0;
+}
 // book keeping functions
 shared_ptr<TranslationTask>TranslationJob::getNextTask(){
   // check if we have anyhthing to translate
