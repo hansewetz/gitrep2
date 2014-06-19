@@ -34,6 +34,7 @@ public:
   std::size_t noTranslated()const;
   std::size_t noUntranslated()const;
   std::size_t noInTranslation()const;
+  bool done()const;
 
   // task management functions
   std::shared_ptr<TranslationTask>getNextTask();
