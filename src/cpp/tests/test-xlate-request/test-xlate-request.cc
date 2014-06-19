@@ -14,19 +14,21 @@ using namespace xlate;
 // consume tasks
 void translateTasks(shared_ptr<TaskQueue>qin,shared_ptr<TaskQueue>qout){
   shared_ptr<TranslationTask>task;
-  while(task=qin->deq(true))qout->enq(task);
+  while(task=qout->deq(true))qin->enq(task);
+  qin->enq(task);
 }
 // produce tasks
 void scheduleTasks(shared_ptr<TranslationJob>job,shared_ptr<TaskQueue>qout){
   // feed all tasks to consumer
   shared_ptr<TranslationTask>task;
   while(task=job->getNextTask())qout->enq(task);
+  qout->enq(shared_ptr<TranslationTask>(nullptr));
 }
 // read translated task
 void collect(shared_ptr<TranslationJob>job,shared_ptr<TaskQueue>qin){
   // read translated tasks
   shared_ptr<TranslationTask>task;
-  while(task=qin->deq(true)){
+  while((task=qin->deq(true))&&task){
     job->addTranslatedTask(task);
   }
 }
@@ -48,7 +50,7 @@ int main(){
   shared_ptr<TaskQueue>qin{make_shared<TaskQueue>(10)};
 
   // create threads
-  thread thr_translate{translateTasks,qout,qin};
+  thread thr_translate{translateTasks,qin,qout};
   thread thr_schedule(scheduleTasks,job,qout);
   thread thr_collect(collect,job,qin);
 

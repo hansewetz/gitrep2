@@ -52,9 +52,6 @@ private:
   TranslationJobId id_;
   LanguageCode slan_;
   LanguageCode tlan_;
-  std::size_t noTranslated_;
-  std::size_t noUntranslated_;
-  std::size_t noInTranslation_;
   std::list<std::shared_ptr<TranslationTask>>translated_;
   std::list<std::shared_ptr<TranslationTask>>nonTranslated_;
   std::map<TranslationTaskId,std::shared_ptr<TranslationTask>>inTranslation_;

@@ -11,8 +11,7 @@ namespace xlate{
 // ctors
 TranslationJob::TranslationJob(TranslateRequest const&req):
     id_(TranslationJobId()),
-    slan_(req.srcLan()),tlan_(req.targLan()),
-    noTranslated_{0},noUntranslated_{req.segs().size()},noInTranslation_(0){
+    slan_(req.srcLan()),tlan_(req.targLan()){
 
   // create tasks to be translated
   vector<string>const&segs{req.segs()};
@@ -36,15 +35,15 @@ LanguageCode const&TranslationJob::targLan()const{
 }
 // get #of translated segments
 size_t TranslationJob::noTranslated()const{
-  return noTranslated_;
+  return translated_.size();
 }
 // get #of un-translated segments
 size_t TranslationJob::noUntranslated()const{
-  return noUntranslated_;
+  return nonTranslated_.size();
 }
 // get #of in translation segments
 size_t TranslationJob::noInTranslation()const{
-  return noInTranslation_;
+  return inTranslation_.size();
 }
 // book keeping functions
 shared_ptr<TranslationTask>TranslationJob::getNextTask(){
@@ -54,10 +53,8 @@ shared_ptr<TranslationTask>TranslationJob::getNextTask(){
   // get task to translate
   shared_ptr<TranslationTask>ret{*nonTranslated_.begin()};
   nonTranslated_.pop_front();
-  --noUntranslated_;
 
   // track sements which are in the process of translation
-  ++noInTranslation_;
   TranslationTaskId id{ret->id()};
   if(inTranslation_.find(id)!=inTranslation_.end()){
     THROW_RUNTIME("attempt to insert segmementg in map of segments waiting for translation when segent already exist, id: "<<id);
@@ -77,15 +74,13 @@ void TranslationJob::addTranslatedTask(std::shared_ptr<TranslationTask>task){
   }
   // remove task from tasks waiting for translation
   inTranslation_.erase(id);
-  --noInTranslation_;
 
   // add task to translated tasks
   translated_.push_back(task);
-  ++noTranslated_;
 }
 // print function
 ostream&TranslationJob::print(ostream&os)const{
-  return os<<"id: "<<id_<<", source-lan: "<<slan_<<", target-lan: "<<tlan_<<", #translated: "<<noTranslated_<<", #non-translated: "<<noUntranslated_<<", #in-translation: "<<noInTranslation_;
+  return os<<"id: "<<id_<<", source-lan: "<<slan_<<", target-lan: "<<tlan_<<", #translated: "<<noTranslated()<<", #non-translated: "<<noUntranslated()<<", #in-translation: "<<noInTranslation();
 }
 // print operator
 ostream&operator<<(ostream&os,TranslationJob const&j){
