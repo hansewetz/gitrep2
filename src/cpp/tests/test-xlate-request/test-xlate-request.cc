@@ -11,22 +11,32 @@
 using namespace std;
 using namespace xlate;
 
-// consume tasks
+// translate tasks
 void translateTasks(shared_ptr<TaskQueue>qin,shared_ptr<TaskQueue>qout){
   shared_ptr<TranslationTask>task;
-  while(task=qout->deq(true))qin->enq(task);
+  while(task=qout->deq(true)){
+    // translate segment and add it to task
+    // ...
+    task->setTargetSeg(string("TRANSLATED: ")+task->srcSeg());
+
+    // send translated task back to whoever wants to process it
+    qin->enq(task);
+  }
+  // send null task to stop receiver
   qin->enq(task);
 }
-// produce tasks
+// read tasks from the job and send them fr translation
 void scheduleTasks(shared_ptr<TranslationJob>job,shared_ptr<TaskQueue>qout){
   // feed all tasks to consumer
   shared_ptr<TranslationTask>task;
   while(task=job->getNextTask())qout->enq(task);
+
+ // send null task to stop translation
   qout->enq(shared_ptr<TranslationTask>(nullptr));
 }
-// read translated task
+// read translated task and add them back to the job
 void collect(shared_ptr<TranslationJob>job,shared_ptr<TaskQueue>qin){
-  // read translated tasks
+  // read translated tasks (will end when we receive a null task)
   shared_ptr<TranslationTask>task;
   while((task=qin->deq(true))&&task){
     job->addTranslatedTask(task);
@@ -39,20 +49,18 @@ int main(){
   LanguageCode target{"sv"};
   TranslateRequest req{src,target,{"Hello world","second phrase","third phrase"}};
 
-  // create a job with tasks
+  // create a job from request
   shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};
-
-  // print job before translation
   cerr<<"JOB: "<<*job<<endl;
 
   // create queues
   shared_ptr<TaskQueue>qout{make_shared<TaskQueue>(10)};
   shared_ptr<TaskQueue>qin{make_shared<TaskQueue>(10)};
 
-  // create threads
+  // create threads (producer, translator and consumer of translated segments)
   thread thr_translate{translateTasks,qin,qout};
-  thread thr_schedule(scheduleTasks,job,qout);
-  thread thr_collect(collect,job,qin);
+  thread thr_schedule{scheduleTasks,job,qout};
+  thread thr_collect{collect,job,qin};
 
   // join threads
   thr_collect.join();
