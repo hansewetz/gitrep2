@@ -2,6 +2,7 @@
 #define __LANGUAGE_CODE_H__
 #include <iosfwd>
 #include <string>
+#include <utility>
 namespace xlate{
 
 // language code
@@ -18,6 +19,10 @@ public:
   // getters
   std::string const&languageCode()const;
 
+  // comparison operators
+  bool operator==(LanguageCode const&lc)const{return lc_==lc.lc_;}
+  bool operator<(LanguageCode const&lc)const{return lc<lc.lc_;}
+
   // print function
   std::ostream&print(std::ostream&os)const;
 private:
@@ -25,5 +30,8 @@ private:
 };
 // print function
 std::ostream&operator<<(std::ostream&os,LanguageCode const&lc);
+
+// make sure we get all relational operators
+using namespace std::rel_ops;
 }
 #endif
