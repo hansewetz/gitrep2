@@ -11,8 +11,8 @@ namespace xlate{
 class TranslateRequest{
 public:
   // ctors (movable, not copyable)
-  TranslateRequest(LanguageCode const&slan,LanguageCode const&tlan,std::initializer_list<std::string>segs);
-  TranslateRequest(LanguageCode const&slan,LanguageCode const&tlan,std::vector<std::string>const&segs);
+  TranslateRequest(LanguagePair const&lanpair,std::initializer_list<std::string>segs);
+  TranslateRequest(LanguagePair const&lanpair,std::vector<std::string>const&segs);
   TranslateRequest(TranslateRequest const&)=delete;
   TranslateRequest(TranslateRequest&&)=default;
   TranslateRequest&operator=(TranslateRequest const&)=delete;
@@ -21,8 +21,7 @@ public:
 
   // getters
   TranslateRequestId const&id()const;
-  LanguageCode const&srcLan()const;
-  LanguageCode const&targLan()const;
+  LanguagePair const&lanpair()const;
   std::vector<std::string>const&segs()const;
 
   // print function
@@ -30,8 +29,7 @@ public:
 private:
   TranslateRequestId id_;
   std::vector<std::string>segs_;
-  LanguageCode slan_;
-  LanguageCode tlan_;
+  LanguagePair lanpair_;
 };
 // print function
 std::ostream&operator<<(std::ostream&os,TranslateRequest const&);

@@ -5,7 +5,7 @@ using namespace std;
 namespace xlate{
 
 // ctor
-TranslationTask::TranslationTask(pair<LanguageCode,LanguageCode>lanpair,string const&seg,size_t segno):
+TranslationTask::TranslationTask(LanguagePair const&lanpair,string const&seg,size_t segno):
   id_(TranslationTaskId()),lanpair_(lanpair),srcSeg_(seg),segno_(segno){
 }
 // get id of task
@@ -13,7 +13,7 @@ TranslationTaskId  const&TranslationTask::id()const{
   return id_;
 }
 // get language pair
-pair<LanguageCode,LanguageCode>const&TranslationTask::lanpair()const{
+LanguagePair const&TranslationTask::lanpair()const{
   return lanpair_;
 }
 // get segment to translate

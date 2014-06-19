@@ -31,9 +31,11 @@ private:
 // print function
 std::ostream&operator<<(std::ostream&os,LanguageCode const&lc);
 
+// typedef for a language pair
+using LanguagePair=std::pair<LanguageCode,LanguageCode>;
+
 // helper creation functions
-LanguageCode make_lanpair(std::string const&lan);
-std::pair<LanguageCode,LanguageCode>make_lanpairs(std::string const&lan1,std::string const&lan2);
+LanguagePair make_lanpair(std::string const&lan1,std::string const&lan2);
 
 // make sure we get all relational operators
 using namespace std::rel_ops;

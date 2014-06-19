@@ -11,7 +11,7 @@ namespace xlate{
 // ctors
 TranslationJob::TranslationJob(TranslateRequest const&req):
     id_(TranslationJobId()),
-    lanpair_{req.srcLan(),req.targLan()}{
+    lanpair_{req.lanpair()}{
 
   // create tasks to be translated
   vector<string>const&segs{req.segs()};
@@ -26,7 +26,7 @@ TranslationJobId const&TranslationJob::id()const{
   return id_;
 }
 // get language pair
-pair<LanguageCode,LanguageCode>const&TranslationJob::lanpair()const{
+LanguagePair const&TranslationJob::lanpair()const{
   return lanpair_;
 }
 // get #of translated segments

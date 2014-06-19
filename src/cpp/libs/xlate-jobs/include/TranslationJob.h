@@ -28,7 +28,7 @@ public:
 
   // general getters
   TranslationJobId const&id()const;
-  std::pair<LanguageCode,LanguageCode>const&lanpair()const;
+  LanguagePair const&lanpair()const;
 
   // translation stats
   std::size_t noTranslated()const;
@@ -44,7 +44,7 @@ public:
   std::ostream&print(std::ostream&os)const;
 private:
   TranslationJobId id_;
-  std::pair<LanguageCode,LanguageCode>lanpair_;
+  LanguagePair lanpair_;
   mutable std::mutex mtx_;
   std::list<std::shared_ptr<TranslationTask>>translated_;
   std::list<std::shared_ptr<TranslationTask>>nonTranslated_;

@@ -5,24 +5,20 @@ using namespace std;
 namespace xlate{
 
 // ctor
-TranslateRequest::TranslateRequest(LanguageCode const&slan,LanguageCode const&tlan,initializer_list<string>segs):
-  TranslateRequest(slan,tlan,vector<string>(segs)){
+TranslateRequest::TranslateRequest(LanguagePair const&lanpair,initializer_list<string>segs):
+  TranslateRequest(lanpair,vector<string>(segs)){
 }
 // ctor (re-use ctor taking vector of segments)
-TranslateRequest::TranslateRequest(LanguageCode const&slan,LanguageCode const&tlan,vector<string>const&segs):
-  slan_(slan),tlan_(tlan),id_(TranslateRequestId()),segs_(segs){
+TranslateRequest::TranslateRequest(LanguagePair const&lanpair,vector<string>const&segs):
+  lanpair_(lanpair),id_(TranslateRequestId()),segs_(segs){
 }
 // getters
 TranslateRequestId const&TranslateRequest::id()const{
   return id_;
 }
-// get source language
-LanguageCode const&TranslateRequest::srcLan()const{
-  return slan_;
-}
-// get target language
-LanguageCode const&TranslateRequest::targLan()const{
-  return tlan_;
+// get language pair
+LanguagePair const&TranslateRequest::lanpair()const{
+  return lanpair_;
 }
 // get request segments
 vector<string>const&TranslateRequest::segs()const{
@@ -30,7 +26,7 @@ vector<string>const&TranslateRequest::segs()const{
 }
 // print function
 ostream&TranslateRequest::print(ostream&os)const{
-  os<<"id: "<<id_<<"srclan: "<<slan_<<", targetlan: "<<tlan_<<endl;
+  os<<"id: "<<id_<<"srclan: "<<lanpair_.first<<", targetlan: "<<lanpair_.second<<endl;
   os<<"segs: "<<endl;
   for(auto const&s:segs_)os<<"\t"<<s<<endl;
   return os;

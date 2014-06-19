@@ -23,7 +23,7 @@ LanguageCode make_lanpair(string const&lan){
   return LanguageCode(lan);
 }
 //create a pair of language codes
-pair<LanguageCode,LanguageCode>make_lanpairs(string const&lan1,string const&lan2){
+LanguagePair make_lanpair(string const&lan1,string const&lan2){
   return make_pair(make_lanpair(lan1),make_lanpair(lan2));
 }
 }
