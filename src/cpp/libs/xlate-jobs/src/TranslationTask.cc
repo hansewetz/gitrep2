@@ -5,20 +5,16 @@ using namespace std;
 namespace xlate{
 
 // ctor
-TranslationTask::TranslationTask(LanguageCode const&slan,LanguageCode const&tlan,string const&seg,size_t segno):
-  id_(TranslationTaskId()),slan_(slan),tlan_(tlan),srcSeg_(seg),segno_(segno){
+TranslationTask::TranslationTask(pair<LanguageCode,LanguageCode>lanpair,string const&seg,size_t segno):
+  id_(TranslationTaskId()),lanpair_(lanpair),srcSeg_(seg),segno_(segno){
 }
 // get id of task
 TranslationTaskId  const&TranslationTask::id()const{
   return id_;
 }
-// get source lan
-LanguageCode const&TranslationTask::srcLan()const{
-  return slan_;
-}
-// get target lan
-LanguageCode const&TranslationTask::targLan()const{
-  return tlan_;
+// get language pair
+pair<LanguageCode,LanguageCode>const&TranslationTask::lanpair()const{
+  return lanpair_;
 }
 // get segment to translate
 string const&TranslationTask::srcSeg()const{
@@ -44,7 +40,7 @@ void TranslationTask::setTargetSeg(string const&seg){
 }
 // print function
 ostream&TranslationTask::print(ostream&os)const{
-  return os<<"id: "<<id_<<", segno: "<<segno_<<", source-lan: "<<slan_<<", target-lan: "<<tlan_<<", srcSeg: \""<<srcSeg_<<"\""<<", has target: "<<boolalpha<<hasTargetSeg_<<", target-seg: \""<<targetSeg_<<"\"";
+  return os<<"id: "<<id_<<", segno: "<<segno_<<", source-lan: "<<lanpair_.first<<", target-lan: "<<lanpair_.second<<", srcSeg: \""<<srcSeg_<<"\""<<", has target: "<<boolalpha<<hasTargetSeg_<<", target-seg: \""<<targetSeg_<<"\"";
 }
 // print operator
 ostream&operator<<(ostream&os,TranslationTask const&t){

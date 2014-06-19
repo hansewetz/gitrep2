@@ -11,13 +11,13 @@ namespace xlate{
 // ctors
 TranslationJob::TranslationJob(TranslateRequest const&req):
     id_(TranslationJobId()),
-    slan_(req.srcLan()),tlan_(req.targLan()){
+    lanpair_{req.srcLan(),req.targLan()}{
 
   // create tasks to be translated
   vector<string>const&segs{req.segs()};
   size_t segcount{0};
   for(auto s:segs){
-    auto task=make_shared<TranslationTask>(slan_,tlan_,s,segcount++);
+    auto task=make_shared<TranslationTask>(lanpair_,s,segcount++);
     nonTranslated_.push_back(task);
   }
 }
@@ -25,13 +25,9 @@ TranslationJob::TranslationJob(TranslateRequest const&req):
 TranslationJobId const&TranslationJob::id()const{
   return id_;
 }
-// get source lan
-LanguageCode const&TranslationJob::srcLan()const{
-  return slan_;
-}
-// get target lan
-LanguageCode const&TranslationJob::targLan()const{
-  return tlan_;
+// get language pair
+pair<LanguageCode,LanguageCode>const&TranslationJob::lanpair()const{
+  return lanpair_;
 }
 // get #of translated segments
 size_t TranslationJob::noTranslated()const{
@@ -93,7 +89,7 @@ void TranslationJob::addTranslatedTask(std::shared_ptr<TranslationTask>task){
 // print function
 ostream&TranslationJob::print(ostream&os)const{
   lock_guard<mutex>lock(mtx_);
-  return os<<"id: "<<id_<<", source-lan: "<<slan_<<", target-lan: "<<tlan_<<
+  return os<<"id: "<<id_<<", source-lan: "<<lanpair_.first<<", target-lan: "<<lanpair_.second<<
              ", #translated: "<<translated_.size()<<
              ", #non-translated: "<<nonTranslated_.size()<<
              ", #in-translation: "<<inTranslation_.size();

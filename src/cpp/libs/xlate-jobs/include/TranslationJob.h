@@ -28,8 +28,7 @@ public:
 
   // general getters
   TranslationJobId const&id()const;
-  LanguageCode const&srcLan()const;
-  LanguageCode const&targLan()const;
+  std::pair<LanguageCode,LanguageCode>const&lanpair()const;
 
   // translation stats
   std::size_t noTranslated()const;
@@ -40,19 +39,12 @@ public:
   // task management functions
   std::shared_ptr<TranslationTask>getNextTask();
   void addTranslatedTask(std::shared_ptr<TranslationTask>);
-  
-
-  // NOTE! Book keeping functions */
-  //	- add translated segents
-  //	- get segment for translation
-  //	- get #of remaining segments
 
   // print function
   std::ostream&print(std::ostream&os)const;
 private:
   TranslationJobId id_;
-  LanguageCode slan_;
-  LanguageCode tlan_;
+  std::pair<LanguageCode,LanguageCode>lanpair_;
   mutable std::mutex mtx_;
   std::list<std::shared_ptr<TranslationTask>>translated_;
   std::list<std::shared_ptr<TranslationTask>>nonTranslated_;

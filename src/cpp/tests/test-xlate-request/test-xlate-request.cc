@@ -46,8 +46,8 @@ void collect(shared_ptr<TranslationJob>job,shared_ptr<TaskQueue>qin){
 int main(){
   // create a request
   LanguageCode src{"en"};
-  LanguageCode target{"sv"};
-  TranslateRequest req{src,target,{"Hello world","second phrase","third phrase"}};
+  LanguageCode targ{"sv"};
+  TranslateRequest req{src,targ,{"Hello world","second phrase","third phrase"}};
 
   // create a job from request
   shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};
