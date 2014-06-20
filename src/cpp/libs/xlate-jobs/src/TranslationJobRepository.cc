@@ -8,13 +8,19 @@ namespace xlate{
 // ctor
 TranslationJobRepository::TranslationJobRepository(){
 }
+// check if job exist
+bool TranslationJobRepository::hasJob(TranslationJobId const&jobid)const{
+  return id2jobmap_.find(jobid)!=id2jobmap_.end();
+}
 // get job by job id
 shared_ptr<TranslationJob>TranslationJobRepository::getJob(TranslationJobId const&jobid)const{
-  // NOTE! Not yet done
+  auto it=id2jobmap_.find(jobid);
+  if(it==id2jobmap_.end())return shared_ptr<TranslationJob>(nullptr);
+  return it->second;
 }
 // get #of jobs for a language pair
-size_t TranslationJobRepository::jobCount(LanguagePair const&)const{
-  // NOTE! Not yet done
+size_t TranslationJobRepository::jobCount(LanguagePair const&lp)const{
+  return lanp2jobmap_.count(lp);
 }
 // repository update functions
 void TranslationJobRepository::addJob(shared_ptr<TranslationJob>){
@@ -22,7 +28,7 @@ void TranslationJobRepository::addJob(shared_ptr<TranslationJob>){
 }
 // print function
 ostream&TranslationJobRepository::print(ostream&os)const{
-  return os<<"#lanpairs: "<<jobs_.size()<<endl;
+  return os<<"#lanpairs: "<<id2jobmap_.size()<<endl;
 }
 // debug print function
 ostream&operator<<(ostream&os,TranslationJobRepository const&r){

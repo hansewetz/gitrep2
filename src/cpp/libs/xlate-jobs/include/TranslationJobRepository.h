@@ -24,6 +24,7 @@ public:
   ~TranslationJobRepository()=default;
 
   // repository query functions
+  bool hasJob(TranslationJobId const&)const;
   std::shared_ptr<TranslationJob>getJob(TranslationJobId const&)const;
   std::size_t jobCount(LanguagePair const&)const;
 
@@ -34,7 +35,10 @@ public:
   std::ostream&print(std::ostream&os)const;
 private:
   // store jobs in a set of queues indexed by LanguagePair
-  std::multimap<LanguagePair,std::queue<std::shared_ptr<TranslationJob>>>jobs_;
+  std::multimap<LanguagePair,std::queue<std::shared_ptr<TranslationJob>>>lanp2jobmap_;
+
+  // map of job ids to jobs (we ensure jobids are unique)
+  std::map<TranslationJobId,std::shared_ptr<TranslationJob>>id2jobmap_;
 };
 // debug print function
 std::ostream&operator<<(std::ostream&os,TranslationJobRepository const&);
