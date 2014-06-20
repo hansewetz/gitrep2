@@ -1,9 +1,12 @@
 #ifndef __TRANSLATION_JOB_REPOSITORY_H__
 #define __TRANSLATION_JOB_REPOSITORY_H__
 #include "xlate-jobs/LanguageCode.h"
+#include "xlate-jobs/Identifiers.h"
 #include <iosfwd>
 #include <map>
+#include <vector>
 #include <memory>
+#include <queue>
 namespace xlate{
 
 // forward decl
@@ -21,15 +24,17 @@ public:
   ~TranslationJobRepository()=default;
 
   // repository query functions
-  // ...
+  std::shared_ptr<TranslationJob>getJob(TranslationJobId const&)const;
+  std::size_t jobCount(LanguagePair const&)const;
 
   // repository update functions
-  // ...
+  void addJob(std::shared_ptr<TranslationJob>);
 
   // print function
-  std::ostream&print(TranslationJobRepository const&)const;
+  std::ostream&print(std::ostream&os)const;
 private:
-  std::map<LanguagePair,std::shared_ptr<TranslationJob>>jobs_;
+  // store jobs in a set of queues indexed by LanguagePair
+  std::multimap<LanguagePair,std::queue<std::shared_ptr<TranslationJob>>>jobs_;
 };
 // debug print function
 std::ostream&operator<<(std::ostream&os,TranslationJobRepository const&);
