@@ -17,6 +17,7 @@ void translateTasks(shared_ptr<TaskQueue>qin,shared_ptr<TaskQueue>qout){
   while(task=qout->deq(true)){
     // translate segment and add it to task
     // ...
+    cout<<"translating segment no: "<<task->segno()<<", from : "<<task->lanpair().first<<" to "<<task->lanpair().second<<", text: "<<task->srcSeg()<<endl;;
     task->setTargetSeg(string("TRANSLATED: ")+task->srcSeg());
 
     // send translated task back to whoever wants to process it
@@ -36,7 +37,7 @@ void scheduleTasks(shared_ptr<TranslationJob>job,shared_ptr<TaskQueue>qout){
 }
 // read translated task and add them back to the job
 void collect(shared_ptr<TranslationJob>job,shared_ptr<TaskQueue>qin){
-  // read translated tasks (will end when we receive a null task)
+  // read translated tasks and add them to the job where they came from (will end when we receive a null task)
   shared_ptr<TranslationTask>task;
   while((task=qin->deq(true))&&task){
     job->addTranslatedTask(task);

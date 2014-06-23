@@ -5,6 +5,9 @@
 using namespace std;
 namespace xlate{
 
+// NOTE! Must use mutex + condition variable since
+//	 there are produceres and consumers of jobs for the rep[osityory
+
 // ctor
 TranslationJobRepository::TranslationJobRepository(){
 }
@@ -25,6 +28,12 @@ size_t TranslationJobRepository::jobCount(LanguagePair const&lp)const{
 // repository update functions
 void TranslationJobRepository::addJob(shared_ptr<TranslationJob>){
   // NOTE! Not yet done
+  // must add to both maps
+}
+// remove job and get job objects
+shared_ptr<TranslationJob>TranslationJobRepository::removeJob(TranslationJobId const&)const{
+  // NOTE! Not yet done
+  // must add to both maps
 }
 // print function
 ostream&TranslationJobRepository::print(ostream&os)const{

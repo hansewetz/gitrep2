@@ -30,6 +30,7 @@ public:
 
   // repository update functions
   void addJob(std::shared_ptr<TranslationJob>);
+  std::shared_ptr<TranslationJob>removeJob(TranslationJobId const&)const;
 
   // print function
   std::ostream&print(std::ostream&os)const;
@@ -39,6 +40,9 @@ private:
 
   // map of job ids to jobs (we ensure jobids are unique)
   std::map<TranslationJobId,std::shared_ptr<TranslationJob>>id2jobmap_;
+
+// NOTE! Should have mutex + cond variables for clients accessing the repository
+//	...
 };
 // debug print function
 std::ostream&operator<<(std::ostream&os,TranslationJobRepository const&);

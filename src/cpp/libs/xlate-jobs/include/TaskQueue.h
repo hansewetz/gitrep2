@@ -24,6 +24,7 @@ public:
   std::size_t size()const ;
   bool enq(std::shared_ptr<TranslationTask>task);
   std::shared_ptr<TranslationTask>deq(bool block);
+  bool wait(bool block)const;
 
   // print function
   std::ostream&print(std::ostream&os)const;

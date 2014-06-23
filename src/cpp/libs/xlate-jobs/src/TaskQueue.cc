@@ -37,6 +37,15 @@ shared_ptr<TranslationTask>TaskQueue::TaskQueue::deq(bool block){
   queue_.pop();
   return ret;
 }
+// wait until a task arrives - returnsd true if so, else false
+bool TaskQueue::wait(bool block)const{
+  unique_lock<mutex>lock(mtx_);
+  if(block)cond_.wait(lock,[&](){return !queue_.empty();});
+  else cond_.wait_for(lock,chrono::milliseconds(0),[&](){return !queue_.empty();});
+
+  // if queue not emoty we have a task
+  return !queue_.empty();
+}
 // print function
 ostream&TaskQueue::print(ostream&os)const{
    return os<<"#items: "<<size();
