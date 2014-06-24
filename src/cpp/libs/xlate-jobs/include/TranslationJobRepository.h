@@ -13,7 +13,7 @@ namespace xlate{
 // forward decl
 class TranslationJob;
 
-// class holding all jobs to be translated
+// class holding all jobs to be processed
 class TranslationJobRepository{
 public:
   // ctors, dtor
@@ -26,12 +26,14 @@ public:
 
   // repository update functions
   void addJob(std::shared_ptr<TranslationJob>);
-  std::shared_ptr<TranslationJob>getJobForTranslation();
+  std::shared_ptr<TranslationJob>startJob();
+  std::shared_ptr<TranslationJob>getStartedJob(TranslationJobId const&);
+  std::shared_ptr<TranslationJob>removeStartedJob(TranslationJobId const&);
 
   // print function
   std::ostream&print(std::ostream&os)const;
 private:
-  // map of job ids to jobs (we ensure jobids are unique)
+  // list of idle jobs and map of jobs in progress
   std::list<std::shared_ptr<TranslationJob>>idleJobs_;
   std::map<TranslationJobId,std::shared_ptr<TranslationJob>>startedJobs_;
 

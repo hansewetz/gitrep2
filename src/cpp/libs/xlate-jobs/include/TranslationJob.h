@@ -19,7 +19,7 @@ class TranslationTask;
 class TranslationJob{
 public:
   // ctors, dtor (non-copyable, movable)
-  TranslationJob(TranslateRequest const&);
+  TranslationJob(std::shared_ptr<TranslateRequest>);
   TranslationJob(TranslationJob const&)=delete;
   TranslationJob(TranslationJob&&)=default;
   TranslationJob&operator=(TranslationJob const&)=delete;

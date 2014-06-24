@@ -16,8 +16,8 @@ void TranslationJobRepository::addJob(shared_ptr<TranslationJob>job){
   idleJobs_.push_back(job);
   cond_.notify_all();
 }
-// get job for translation
-shared_ptr<TranslationJob>TranslationJobRepository::getJobForTranslation(){
+// get job for processing
+shared_ptr<TranslationJob>TranslationJobRepository::startJob(){
   // block until we have a job
   unique_lock<mutex>lock(mtx_);
   cond_.wait(lock,[&](){return !idleJobs_.empty();});
@@ -27,6 +27,25 @@ shared_ptr<TranslationJob>TranslationJobRepository::getJobForTranslation(){
   idleJobs_.pop_front();
   startedJobs_.insert(make_pair(job->id(),job));
   return job;
+}
+// get a started job from jobid
+shared_ptr<TranslationJob>TranslationJobRepository::getStartedJob(TranslationJobId const&jobid){
+  // lookup job among started jobs
+  lock_guard<mutex>lock(mtx_);
+  auto it=startedJobs_.find(jobid);
+  if(it==startedJobs_.end())THROW_RUNTIME("attempt to retrieve non-existing started job with job id: "<<jobid);
+  return it->second;
+}
+// remove job from repository
+shared_ptr<TranslationJob>TranslationJobRepository::removeStartedJob(TranslationJobId const&jobid){
+  // check if job is a started
+  auto it=startedJobs_.find(jobid);
+  if(it!=startedJobs_.end()){
+    auto ret{it->second};
+    startedJobs_.erase(it);
+    return it->second;
+  }
+  THROW_RUNTIME("attempt to remove idle job as started job, jobid: "<<jobid);
 }
 // print function
 ostream&TranslationJobRepository::print(ostream&os)const{

@@ -10,7 +10,7 @@ namespace xlate{
 class TranslationTask{
 public:
   // ctors, dtor
-  TranslationTask(LanguagePair const&lanpair,std::string const&seg,std::size_t segno);
+  TranslationTask(TranslationJobId const&jobid,LanguagePair const&lanpair,std::string const&seg,std::size_t segno);
   TranslationTask(TranslationTask const&)=default;
   TranslationTask(TranslationTask&&)=default;
   TranslationTask&operator=(TranslationTask const&)=default;
@@ -18,7 +18,8 @@ public:
   ~TranslationTask()=default;
 
   // getters
-  TranslationTaskId  const&id()const;
+  TranslationTaskId const&id()const;
+  TranslationJobId const&jobid()const;
   LanguagePair const&lanpair()const;
   std::string const&srcSeg()const;
   bool hasTargetSeg()const;
@@ -32,6 +33,7 @@ public:
   std::ostream&print(std::ostream&os)const;
 private:
   TranslationTaskId id_;
+  TranslationJobId jobid_;
   LanguagePair lanpair_;
   std::string srcSeg_;
   std::string targetSeg_;

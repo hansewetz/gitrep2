@@ -9,15 +9,15 @@ using namespace std;
 namespace xlate{
 
 // ctors
-TranslationJob::TranslationJob(TranslateRequest const&req):
+TranslationJob::TranslationJob(std::shared_ptr<TranslateRequest>req):
     id_(TranslationJobId()),
-    lanpair_{req.lanpair()}{
+    lanpair_{req->lanpair()}{
 
   // create tasks to be translated
-  vector<string>const&segs{req.segs()};
+  vector<string>const&segs{req->segs()};
   size_t segcount{0};
   for(auto s:segs){
-    auto task=make_shared<TranslationTask>(lanpair_,s,segcount++);
+    auto task=make_shared<TranslationTask>(id_,lanpair_,s,segcount++);
     nonTranslated_.push_back(task);
   }
 }
