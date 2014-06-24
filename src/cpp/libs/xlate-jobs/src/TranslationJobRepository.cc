@@ -13,19 +13,19 @@ TranslationJobRepository::TranslationJobRepository(LanguagePair const&lp):lp_(lp
 void TranslationJobRepository::addJob(shared_ptr<TranslationJob>job){
   // insert job in jobsPending_
   unique_lock<mutex>lock(mtx_);
-  waitingJobs_.push_back(job);
+  idleJobs_.push_back(job);
   cond_.notify_all();
 }
 // get job for translation
 shared_ptr<TranslationJob>TranslationJobRepository::getJobForTranslation(){
   // block until we have a job
   unique_lock<mutex>lock(mtx_);
-  cond_.wait(lock,[&](){return !waitingJobs_.empty();});
+  cond_.wait(lock,[&](){return !idleJobs_.empty();});
 
-  // move job from waitingJobs_ --> processingJobs_ and return job
-  shared_ptr<TranslationJob>job{waitingJobs_.front()};
-  waitingJobs_.pop_front();
-  processingJobs_.push_back(job);
+  // remove from idelJobs_ and insert into startedJobs_
+  shared_ptr<TranslationJob>job{idleJobs_.front()};
+  idleJobs_.pop_front();
+  startedJobs_.insert(make_pair(job->id(),job));
   return job;
 }
 // print function

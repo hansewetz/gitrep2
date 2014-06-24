@@ -3,6 +3,8 @@
 #include "xlate-jobs/LanguageCode.h"
 #include "xlate-jobs/Identifiers.h"
 #include <iosfwd>
+#include <list>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <condition_variable>
@@ -30,10 +32,10 @@ public:
   std::ostream&print(std::ostream&os)const;
 private:
   // map of job ids to jobs (we ensure jobids are unique)
-  std::list<std::shared_ptr<TranslationJob>>waitingJobs_;
-  std::list<std::shared_ptr<TranslationJob>>processingJobs_;
+  std::list<std::shared_ptr<TranslationJob>>idleJobs_;
+  std::map<TranslationJobId,std::shared_ptr<TranslationJob>>startedJobs_;
 
-  // language pair for this rep
+  // language pair for repository
   LanguagePair lp_;
 
   // we have multiple consumers/producuerproducers
