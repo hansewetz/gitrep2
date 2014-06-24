@@ -7,6 +7,8 @@
 #include <vector>
 #include <memory>
 #include <queue>
+#include <mutex>
+#include <condition_variable>
 namespace xlate{
 
 // forward decl
@@ -24,13 +26,12 @@ public:
   ~TranslationJobRepository()=default;
 
   // repository query functions
-  bool hasJob(TranslationJobId const&)const;
-  std::shared_ptr<TranslationJob>getJob(TranslationJobId const&)const;
   std::size_t jobCount(LanguagePair const&)const;
 
   // repository update functions
   void addJob(std::shared_ptr<TranslationJob>);
-  std::shared_ptr<TranslationJob>removeJob(TranslationJobId const&)const;
+  std::shared_ptr<TranslationJob>getJobForTranslation(TranslationJobId const&);
+  std::shared_ptr<TranslationJob>removeJob(TranslationJobId const&);
 
   // print function
   std::ostream&print(std::ostream&os)const;
@@ -39,10 +40,14 @@ private:
   std::multimap<LanguagePair,std::queue<std::shared_ptr<TranslationJob>>>lanp2jobmap_;
 
   // map of job ids to jobs (we ensure jobids are unique)
-  std::map<TranslationJobId,std::shared_ptr<TranslationJob>>id2jobmap_;
+  std::map<TranslationJobId,std::shared_ptr<TranslationJob>>allJobs_;
+  std::map<TranslationJobId,std::shared_ptr<TranslationJob>>startedJobs_;
 
-// NOTE! Should have mutex + cond variables for clients accessing the repository
-//	...
+// NOTE! Must update 'jobsInTranslation_'
+
+  // we have multiple consumers/producuerproducers
+  mutable std::mutex mtx_;
+  mutable std::condition_variable cond_;
 };
 // debug print function
 std::ostream&operator<<(std::ostream&os,TranslationJobRepository const&);
