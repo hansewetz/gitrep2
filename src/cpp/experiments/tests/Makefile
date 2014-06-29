@@ -1,5 +1,6 @@
 SUBDIRS = \
-system-programming test-SFINAE test-asio test-atomic test-boost-log test-boost-regexp test-buffered-fd-channel \
+asio \
+system-programming test-SFINAE test-atomic test-boost-log test-boost-regexp test-buffered-fd-channel \
 test-callable test-clucene test-const test-fd-stream test-for test-future test-index-list test-lambda test-lambda-recurse test-libssh-ftp \
 test-list-add-numbers test-numeric-limit test-occi test-occi-iterator test-occi-timed test-packaged-task test-param-passing \
 test-readlines test-sqlite test-stop-watch test-stop-watch-boost test-streambuf test-thread test-thread-pool test-threadpool test-tuplet-apply test-type-printer \

@@ -24,9 +24,11 @@ void tmoCb(const boost::system::error_code&err,boost::asio::deadline_timer*t){
 
 // main.
 int main(int argc,char**argv){
+  // io service
   boost::asio::io_service ios;
-  boost::asio::deadline_timer tmo(ios);
-  tmo.expires_from_now(boost::posix_time::seconds(2));
+
+  // setup timer and run event loop
+  boost::asio::deadline_timer tmo(ios,boost::posix_time::seconds(2));
   tmo.async_wait(boost::bind(tmoCb,boost::asio::placeholders::error,&tmo));
   std::thread t(boost::bind(&boost::asio::io_service::run,&ios));
 
