@@ -1,6 +1,6 @@
 SUBDIRS = \
 	test-thread-asio \
-	test-timer-simple
+	test-timer-lambda
 
 include $(PROJECT_ROOT)/env/makerules/subdirs.rules
 
