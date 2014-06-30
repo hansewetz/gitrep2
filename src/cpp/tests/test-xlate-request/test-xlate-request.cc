@@ -18,7 +18,7 @@ void translateTasks(shared_ptr<TaskQueue>q2process,shared_ptr<TaskQueue>qprocess
   while(task=q2process->deq(true)){
     // translate segment and add it to task
     // ...
-    cout<<"translating segment no: "<<task->segno()<<", from : "<<task->lanpair().first<<" to "<<task->lanpair().second<<", text: "<<task->srcSeg()<<endl;;
+    cout<<"translating segment no: "<<task->segno()<<", in job: "<<task->jobid()<<", task: "<<task->id()<<", from: "<<task->lanpair().first<<" to "<<task->lanpair().second<<", text: "<<task->srcSeg()<<endl;;
     task->setTargetSeg(string("TRANSLATED: ")+task->srcSeg());
 
     // send translated task back to whoever wants to process it
