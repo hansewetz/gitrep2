@@ -9,11 +9,17 @@ namespace xlate{
 // ctor
 TranslationJobRepository::TranslationJobRepository(LanguagePair const&lp):lp_(lp){
 }
+// add task to job in repository
+// (return true if task added, else false)
+bool TranslationJobRepository::addTask(shared_ptr<TranslationTask>task){
+  // lookup job and add task to job
+ 
+}
 // repository update functions
 void TranslationJobRepository::addJob(shared_ptr<TranslationJob>job){
   // insert job in jobsPending_
   unique_lock<mutex>lock(mtx_);
-  idleJobs_.push_back(job);
+  addJobNoLock(job);
   cond_.notify_all();
 }
 // get job for processing
@@ -51,6 +57,11 @@ shared_ptr<TranslationJob>TranslationJobRepository::removeStartedJob(Translation
 ostream&TranslationJobRepository::print(ostream&os)const{
   lock_guard<mutex>lock(mtx_);
   return os<<"lanpair:: "<<lp_<<endl;
+}
+// add a job without locking a mutex
+bool TranslationJobRepository::addJobNoLock(shared_ptr<TranslationJob>job){
+  // add job - we might have to do more stuff here
+  idleJobs_.push_back(job);
 }
 // debug print function
 ostream&operator<<(ostream&os,TranslationJobRepository const&r){

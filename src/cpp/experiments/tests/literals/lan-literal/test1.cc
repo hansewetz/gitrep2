@@ -27,6 +27,5 @@ Lan operator"" _X(char const*l,size_t n){
 
 // test main program
 int main(){
-  Lan lan{"en"_X};
-  cout<<"Language: "<<lan<<endl;
+  cout<<"Language: "<<"en"_X<<endl;
 }
