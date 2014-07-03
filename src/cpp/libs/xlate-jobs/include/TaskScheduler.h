@@ -2,6 +2,7 @@
 #define __TASK_SCHEDULER_H__
 #include <iosfwd>
 #include <memory>
+#include <mutex>
 namespace xlate{
 
 // forward decl
@@ -21,11 +22,17 @@ public:
   // run task collector (moves tasks from task queue into job repository)
   void operator()();
 
+  // controll functions for scheduler
+  void terminate();
+
   // debug print operator
   friend std::ostream&operator<<(std::ostream&os,TaskScheduler const&tc);
 private:
   std::shared_ptr<TranslationJobRepository>jobrep_;
   std::shared_ptr<TaskQueue>taskq_;
+
+  bool done_;
+  mutable std::mutex mtx_;
 };
 }
 #endif

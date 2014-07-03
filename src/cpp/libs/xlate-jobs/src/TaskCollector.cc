@@ -16,7 +16,7 @@ void TaskCollector::operator()(){
   // loop forever
   shared_ptr<TranslationTask>task;
   while((task=taskq_->deq(true))&&task){
-    jobrep_->addTask(task);
+    jobrep_->addCompletedTask(task);
   }
 }
 // debug print function

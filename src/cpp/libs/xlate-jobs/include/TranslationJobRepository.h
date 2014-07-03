@@ -25,11 +25,13 @@ public:
   ~TranslationJobRepository()=default;
 
   // repository update functions
-  void addTask(std::shared_ptr<TranslationTask>);
   void addJob(std::shared_ptr<TranslationJob>);
   std::shared_ptr<TranslationJob>startJob();
   std::shared_ptr<TranslationJob>getStartedJob(TranslationJobId const&);
   std::shared_ptr<TranslationJob>removeStartedJob(TranslationJobId const&);
+
+  // put a completed task back into the job to which it belongs
+  void addCompletedTask(std::shared_ptr<TranslationTask>);
 
   // print function
   std::ostream&print(std::ostream&os)const;

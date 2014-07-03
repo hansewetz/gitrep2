@@ -12,7 +12,7 @@ TranslationJobRepository::TranslationJobRepository(LanguagePair const&lp):lp_(lp
 }
 // add task to job in repository
 // (return true if task added, else false)
-void TranslationJobRepository::addTask(shared_ptr<TranslationTask>task){
+void TranslationJobRepository::addCompletedTask(shared_ptr<TranslationTask>task){
   // lookup job and add task to job
   shared_ptr<TranslationJob>job{getStartedJob(task->jobid())};
   job->addTranslatedTask(task);

@@ -13,6 +13,7 @@
 #include <string>
 #include <utility>
 #include <thread>
+#include <chrono>
 using namespace std;
 using namespace xlate;
 
@@ -41,8 +42,14 @@ int main(){
     // --- create a job and add job to job repository
     shared_ptr<TranslateRequest>req{createRequest(lanpair,{"Hello world","second phrase","third phrase"})};
     shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};
-    cerr<<"JOB: "<<*job<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<"JOB: "<<*job;
     jobRepos->addJob(job);
+
+    // sleep a little and then terminate scheduler
+    BOOST_LOG_TRIVIAL(debug)<<"sleeping 1 second ...";
+    ::this_thread::sleep_for(chrono::seconds(1));
+    BOOST_LOG_TRIVIAL(debug)<<"terminating scheduler";
+    taskScehduler.terminate();
 
     // --- done
     // join threads
