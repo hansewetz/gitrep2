@@ -4,6 +4,8 @@
 #include "xlate-jobs/TranslationTask.h"
 #include "xlate-jobs/LanguageCode.h"
 #include "xlate-jobs/TaskQueue.h"
+#include "xlate-jobs/TaskCollector.h"
+#include "xlate-jobs/TaskScheduler.h"
 #include <vector>
 #include <iostream>
 #include <string>
@@ -27,75 +29,46 @@ void translateTasks(shared_ptr<TaskQueue>q2process,shared_ptr<TaskQueue>qprocess
   // send null task to stop receiver
   qprocessed->enq(task);
 }
-// read job from job repository and schedule tasks
-void scheduleTasks(shared_ptr<TranslationJobRepository>jobRepos,shared_ptr<TaskQueue>q2process){
-  // loop over jobs in job repository
-  while(true){
-    // get next job to process
-    shared_ptr<TranslationJob>job{jobRepos->startJob()};
-    
-    // feed all tasks to consumer
-    shared_ptr<TranslationTask>task;
-    while(task=job->getNextTask())q2process->enq(task);
-
-    // NOTE! Break after one job
-    break;
-  }
-  // send null task to stop translation
-  q2process->enq(shared_ptr<TranslationTask>(nullptr));
-}
-// read translated task and add them back to the job
-void collect(shared_ptr<TranslationJobRepository>jobRepos,shared_ptr<TaskQueue>qprocessed){
-  // read translated tasks and add them to the job where they came from (will end when we receive a null task)
-  shared_ptr<TranslationTask>task;
-  while((task=qprocessed->deq(true))&&task){
-    // lookup job from job repository and add task to job
-    shared_ptr<TranslationJob>job{jobRepos->getStartedJob(task->jobid())};
-    job->addTranslatedTask(task);
-  }
-}
 // ------- helper functions
 // create a request
 shared_ptr<TranslateRequest>createRequest(LanguagePair const&lp,initializer_list<string>segs){
   return make_shared<TranslateRequest>(lp,segs);
 }
-// create a job repository
-shared_ptr<TranslationJobRepository>createJobRepos(LanguagePair const&lp){
-  return make_shared<TranslationJobRepository>(lp);
-}
-// create a job
-shared_ptr<TranslationJob>createJob(shared_ptr<TranslateRequest>req){
-  return make_shared<TranslationJob>(req);
-}
-
 // main test program
 int main(){
-  // create language pair for this test
-  LanguagePair lp{make_lanpair("en","sv")};
+  try{
+    // --- create components making up system
+    LanguagePair lanpair{make_lanpair("en","sv")};
+    shared_ptr<TranslationJobRepository>jobRepos{make_shared<TranslationJobRepository>(lanpair)};
+    shared_ptr<TaskQueue>q2process{make_shared<TaskQueue>(10)};
+    shared_ptr<TaskQueue>qprocessed{make_shared<TaskQueue>(10)};
+    TaskCollector taskCollector{jobRepos,qprocessed};
+    TaskScheduler taskScehduler{jobRepos,q2process};
 
-  // create request and a job from request
-  shared_ptr<TranslateRequest>req{createRequest(lp,{"Hello world","second phrase","third phrase"})};
-  shared_ptr<TranslationJob>job{createJob(req)};
-  cerr<<"JOB: "<<*job<<endl;
+    // --- start component - each one in a separate thread
+    thread thr_translate{translateTasks,q2process,qprocessed};
+    thread thr_schedule{[&](){taskScehduler();}};
+    thread thr_collect{[&](){taskCollector();}};
 
-  // create a job repository and add a job
-  shared_ptr<TranslationJobRepository>jobRepos{createJobRepos(lp)};
-  jobRepos->addJob(job);
+    // --- create a job and add job to job repository
+    shared_ptr<TranslateRequest>req{createRequest(lanpair,{"Hello world","second phrase","third phrase"})};
+    shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};
+    cerr<<"JOB: "<<*job<<endl;
+    jobRepos->addJob(job);
 
-  // create queues between repository and trsnalator
-  shared_ptr<TaskQueue>q2process{make_shared<TaskQueue>(10)};
-  shared_ptr<TaskQueue>qprocessed{make_shared<TaskQueue>(10)};
+    // create a job having a null ptr task - will teminate processing
+// NOTE!
 
-  // create threads (producer, translator and consumer of translated segments)
-  thread thr_translate{translateTasks,q2process,qprocessed};
-  thread thr_schedule{scheduleTasks,jobRepos,q2process};
-  thread thr_collect{collect,jobRepos,qprocessed};
+    // --- done
+    // join threads
+    thr_collect.join();
+    thr_schedule.join();
+    thr_translate.join();
 
-  // join threads
-  thr_collect.join();
-  thr_schedule.join();
-  thr_translate.join();
-
-  // print job after translation
-  cerr<<"JOB: "<<*job<<endl;
+    // print job after translation
+    cerr<<"JOB: "<<*job<<endl;
+  }
+  catch(exception const&e){
+    cerr<<"cought exception: "<<e.what()<<endl;
+  }
 }

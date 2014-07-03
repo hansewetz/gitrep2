@@ -25,7 +25,7 @@ public:
   ~TranslationJobRepository()=default;
 
   // repository update functions
-  bool addTask(std::shared_ptr<TranslationTask>);
+  void addTask(std::shared_ptr<TranslationTask>);
   void addJob(std::shared_ptr<TranslationJob>);
   std::shared_ptr<TranslationJob>startJob();
   std::shared_ptr<TranslationJob>getStartedJob(TranslationJobId const&);
@@ -46,7 +46,7 @@ private:
   mutable std::condition_variable cond_;
 
   // helper functions
-  bool addJobNoLock(std::shared_ptr<TranslationJob>);
+  std::shared_ptr<TranslationJob>getStartedJobNoLock(TranslationJobId const&);
 };
 // debug print function
 std::ostream&operator<<(std::ostream&os,TranslationJobRepository const&);

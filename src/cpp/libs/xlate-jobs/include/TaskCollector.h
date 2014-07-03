@@ -1,7 +1,6 @@
 #ifndef __TASK_COLLECTOR_H__
 #define __TASK_COLLECTOR_H__
 #include <iosfwd>
-#include <string>
 #include <memory>
 namespace xlate{
 
@@ -12,7 +11,7 @@ class TaskQueue;
 // class collecting tasks form a queue and forwarding them to a job repository
 class TaskCollector{
 public:
-  TaskCollector(std::shared_ptr<TranslationJobRepository>jobrep,std::shared_ptr<TaskQueue>taskq_);
+  TaskCollector(std::shared_ptr<TranslationJobRepository>jobrep,std::shared_ptr<TaskQueue>taskq);
   TaskCollector(TaskCollector const&)=delete;
   TaskCollector(TaskCollector&&)=default;
   TaskCollector&operator=(TaskCollector const&)=delete;
@@ -20,7 +19,7 @@ public:
   ~TaskCollector()=default;
 
   // run task collector (moves tasks from task queue into job repository)
-  void run();
+  void operator()();
 
   // debug print operator
   friend std::ostream&operator<<(std::ostream&os,TaskCollector const&tc);

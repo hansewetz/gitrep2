@@ -2,7 +2,7 @@
 #include "xlate-jobs/TranslationJobRepository.h"
 #include "xlate-jobs/TranslationTask.h"
 #include "xlate-jobs/TaskQueue.h"
-#include <boost/log/trivial.hpp>
+#include "utils/utility.h"
 #include <iostream>
 using namespace std;
 namespace xlate{
@@ -12,15 +12,11 @@ TaskCollector::TaskCollector(shared_ptr<TranslationJobRepository>jobrep,shared_p
     jobrep_(jobrep),taskq_(taskq){
 }
 // run task collector (moves tasks from task queue into job repository)
-void TaskCollector::run(){
+void TaskCollector::operator()(){
   // loop forever
-  while(true){
-    // get task from queue in blocking mode and move it into repository
-    shared_ptr<TranslationTask>task{taskq_->deq(true)};
-    if(!jobrep_->addTask(task)){
-      // job must have been removed
-      BOOST_LOG_TRIVIAL(warning)<<"failed attempt to add task: "<<*task<<" to job repository - likely cause: job has been removed from repository";
-    }
+  shared_ptr<TranslationTask>task;
+  while((task=taskq_->deq(true))&&task){
+    jobrep_->addTask(task);
   }
 }
 // debug print function
