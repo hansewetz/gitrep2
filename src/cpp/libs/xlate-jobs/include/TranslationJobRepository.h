@@ -27,6 +27,7 @@ public:
   // repository update functions
   void addJob(std::shared_ptr<TranslationJob>);
   std::shared_ptr<TranslationJob>startJob();
+  void blockStartingJobs();
   std::shared_ptr<TranslationJob>getStartedJob(TranslationJobId const&);
   std::shared_ptr<TranslationJob>removeStartedJob(TranslationJobId const&);
 
@@ -44,6 +45,7 @@ private:
   LanguagePair lp_;
 
   // we have multiple consumers/producuerproducers
+  bool blockStartingJobs_=false;
   mutable std::mutex mtx_;
   mutable std::condition_variable cond_;
 

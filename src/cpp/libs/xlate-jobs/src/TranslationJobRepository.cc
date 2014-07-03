@@ -28,13 +28,20 @@ void TranslationJobRepository::addJob(shared_ptr<TranslationJob>job){
 shared_ptr<TranslationJob>TranslationJobRepository::startJob(){
   // block until we have a job
   unique_lock<mutex>lock(mtx_);
-  cond_.wait(lock,[&](){return !idleJobs_.empty();});
+  cond_.wait(lock,[&](){return !idleJobs_.empty()||blockStartingJobs_;});
+  if(blockStartingJobs_)return shared_ptr<TranslationJob>(nullptr);
 
   // remove from idelJobs_ and insert into startedJobs_
   shared_ptr<TranslationJob>job{idleJobs_.front()};
   idleJobs_.pop_front();
   startedJobs_.insert(make_pair(job->id(),job));
   return job;
+}
+// block starting of any new jobs
+void TranslationJobRepository::blockStartingJobs(){
+  lock_guard<mutex>loc(mtx_);
+  blockStartingJobs_=true;
+  cond_.notify_all();
 }
 // get a started job from jobid
 shared_ptr<TranslationJob>TranslationJobRepository::getStartedJob(TranslationJobId const&jobid){

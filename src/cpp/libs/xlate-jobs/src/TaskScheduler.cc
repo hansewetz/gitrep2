@@ -13,17 +13,13 @@ TaskScheduler::TaskScheduler(shared_ptr<TranslationJobRepository>jobrep,shared_p
 }
 // run task collector (moves tasks from task queue into job repository)
 void TaskScheduler::operator()(){
-
-
-// NOTE! Must have condition variable so we can wake up when don_ flag has changed ...
-//	or some other mechanism to tell this function to exit
-//	possible have 'terminate()' inform repository to cancel any waiting threads ... maybe the best way, using callbacks ... ???
-
-  
 // loop over jobs in job repository
   while(true){
     // get next job to process
     shared_ptr<TranslationJob>job{jobrep_->startJob()};
+
+    // check if we were blocked
+    if(!job)break;
     
     // feed all tasks to consumer
     while(true){
@@ -40,6 +36,7 @@ void TaskScheduler::terminate(){
   lock_guard<mutex>lock(mtx_);
   taskq_->enq(shared_ptr<TranslationTask>(nullptr));
   done_=true;
+  jobrep_->blockStartingJobs();
 }
 // debug print operator
 ostream&operator<<(ostream&os,TaskScheduler const&tc){
