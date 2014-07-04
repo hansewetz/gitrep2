@@ -6,7 +6,7 @@
 #include "xlate-jobs/TaskQueue.h"
 #include "xlate-jobs/TaskCollector.h"
 #include "xlate-jobs/TaskScheduler.h"
-#include "xlate-jobs/DummyTranslator.h"
+#include "xlate-jobs/DummyTranslationEngine.h"
 #include <boost/log/trivial.hpp>
 #include <vector>
 #include <iostream>
@@ -32,7 +32,7 @@ int main(){
     shared_ptr<TaskQueue>qprocessed{make_shared<TaskQueue>(10)};
     TaskCollector taskCollector{jobRepos,qprocessed};
     TaskScheduler taskScehduler{jobRepos,q2process};
-    DummyTranslator translator{q2process,qprocessed};
+    DummyTranslationEngine translator{q2process,qprocessed};
 
     // --- start component - each one in a separate thread
     thread thr_translate{[&](){translator();}};
@@ -47,7 +47,7 @@ int main(){
 
     // sleep a little and then terminate scheduler
     BOOST_LOG_TRIVIAL(debug)<<"sleeping 1 second ...";
-    ::this_thread::sleep_for(chrono::seconds(1));
+    ::this_thread::sleep_for(chrono::milliseconds(1));
     BOOST_LOG_TRIVIAL(debug)<<"terminating scheduler";
     taskScehduler.terminate();
 
