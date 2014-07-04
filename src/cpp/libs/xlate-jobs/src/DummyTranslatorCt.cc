@@ -10,8 +10,8 @@
 using namespace std;
 namespace xlate{
 // ctor
-DummyTranslatorCt::DummyTranslatorCt(shared_ptr<TranslationJobRepository>jobrep):
-    jobrep_(jobrep),
+DummyTranslatorCt::DummyTranslatorCt(LanguagePair const&lanpair):
+    jobrep_(make_shared<TranslationJobRepository>(lanpair)),
     qin_(make_shared<TaskQueue>(10)), // NOTE! Hard coded limit queue
     qout_(make_shared<TaskQueue>(10)),
     scheduler_(make_shared<TaskScheduler>(jobrep_,qin_)),
@@ -32,6 +32,12 @@ void DummyTranslatorCt::operator()(){
 }
 void DummyTranslatorCt::terminate(){
   // terminate through scheduler
+  lock_guard<mutex>lock(mtx_);
   scheduler_->terminate();
+}
+// add job to be translated
+void DummyTranslatorCt::addJob(std::shared_ptr<TranslationJob>job){
+  lock_guard<mutex>lock(mtx_);
+  jobrep_->addJob(job);
 }
 }
