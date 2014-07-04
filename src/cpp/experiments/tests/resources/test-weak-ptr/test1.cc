@@ -18,19 +18,25 @@ int main(){
   shared_ptr<Foo>sp;
   {
     sp=shared_ptr<Foo>(new Foo);
-    cout<<"usecount (should be one): "<<sp.use_count()<<endl;
+    cout<<"after creating sp: usecount (should be one): "<<sp.use_count()<<endl;
   }
   // shared pointerout of scope but object still alive
   weak_ptr<Foo>wp=sp;
-  cout<<"usecount (should be one): "<<sp.use_count()<<endl;
+  cout<<"after creating wweak pointer): usecount (should be one): "<<sp.use_count()<<endl;
 
   // create shared pointer
-  sp=wp.lock();
-  cout<<"usecount (should be one): "<<sp.use_count()<<endl;
-
+  {
+    shared_ptr<Foo>sp2=wp.lock();
+    cout<<"after locking weak pointer: usecount (should be two): "<<sp2.use_count()<<endl;
+  }
   wp.reset();
-  cout<<"usecount (should be zero - object deleted): "<<wp.use_count()<<endl;
+  cout<<"after reset of weak pointer: usecount (should be zero): "<<wp.use_count()<<endl;
+  cout<<"after reset of weak pointer: sp usecount (should be zero): "<<sp.use_count()<<endl;
 
   sp.reset();
+  cout<<"after reset of shared: usecount (should be one): "<<sp.use_count()<<endl;
+
+  // try to lock (create shared pointer)
+  sp=wp.lock();
   cout<<"usecount (should be one): "<<sp.use_count()<<endl;
 }
