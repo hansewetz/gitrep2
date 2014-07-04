@@ -1,5 +1,5 @@
 SUBDIRS = \
-test-unique_ptr test-weak-ptr
+test-unique_ptr test-weak-ptr operator-new
 
 # test-c++1y
 # test-poco-ftp

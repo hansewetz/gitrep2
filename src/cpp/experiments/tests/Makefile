@@ -8,7 +8,7 @@ test-callable test-clucene test-const test-fd-stream test-for test-future test-i
 test-list-add-numbers test-numeric-limit test-occi test-occi-iterator test-occi-timed test-packaged-task test-param-passing \
 test-readlines test-sqlite test-stop-watch test-stop-watch-boost test-streambuf test-thread test-thread-pool test-threadpool test-tuplet-apply test-type-printer \
 test-utf test-variadic-count test-variadic-printf test-xml-beans test1_db \
-test-libxml c-strange-index  rvalue-function-qualifiers operator-new boost-fd-stream 
+test-libxml c-strange-index  rvalue-function-qualifiers boost-fd-stream 
 
 
 # test-c++1y
