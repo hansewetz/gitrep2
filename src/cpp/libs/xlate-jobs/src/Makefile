@@ -1,7 +1,9 @@
 # To be built
 LOCAL_TARGET    =
 LOCAL_SOTARGET  = $(PROJECT_ROOT)/lib/libxlate-jobs.so
-LOCAL_OBJS      = TranslateRequest.o TranslationJob.o LanguageCode.o TranslationTask.o TaskQueue.o TranslationJobRepository.o TaskCollector.o TaskScheduler.o DummyTranslationEngine.o
+LOCAL_OBJS      = TranslateRequest.o TranslationJob.o LanguageCode.o TranslationTask.o TaskQueue.o \
+		  TranslationJobRepository.o TaskCollector.o TaskScheduler.o \
+		  DummyEngine.o DummyTranslatorCt.o
 
 # Control.
 LOCAL_LIBS      = 
