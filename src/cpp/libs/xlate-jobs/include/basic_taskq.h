@@ -1,6 +1,7 @@
 #ifndef __basic_taskq_H__
 #define __basic_taskq_H__
 #include "xlate-jobs/TaskQueue.h"
+#include "xlate-jobs/TranslationTask.h"
 
 #include <boost/asio.hpp> 
 #include <boost/shared_ptr.hpp> 
@@ -21,12 +22,12 @@ template<typename Service>
 class basic_taskq:public boost::asio::basic_io_object<Service>{
 public: 
   // ctor
-  explicit basic_taskq(boost::asio::io_service&io_service,std::shared_ptr<TaskQueue>,bool block):
+  explicit basic_taskq(boost::asio::io_service&io_service):
       boost::asio::basic_io_object<Service>(io_service) {
   } 
   // sync deq operation
-  void deq(){
-    return this->service.deq(this->implementation); 
+  std::shared_ptr<TranslationTask>deq(std::shared_ptr<TaskQueue>tq){
+    return this->service.deq(this->implementation,tq); 
   } 
   // async sync deq operation
   template <typename Handler> 
@@ -39,7 +40,7 @@ using TaskQueueIOService=basic_taskq<basic_taskq_service<>>;
 
 // --- service class for basic_taskq
 template<typename Impl>
-class basic_taskq_service: public boost::asio::io_service::service {
+class basic_taskq_service:public boost::asio::io_service::service{
 public:
  static boost::asio::io_service::id id; 
 
@@ -51,8 +52,11 @@ public:
   } 
   // dtor
   ~basic_taskq_service(){
-    // NOTE! Not yet done
+    async_work_.reset(); 
+    async_io_service_.stop(); 
+    async_thread_.join(); 
   }
+  // get a typedef  for the implementation
   typedef boost::shared_ptr<Impl>implementation_type; 
 
   // mandatory
@@ -65,8 +69,11 @@ public:
     impl.reset(); 
   }
   // sync deq operation
-  void deq(){
-    // NOTE! Not yet done
+  std::shared_ptr<TranslationTask>deq(implementation_type&impl,std::shared_ptr<TaskQueue>tq){
+    boost::system::error_code ec; 
+    std::shared_ptr<TranslationTask>ret=impl->deq(tq,ec); 
+    boost::asio::detail::throw_error(ec); 
+    return ret;
   } 
   // async sync deq operation
   template <typename Handler> 
@@ -90,11 +97,22 @@ boost::asio::io_service::id basic_taskq_service<Impl>::id;
 // --- implementation of taskq
 class taskq_impl{
 public:
-  // NOTE! Not yet done
+  // ctor
+  taskq_impl(){}
 
+  // dtor
+  ~taskq_impl(){
+    // NOTE! Should have stop method on queue here
+  }
   // destroy implementation of service
   void destroy(){
     // NOTE! Not yet done
+  } 
+  // deque message
+  std::shared_ptr<TranslationTask>deq(std::shared_ptr<TaskQueue>tq,boost::system::error_code&ec){ 
+    std::shared_ptr<TranslationTask>task=tq->deq(true); // NOTE! Hard coded block
+    ec = boost::system::error_code(); 
+    return task;
   } 
 };
 }
