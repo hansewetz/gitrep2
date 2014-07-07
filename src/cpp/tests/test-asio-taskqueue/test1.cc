@@ -8,7 +8,7 @@
 using namespace std;
 using namespace xlate;
 
-// get task from queue
+// send task to a queue
 void sendTask(std::shared_ptr<TaskQueue>tq){
   LanguagePair lp{make_lanpair("en","sv")};
   std::shared_ptr<TranslationTask>task{make_shared<TranslationTask>(TranslationJobId(),lp,string("Hello World"),17)};
