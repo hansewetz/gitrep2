@@ -17,6 +17,7 @@ public:
   TaskQueue(std::size_t maxsize);
   TaskQueue(TaskQueue const&)=delete;
   TaskQueue(TaskQueue&&)=default;
+  TaskQueue&operator=(TaskQueue const&)=delete;
   TaskQueue&operator=(TaskQueue&&)=default;
   ~TaskQueue()=default;
 
