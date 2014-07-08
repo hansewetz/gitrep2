@@ -1,7 +1,7 @@
 /* NOTE!
-Missing:
-	- sync operation with error code (no exception)
-	- async operation
+Notes:
+	- We have to reet the queue after each completed async operation
+	  we should probably have the Impl object maintain the TaskQueue so we don't need to pass it as a parameter each time
 */
 #ifndef __basic_taskq_H__
 #define __basic_taskq_H__
@@ -115,7 +115,7 @@ public:
 private:
   // shutdown service
   void shutdown_service(){
-    // NOTE! Not yet done
+    // must be present - nothing to do here
   } 
   // private data
   boost::asio::io_service async_io_service_; 
@@ -134,16 +134,15 @@ public:
 
   // dtor
   ~taskq_impl(){
-    // NOTE! Should have stop method on queue here
+    // NOTE! stop queue here (need stop method on queue)
   }
   // destroy implementation of service
   void destroy(){
-    // NOTE! Not yet done
+    // NOTE! cancel an blocking deq() on queue here (need stop method here)
   } 
   // deque message
   std::shared_ptr<TranslationTask>deq(std::shared_ptr<TaskQueue>tq,boost::system::error_code&ec){ 
-// NOTE!
-    std::shared_ptr<TranslationTask>task=tq->deq(true); // NOTE! Hard coded block
+    std::shared_ptr<TranslationTask>task=tq->deq(true);
     ec = boost::system::error_code(); 
     return task;
   } 

@@ -4,6 +4,7 @@
 #include <boost/bind.hpp> 
 #include <boost/lambda/bind.hpp>
 #include <boost/log/trivial.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -13,6 +14,7 @@ using namespace xlate;
 
 // constants
 constexpr static size_t maxmsg{1000};
+constexpr static size_t tmoSec{3};
 
 // send task to a queue
 void sendTask(std::shared_ptr<TaskQueue>tq){
@@ -42,6 +44,12 @@ private:
   std::shared_ptr<TaskQueue>tq_;
   TaskQueueIOService asioq_;
 };
+// timer pop function
+void timerPopped(const boost::system::error_code&ec,boost::asio::deadline_timer*tmo){
+  BOOST_LOG_TRIVIAL(debug)<<"TMO POPPED";
+  tmo->expires_at(tmo->expires_at()+boost::posix_time::seconds(tmoSec));
+  tmo->async_wait(boost::bind(timerPopped,boost::asio::placeholders::error,tmo));
+}
 // main test program
 int main(){
   try{
@@ -55,7 +63,8 @@ int main(){
     TaskHandler taskHandler(ios,tq);
 
     // create a deealine timer and register it
-    
+    boost::asio::deadline_timer tmo(ios,boost::posix_time::seconds(tmoSec));
+    tmo.async_wait(boost::bind(timerPopped,boost::asio::placeholders::error,&tmo));
 
     // publish tasks
     std::thread thrSend{[&](){sendTask(tq);}};
