@@ -4,6 +4,7 @@
 #include <boost/log/trivial.hpp>
 #include <iostream>
 #include <thread>
+#include <chrono>
 #include <string>
 using namespace std;
 using namespace xlate;
@@ -29,6 +30,9 @@ int main(){
 
     // send task n separate thread
     std::thread thrSend{[&](){sendTask(tq);}};
+
+    // sleep a little
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     // get tasks from queue synchronously
     std::shared_ptr<TranslationTask>task{asioq.deq(tq)};
