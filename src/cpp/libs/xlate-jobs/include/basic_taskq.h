@@ -1,3 +1,8 @@
+/* NOTE!
+Missing:
+	- sync operation with error code (no exception)
+	- async operation
+*/
 #ifndef __basic_taskq_H__
 #define __basic_taskq_H__
 #include "xlate-jobs/TaskQueue.h"
@@ -17,7 +22,7 @@ namespace xlate{
 class taskq_impl;
 template<typename Impl=taskq_impl>class basic_taskq_service;
 
-// --- IO Object (used by client)
+// --- IO Object (used by client) -----------------------------
 template<typename Service>
 class basic_taskq:public boost::asio::basic_io_object<Service>{
 public: 
@@ -31,14 +36,14 @@ public:
   } 
   // async sync deq operation
   template <typename Handler> 
-  void async_deq(Handler handler) {
-    this->service.async_deq(this->implementation); 
+  void async_deq(std::shared_ptr<TaskQueue>tq,Handler handler) {
+    this->service.async_deq(this->implementation,tq,handler); 
   } 
 }; 
 // typedef for using standard service object
 using TaskQueueIOService=basic_taskq<basic_taskq_service<>>;
 
-// --- service class for basic_taskq
+// --- service class for basic_taskq -----------------------------
 template<typename Impl>
 class basic_taskq_service:public boost::asio::io_service::service{
 public:
@@ -75,10 +80,37 @@ public:
     boost::asio::detail::throw_error(ec); 
     return ret;
   } 
+  // async deq() operation in its own thread
+  template <typename Handler> 
+  class deq_operation{ 
+  public: 
+    // ctor
+    deq_operation(implementation_type&impl,boost::asio::io_service &io_service,std::shared_ptr<TaskQueue>tq, Handler handler):
+        impl_(impl),io_service_(io_service),work_(io_service),tq_(tq),handler_(handler) {
+  } 
+  // function called by thread
+  void operator()(){ 
+    implementation_type impl=impl_.lock(); 
+    if(impl){
+      boost::system::error_code ec; 
+      std::shared_ptr<TranslationTask>task=impl->deq(tq_,ec); 
+      this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec,task));
+    } else{
+      std::shared_ptr<TranslationTask>task=std::shared_ptr<TranslationTask>(nullptr);
+      this->io_service_.post(boost::asio::detail::bind_handler(handler_,boost::asio::error::operation_aborted,task));
+    } 
+  } 
+  private: 
+    boost::weak_ptr<Impl> impl_; 
+    boost::asio::io_service &io_service_; 
+    boost::asio::io_service::work work_; 
+    std::shared_ptr<TaskQueue>tq_;
+    Handler handler_; 
+  }; 
   // async sync deq operation
   template <typename Handler> 
-  void async_deq(implementation_type&impl,Handler handler){
-    // NOTE! Not yet done
+  void async_deq(implementation_type&impl,std::shared_ptr<TaskQueue>tq,Handler handler){
+    this->async_io_service_.post(deq_operation<Handler>(impl,this->get_io_service(),tq,handler)); 
   } 
 private:
   // shutdown service
@@ -94,7 +126,7 @@ private:
 template <typename Impl> 
 boost::asio::io_service::id basic_taskq_service<Impl>::id; 
 
-// --- implementation of taskq
+// --- implementation of taskq -----------------------------
 class taskq_impl{
 public:
   // ctor
@@ -110,6 +142,7 @@ public:
   } 
   // deque message
   std::shared_ptr<TranslationTask>deq(std::shared_ptr<TaskQueue>tq,boost::system::error_code&ec){ 
+// NOTE!
     std::shared_ptr<TranslationTask>task=tq->deq(true); // NOTE! Hard coded block
     ec = boost::system::error_code(); 
     return task;
