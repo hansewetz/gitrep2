@@ -12,11 +12,11 @@
 using namespace std;
 using namespace xlate;
 
-// constants
+// --- constants
 constexpr static size_t maxmsg{1000};
 constexpr static size_t tmoSec{3};
 
-// send task to a queue
+// --- send task to a queue
 void sendTask(std::shared_ptr<TaskQueue>tq){
   LanguagePair lp{make_lanpair("en","sv")};
   std::shared_ptr<TranslationTask>task{make_shared<TranslationTask>(TranslationJobId(),lp,string("Hello World"),17)};
@@ -26,24 +26,11 @@ void sendTask(std::shared_ptr<TaskQueue>tq){
     this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 }
-// asio deq handler
-class TaskHandler{
-public:
-  // ctor
-  TaskHandler(boost::asio::io_service&ios,std::shared_ptr<TaskQueue>tq):
-      ios_(ios),tq_(tq),asioq_(ios_){
-    asioq_.async_deq(tq_,boost::bind(&TaskHandler::handleTask,this,boost::asio::placeholders::error,boost::lambda::_2));
-  }
-  // handle async events
-  void handleTask(const boost::system::error_code&ec,std::shared_ptr<TranslationTask>task){
+// --- asio deq handler
+void taskHandler(const boost::system::error_code&ec,std::shared_ptr<TranslationTask>task,TaskQueueIOService*asioq,std::shared_ptr<TaskQueue>tq){
     BOOST_LOG_TRIVIAL(debug)<<"asio: "<<*task;
-    asioq_.async_deq(tq_,boost::bind(&TaskHandler::handleTask,this,boost::asio::placeholders::error,boost::lambda::_2));
-  }
-private:
-  boost::asio::io_service&ios_;
-  std::shared_ptr<TaskQueue>tq_;
-  TaskQueueIOService asioq_;
-};
+    asioq->async_deq(tq,boost::bind(taskHandler,boost::asio::placeholders::error,boost::lambda::_2,asioq,tq));
+}
 // timer pop function
 void timerPopped(const boost::system::error_code&ec,boost::asio::deadline_timer*tmo){
   BOOST_LOG_TRIVIAL(debug)<<"TMO POPPED";
@@ -60,7 +47,9 @@ int main(){
     std::shared_ptr<TaskQueue>tq{make_shared<TaskQueue>(100)};
 
     // create task handler and register it with boost asio
-    TaskHandler taskHandler(ios,tq);
+    TaskQueueIOService asioq(ios);
+    asioq.async_deq(tq,boost::bind(taskHandler,boost::asio::placeholders::error,boost::lambda::_2,&asioq,tq));
+
 
     // create a deealine timer and register it
     boost::asio::deadline_timer tmo(ios,boost::posix_time::seconds(tmoSec));
