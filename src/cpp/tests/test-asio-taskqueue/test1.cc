@@ -50,12 +50,11 @@ int main(){
     TaskQueueIOService asioq(ios);
     asioq.async_deq(tq,boost::bind(taskHandler,boost::asio::placeholders::error,boost::lambda::_2,&asioq,tq));
 
-
     // create a deealine timer and register it
     boost::asio::deadline_timer tmo(ios,boost::posix_time::seconds(tmoSec));
     tmo.async_wait(boost::bind(timerPopped,boost::asio::placeholders::error,&tmo));
 
-    // publish tasks
+    // publish tasks to queue in separate thread
     std::thread thrSend{[&](){sendTask(tq);}};
 
     // run asio service
