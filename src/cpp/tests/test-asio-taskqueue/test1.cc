@@ -13,15 +13,15 @@ using namespace std;
 using namespace xlate;
 
 // --- constants
-constexpr static size_t maxmsg{1000};
+constexpr static size_t maxmsg{10};
 constexpr static size_t tmoSec{3};
 
 // --- send task to a queue
 void sendTask(std::shared_ptr<TaskQueue>tq){
   LanguagePair lp{make_lanpair("en","sv")};
-  std::shared_ptr<TranslationTask>task{make_shared<TranslationTask>(TranslationJobId(),lp,string("Hello World"),17)};
   for(auto i=0;i<maxmsg;++i){
     BOOST_LOG_TRIVIAL(debug)<<"sending task in separate thread ...";
+    std::shared_ptr<TranslationTask>task{make_shared<TranslationTask>(TranslationJobId(),lp,string("Hello World"),17)};
     tq->enq(task);
     this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
@@ -47,8 +47,10 @@ int main(){
     std::shared_ptr<TaskQueue>tq{make_shared<TaskQueue>(100)};
 
     // create task handler and register it with boost asio
-    TaskQueueIOService asioq(ios);
-    asioq.async_deq(tq,boost::bind(taskHandler,boost::asio::placeholders::error,boost::lambda::_2,&asioq,tq));
+    TaskQueueIOService asioq1(ios);
+    TaskQueueIOService asioq2(ios);
+    asioq1.async_deq(tq,boost::bind(taskHandler,boost::asio::placeholders::error,boost::lambda::_2,&asioq1,tq));
+    asioq2.async_deq(tq,boost::bind(taskHandler,boost::asio::placeholders::error,boost::lambda::_2,&asioq2,tq));
 
     // create a deealine timer and register it
     boost::asio::deadline_timer tmo(ios,boost::posix_time::seconds(tmoSec));
