@@ -13,7 +13,7 @@ using namespace std;
 using namespace xlate;
 
 // --- constants
-constexpr static size_t maxmsg{10};
+constexpr static size_t maxmsg{5};
 constexpr static size_t tmoSec{3};
 
 // --- send task to a queue
@@ -27,8 +27,8 @@ void sendTask(std::shared_ptr<TaskQueue>tq){
   }
 }
 // --- asio deq handler
-void taskHandler(const boost::system::error_code&ec,std::shared_ptr<TranslationTask>task,TaskQueueIOService*asioq,std::shared_ptr<TaskQueue>tq){
-    BOOST_LOG_TRIVIAL(debug)<<"asio: "<<*task;
+void taskHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task,TaskQueueIOService*asioq,std::shared_ptr<TaskQueue>tq){
+    BOOST_LOG_TRIVIAL(debug)<<"received task (via asio): "<<*task;
     asioq->async_deq(tq,boost::bind(taskHandler,boost::asio::placeholders::error,boost::lambda::_2,asioq,tq));
 }
 // timer pop function
@@ -52,7 +52,7 @@ int main(){
     asioq1.async_deq(tq,boost::bind(taskHandler,boost::asio::placeholders::error,boost::lambda::_2,&asioq1,tq));
     asioq2.async_deq(tq,boost::bind(taskHandler,boost::asio::placeholders::error,boost::lambda::_2,&asioq2,tq));
 
-    // create a deealine timer and register it
+    // create a deadline timer and register it
     boost::asio::deadline_timer tmo(ios,boost::posix_time::seconds(tmoSec));
     tmo.async_wait(boost::bind(timerPopped,boost::asio::placeholders::error,&tmo));
 
