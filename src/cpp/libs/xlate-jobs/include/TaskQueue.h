@@ -11,7 +11,7 @@ namespace xlate{
 class TranslationTask;
 
 // queue holding shared pointers to TranslationTask objects
-class TaskQueue{
+class TaskQueue:public std::enable_shared_from_this<TaskQueue>{
 public:
   // ctors, dtor
   TaskQueue(std::size_t maxsize);
@@ -22,10 +22,15 @@ public:
   ~TaskQueue()=default;
 
   // operations on queue
-  std::size_t size()const ;
   bool enq(std::shared_ptr<TranslationTask>task);
   std::shared_ptr<TranslationTask>deq(bool block);
+  void blockDeq();
+  void unblockDeq();
+
+  // queries on queue
+  std::size_t size()const ;
   bool wait(bool block)const;
+  bool deqIsBlocked()const;
 
   // print function
   std::ostream&print(std::ostream&os)const;
@@ -34,6 +39,8 @@ private:
   mutable std::mutex mtx_;
   mutable std::condition_variable cond_;
   std::size_t maxsize_;
+  mutable std::size_t nwaiting_;
+  bool blockdeq_;
 };
 // debug print operator
 std::ostream&operator<<(std::ostream&os,TaskQueue const&t);
