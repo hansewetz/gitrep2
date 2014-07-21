@@ -56,9 +56,14 @@ public:
   } 
   // dtor (empty work queue and join async service thread)
   ~basic_taskq_service(){
+// NOTE!
+std::cerr<<"(1) DTOR"<<std::endl;
     async_work_.reset(); 
+std::cerr<<"(2) DTOR"<<std::endl;
     async_io_service_.stop(); 
+std::cerr<<"(3) DTOR"<<std::endl;
     async_thread_.join(); 
+std::cerr<<"(4) DTOR"<<std::endl;
   }
   // get a typedef  for the implementation
   typedef std::shared_ptr<Impl>implementation_type; 
@@ -69,8 +74,12 @@ public:
   } 
   // mandatory (destroy an implementation object)
   void destroy(implementation_type&impl){
+// NOTE!
+std::cerr<<"(1) IMPL DESTROY"<<std::endl;
     impl->destroy(); 
+std::cerr<<"(2) IMPL DESTROY"<<std::endl;
     impl.reset(); 
+std::cerr<<"(3) IMPL DESTROY"<<std::endl;
   }
   // sync deq operation
   std::shared_ptr<TranslationTask>deq(implementation_type&impl,std::shared_ptr<TaskQueue>tq){
@@ -148,10 +157,14 @@ public:
     // nothing to do here, we are only dealing with consumer side
   } 
   // deque message
+  // (if we got a nullptr from deq(), we set 'return.first = false', else true)
   std::pair<bool,std::shared_ptr<TranslationTask>>deq(std::shared_ptr<TaskQueue>tq,boost::system::error_code&ec){ 
     std::shared_ptr<TranslationTask>task=tq->deq(true);
     ec = boost::system::error_code();
+// NOTE!
+std::cerr<<"BEFORE DEQ()"<<std::endl;
     std::pair<bool,std::shared_ptr<TranslationTask>>ret{make_pair(true,task)};
+std::cerr<<"AFTER DEQ()"<<std::endl;
     if(task.get()==nullptr){
       ret.first=false;
       ec=boost::asio::error::operation_aborted;
