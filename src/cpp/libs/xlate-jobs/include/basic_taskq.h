@@ -75,9 +75,9 @@ public:
   // sync deq operation
   std::shared_ptr<TranslationTask>deq(implementation_type&impl,std::shared_ptr<TaskQueue>tq){
     boost::system::error_code ec; 
-    std::shared_ptr<TranslationTask>ret=impl->deq(tq,ec); 
+    std::pair<bool,std::shared_ptr<TranslationTask>>ret{impl->deq(tq,ec)};
     boost::asio::detail::throw_error(ec); 
-    return ret;
+    return ret.second;
   } 
   // function object calling implementation object
   template <typename Handler> 
@@ -92,10 +92,11 @@ public:
       // (must check if implementation object still exist - use of weak_ptr)
       implementation_type impl=impl_.lock(); 
       if(impl){
-        // ok - go ahead and do blocking deq() call on implementation object
+        // go ahead and do blocking deq() call on implementation object
+        // (only post if we did not get a null message)
         boost::system::error_code ec; 
-        std::shared_ptr<TranslationTask>task=impl->deq(tq_,ec); 
-        this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec,task));
+        std::pair<bool,std::shared_ptr<TranslationTask>>ret{impl->deq(tq_,ec)};
+        if(ret.first)this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec,ret.second));
       } else{
         // implementation object no longer exist
         std::shared_ptr<TranslationTask>task=std::shared_ptr<TranslationTask>(nullptr);
@@ -147,10 +148,15 @@ public:
     // nothing to do here, we are only dealing with consumer side
   } 
   // deque message
-  std::shared_ptr<TranslationTask>deq(std::shared_ptr<TaskQueue>tq,boost::system::error_code&ec){ 
+  std::pair<bool,std::shared_ptr<TranslationTask>>deq(std::shared_ptr<TaskQueue>tq,boost::system::error_code&ec){ 
     std::shared_ptr<TranslationTask>task=tq->deq(true);
-    ec = boost::system::error_code(); 
-    return task;
+    ec = boost::system::error_code();
+    std::pair<bool,std::shared_ptr<TranslationTask>>ret{make_pair(true,task)};
+    if(task.get()==nullptr){
+      ret.first=false;
+      ec=boost::asio::error::operation_aborted;
+    }
+    return ret;
   } 
 };
 }
