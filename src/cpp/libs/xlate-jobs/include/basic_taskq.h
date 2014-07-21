@@ -9,13 +9,11 @@ Notes:
 #include "xlate-jobs/TranslationTask.h"
 
 #include <boost/asio.hpp> 
-#include <boost/shared_ptr.hpp> 
 #include <boost/system/error_code.hpp> 
-#include <boost/thread.hpp> 
-#include <boost/bind.hpp> 
 
 #include <cstddef> 
 #include <memory> 
+#include <thread> 
 namespace xlate{
 
 // forward decl
@@ -54,7 +52,7 @@ public:
   explicit basic_taskq_service(boost::asio::io_service&io_service) :
       boost::asio::io_service::service(io_service), 
       async_work_(new boost::asio::io_service::work(async_io_service_)), 
-      async_thread_(boost::bind(&boost::asio::io_service::run,&async_io_service_)){
+      async_thread_([&](){async_io_service_.run();}){
   } 
   // dtor (empty work queue and join async service thread)
   ~basic_taskq_service(){
@@ -63,7 +61,7 @@ public:
     async_thread_.join(); 
   }
   // get a typedef  for the implementation
-  typedef boost::shared_ptr<Impl>implementation_type; 
+  typedef std::shared_ptr<Impl>implementation_type; 
 
   // mandatory (construct an implementation object)
   void construct(implementation_type&impl){ 
@@ -105,8 +103,8 @@ public:
       } 
     } 
   private: 
-    boost::weak_ptr<Impl> impl_; 
-    boost::asio::io_service &io_service_; 
+    std::weak_ptr<Impl>impl_; 
+    boost::asio::io_service&io_service_; 
     boost::asio::io_service::work work_; 
     std::shared_ptr<TaskQueue>tq_;
     Handler handler_; 
@@ -125,7 +123,7 @@ private:
   // private data
   boost::asio::io_service async_io_service_; 
   boost::scoped_ptr<boost::asio::io_service::work>async_work_; 
-  boost::thread async_thread_; 
+  std::thread async_thread_; 
 };
 // definition of id of service
 template <typename Impl> 
