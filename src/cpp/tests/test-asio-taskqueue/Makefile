@@ -8,7 +8,7 @@ LOCAL_LIBS      = -lxlate-jobs -lutils \
 		  -lboost_thread -lboost_system -lboost_filesystem -lboost_iostreams -lboost_log
 LOCAL_LIBPATH   = -L$(PROJECT_ROOT)/lib
 LOCAL_INCPATH   = -I$(PROJECT_ROOT)/src/cpp/include/
-LOCAL_DEFINES   = -DBOOST_ALL_DYN_LINK
+LOCAL_DEFINES   = -DBOOST_ALL_DYN_LINK  -DASIO_STANDALONE
 LOCAL_CXXFLAGS  =
 LOCAL_CPPFLAGS  = 
 LOCAL_LDFLAGS   =
