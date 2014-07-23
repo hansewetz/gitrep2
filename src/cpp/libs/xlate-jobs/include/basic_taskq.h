@@ -24,18 +24,23 @@ template<typename Impl=taskq_impl>class basic_taskq_service;
 template<typename Service>
 class basic_taskq:public boost::asio::basic_io_object<Service>{
 public: 
-  // ctor
-  explicit basic_taskq(boost::asio::io_service&io_service):
+  // ctor (note: 'consruct()' is called in base class)
+  explicit basic_taskq(boost::asio::io_service&io_service,std::shared_ptr<TaskQueue>q):
       boost::asio::basic_io_object<Service>(io_service) {
+    // set queue for in implementation - the queue will never change
+    this->implementation->setQueue(q);
+
+// NOTE!
+std::cerr<<"IN CTOR"<<std::endl;
   } 
   // sync deq operation
-  std::shared_ptr<TranslationTask>deq(std::shared_ptr<TaskQueue>tq){
-    return this->service.deq(this->implementation,tq); 
+  std::shared_ptr<TranslationTask>deq(){
+    return this->service.deq(this->implementation); 
   } 
   // async sync deq operation
   template <typename Handler> 
-  void async_deq(std::shared_ptr<TaskQueue>tq,Handler handler) {
-    this->service.async_deq(this->implementation,tq,handler); 
+  void async_deq(Handler handler) {
+    this->service.async_deq(this->implementation,handler); 
   } 
 }; 
 // typedef for using standard service object
@@ -70,7 +75,9 @@ std::cerr<<"(4) DTOR"<<std::endl;
 
   // mandatory (construct an implementation object)
   void construct(implementation_type&impl){ 
-      impl.reset(new Impl()); 
+      impl.reset(new Impl(std::shared_ptr<TaskQueue>(nullptr))); 
+// NOTE!
+std::cerr<<"IN construct()"<<std::endl;
   } 
   // mandatory (destroy an implementation object)
   void destroy(implementation_type&impl){
@@ -82,9 +89,9 @@ std::cerr<<"(2) IMPL DESTROY"<<std::endl;
 std::cerr<<"(3) IMPL DESTROY"<<std::endl;
   }
   // sync deq operation
-  std::shared_ptr<TranslationTask>deq(implementation_type&impl,std::shared_ptr<TaskQueue>tq){
+  std::shared_ptr<TranslationTask>deq(implementation_type&impl){
     boost::system::error_code ec; 
-    std::pair<bool,std::shared_ptr<TranslationTask>>ret{impl->deq(tq,ec)};
+    std::pair<bool,std::shared_ptr<TranslationTask>>ret{impl->deq(ec)};
     boost::asio::detail::throw_error(ec); 
     return ret.second;
   } 
@@ -93,8 +100,8 @@ std::cerr<<"(3) IMPL DESTROY"<<std::endl;
   class deq_operation{ 
   public: 
     // ctor
-    deq_operation(implementation_type&impl,boost::asio::io_service &io_service,std::shared_ptr<TaskQueue>tq, Handler handler):
-        impl_(impl),io_service_(io_service),work_(io_service),tq_(tq),handler_(handler) {
+    deq_operation(implementation_type&impl,boost::asio::io_service &io_service,Handler handler):
+        impl_(impl),io_service_(io_service),work_(io_service),handler_(handler) {
     } 
     // function calling implementation object in separate thread
     void operator()(){ 
@@ -104,7 +111,7 @@ std::cerr<<"(3) IMPL DESTROY"<<std::endl;
         // go ahead and do blocking deq() call on implementation object
         // (only post if we did not get a null message)
         boost::system::error_code ec; 
-        std::pair<bool,std::shared_ptr<TranslationTask>>ret{impl->deq(tq_,ec)};
+        std::pair<bool,std::shared_ptr<TranslationTask>>ret{impl->deq(ec)};
         if(ret.first)this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec,ret.second));
       } else{
         // implementation object no longer exist
@@ -116,14 +123,13 @@ std::cerr<<"(3) IMPL DESTROY"<<std::endl;
     std::weak_ptr<Impl>impl_; 
     boost::asio::io_service&io_service_; 
     boost::asio::io_service::work work_; 
-    std::shared_ptr<TaskQueue>tq_;
     Handler handler_; 
   }; 
   // async sync deq operation
   template <typename Handler> 
-  void async_deq(implementation_type&impl,std::shared_ptr<TaskQueue>tq,Handler handler){
+  void async_deq(implementation_type&impl,Handler handler){
     // call indirectly by posting a function object so blocking call to deq() will run in a separate thread
-    this->async_io_service_.post(deq_operation<Handler>(impl,this->get_io_service(),tq,handler)); 
+    this->async_io_service_.post(deq_operation<Handler>(impl,this->get_io_service(),handler)); 
   } 
 private:
   // shutdown service
@@ -146,7 +152,7 @@ boost::asio::io_service::id basic_taskq_service<Impl>::id;
 class taskq_impl{
 public:
   // ctor
-  taskq_impl(){}
+  taskq_impl(std::shared_ptr<TaskQueue>tq):tq_(tq){}
 
   // dtor
   ~taskq_impl(){
@@ -158,8 +164,8 @@ public:
   } 
   // deque message
   // (if we got a nullptr from deq(), we set 'return.first = false', else true)
-  std::pair<bool,std::shared_ptr<TranslationTask>>deq(std::shared_ptr<TaskQueue>tq,boost::system::error_code&ec){ 
-    std::shared_ptr<TranslationTask>task=tq->deq(true);
+  std::pair<bool,std::shared_ptr<TranslationTask>>deq(boost::system::error_code&ec){ 
+    std::shared_ptr<TranslationTask>task=tq_->deq(true);
     ec = boost::system::error_code();
 // NOTE!
 std::cerr<<"BEFORE DEQ()"<<std::endl;
@@ -171,6 +177,13 @@ std::cerr<<"AFTER DEQ()"<<std::endl;
     }
     return ret;
   } 
+// NOTE! Should have this one as private and be a friend of the class calling it
+  // set queue to listen on
+  void setQueue(std::shared_ptr<TaskQueue>tq){
+    tq_=tq;
+  }
+private:
+  std::shared_ptr<TaskQueue>tq_;
 };
 }
 #endif
