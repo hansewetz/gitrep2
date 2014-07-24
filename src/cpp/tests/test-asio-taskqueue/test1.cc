@@ -15,6 +15,7 @@ using namespace xlate;
 // --- constants
 constexpr static size_t maxmsg{5};
 constexpr static size_t tmoSec{3};
+constexpr static size_t tmoSeleepBetweenSendMs{250};
 
 // --- send task to a queue
 void sendTask(std::shared_ptr<TaskQueue>tq){
@@ -24,7 +25,7 @@ void sendTask(std::shared_ptr<TaskQueue>tq){
     BOOST_LOG_TRIVIAL(debug)<<"sending task in separate thread ...";
     std::shared_ptr<TranslationTask>task{make_shared<TranslationTask>(TranslationJobId(),lp,string("Hello World"),17)};
     tq->enq(task);
-    this_thread::sleep_for(std::chrono::milliseconds(250));
+    this_thread::sleep_for(std::chrono::milliseconds(tmoSeleepBetweenSendMs));
     if(nsent++==maxmsg)break;
   }
 }
@@ -60,9 +61,11 @@ int main(){
 
     // create task handler and register it with boost asio
     TaskQueueIOService asioq1(ios);
-    TaskQueueIOService asioq2(ios);
     asioq1.async_deq(tq,boost::bind(taskHandler,boost::asio::placeholders::error,boost::lambda::_2,&asioq1,tq));
+    TaskQueueIOService asioq2(ios);
     asioq2.async_deq(tq,boost::bind(taskHandler,boost::asio::placeholders::error,boost::lambda::_2,&asioq2,tq));
+    TaskQueueIOService asioq3(ios);
+    asioq3.async_deq(tq,boost::bind(taskHandler,boost::asio::placeholders::error,boost::lambda::_2,&asioq2,tq));
 
     // create a deadline timer and register it
 /* NOTE!
@@ -79,7 +82,7 @@ cerr<<"outside block"<<endl<<std::flush;
   // join sender thread
 cerr<<"joining sender thread"<<endl;
   thrSend.join();
-cerr<<"done joining sender thread"<<endl;
+cerr<<"done joining sender thread, queue size: "<<tq->size()<<endl;
   }
   catch(exception const&e){
     BOOST_LOG_TRIVIAL(debug)<<"cought exception: "<<e.what();
