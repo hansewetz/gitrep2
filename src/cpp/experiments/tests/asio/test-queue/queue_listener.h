@@ -3,7 +3,6 @@
 #include "simple_queue.h"
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <cstddef>
 #include <thread>
 namespace boost{
@@ -117,7 +116,7 @@ private:
   };
   // private data
   boost::asio::io_service impl_io_service_;
-  boost::scoped_ptr<boost::asio::io_service::work>impl_work_;
+  std::unique_ptr<boost::asio::io_service::work>impl_work_;
   std::thread impl_thread_;
   boost::asio::io_service&post_io_service_;
 };
