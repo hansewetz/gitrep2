@@ -1,16 +1,3 @@
-/* TODO
-	- fix TaskQueue by counting number of listeners + updating blockDeq() to stop all listeners + rename blockDeq() --> disableDeq()
-	- read through the asio code , especially io_service
-	- check what happens if we call 'async_deq() multiple times on the same object ... we must probably stop the queue or throw an exception
-	- add sync deq also on IO Object
-	- try switching queue to listen on in callback when 'reloading' IO object
-	- try with multiple different queues, should make no difference
-	- implement a more generic version where we don't depend on:
-		- nullptr back from queue - instead pair<bool,object>
-		- object must be movable
-		- queue template on object type
-*/
-
 #ifndef __basic_taskq_H__
 #define __basic_taskq_H__
 #include "xlate-jobs/TaskQueue.h"
@@ -32,11 +19,11 @@ template<typename Impl=taskq_impl>class basic_taskq_service;
 template<typename Service>
 class basic_taskq:public boost::asio::basic_io_object<Service>{
 public: 
-  // ctor (note: 'consruct()' is called in base class)
+  // ctor
   explicit basic_taskq(boost::asio::io_service&io_service):
       boost::asio::basic_io_object<Service>(io_service) {
   } 
-  // async sync deq operation
+  // async deq operation
   template <typename Handler> 
   void async_deq(std::shared_ptr<TaskQueue>tq,Handler handler) {
     this->service.async_deq(this->implementation,tq,handler); 
@@ -50,17 +37,17 @@ using TaskQueueIOService=basic_taskq<basic_taskq_service<>>;
 template<typename Impl>
 class basic_taskq_service:public boost::asio::io_service::service{
 public:
+  // required to have id of service
  static boost::asio::io_service::id id; 
 
   // ctor
-  explicit basic_taskq_service(boost::asio::io_service&io_service) :
+  explicit basic_taskq_service(boost::asio::io_service&io_service):
       boost::asio::io_service::service(io_service){
-std::cerr<<"(0) SERVICE CTOR"<<std::endl<<std::flush;
   } 
-  // dtor (empty work queue and join async service thread)
+  // dtor
   ~basic_taskq_service(){
   }
-  // get a typedef  for the implementation
+  // get a typedef  for implementation
   using implementation_type=std::shared_ptr<Impl>;
 
   // mandatory (construct an implementation object)
@@ -69,54 +56,46 @@ std::cerr<<"(0) SERVICE CTOR"<<std::endl<<std::flush;
   } 
   // mandatory (destroy an implementation object)
   void destroy(implementation_type&impl){
-std::cerr<<"(1) SERVICE DESTROY"<<std::endl<<std::flush;
-    impl->destroy(); 
     impl.reset(); 
-std::cerr<<"(2) SERVICE DESTROY"<<std::endl<<std::flush;
   }
   // async sync deq operation
   template <typename Handler> 
   void async_deq(implementation_type&impl,std::shared_ptr<TaskQueue>tq,Handler handler){
-    // this is a non-blocking operation so we are OK calling impl object in same thread
+    // this is a non-blocking operation so we are OK calling impl object in this thread
     impl->async_deq(tq,handler);
   } 
 private:
-  // shutdown service
+  // shutdown service (required)
   void shutdown_service(){
-    // nothing to do here
   } 
 };
-// definition of id of service
+// definition of id of service (required)
 template <typename Impl> 
 boost::asio::io_service::id basic_taskq_service<Impl>::id; 
 
 // --- implementation of taskq -----------------------------
 class taskq_impl{
 public:
-  // ctor
+  // ctor (set up work queue for io_service so we don't bail out when executing run())
   taskq_impl(boost::asio::io_service&post_io_service):
       impl_work_(new boost::asio::io_service::work(impl_io_service_)), 
       impl_thread_([&](){impl_io_service_.run();}),
       post_io_service_(post_io_service){
-std::cerr<<"(0) IMPL CTOR"<<std::endl<<std::flush;
   }
-  // dtor
+  // dtor (clear work queue, stop io service and join thread)
   ~taskq_impl(){
-std::cerr<<"(1) IMPL DTOR"<<std::endl<<std::flush;
     impl_work_.reset(); 
     impl_io_service_.stop(); 
     if(impl_thread_.joinable())impl_thread_.join(); 
-std::cerr<<"(2) IMPL DTOR"<<std::endl<<std::flush;
   }
-  // destroy implementation of service
-  void destroy(){
-    // NOTE! Not yet done
-std::cerr<<"(1) IMPL DESTROY"<<std::endl<<std::flush;
-    if(tq_)tq_->blockDeq();
-std::cerr<<"(2) IMPL DESTROY"<<std::endl<<std::flush;
-  } 
+public:
+  // deque message (post request to thread)
+  template<typename Handler>
+  void async_deq(std::shared_ptr<TaskQueue>tq,Handler handler){
+    impl_io_service_.post(deq_operation<Handler>(post_io_service_,tq,handler)); 
+  }
 private:
-  // function object calling deq() on queue
+  // function object calling blocking deq() on queue
   template <typename Handler> 
   class deq_operation{ 
   public: 
@@ -130,10 +109,9 @@ private:
       std::shared_ptr<TranslationTask>task=tq_->deq(true);
       boost::system::error_code ec = boost::system::error_code();
       std::pair<bool,std::shared_ptr<TranslationTask>>ret{make_pair(true,task)};
-      if(ret.first){
+      if(task){
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec,ret.second));
       }else{
-std::cerr<<"(0) IMPL GOT NULLPOINTER"<<std::endl<<std::flush;
         std::shared_ptr<TranslationTask>task=std::shared_ptr<TranslationTask>(nullptr);
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,boost::asio::error::operation_aborted,task));
       }
@@ -144,21 +122,11 @@ std::cerr<<"(0) IMPL GOT NULLPOINTER"<<std::endl<<std::flush;
     std::shared_ptr<TaskQueue>tq_;
     Handler handler_; 
   }; 
-public:
-  // deque message
-  template<typename Handler>
-  void async_deq(std::shared_ptr<TaskQueue>tq,Handler handler){
-    // NOTE! Hack to set the tq_ member this way
-    tq_=tq;
-    impl_io_service_.post(deq_operation<Handler>(post_io_service_,tq,handler)); 
-  }
-private:
   // private data
   boost::asio::io_service impl_io_service_; 
   boost::scoped_ptr<boost::asio::io_service::work>impl_work_; 
   std::thread impl_thread_; 
   boost::asio::io_service&post_io_service_; 
-  std::shared_ptr<TaskQueue>tq_;
 };
 }
 #endif
