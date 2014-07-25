@@ -72,10 +72,7 @@ private:
 template <typename Impl>
 boost::asio::io_service::id basic_queue_listener_service<Impl>::id;
 
-// NOTE! Not yet done
-
-
-// --- implementation of taskq -----------------------------
+// --- implementation -----------------------------
 class queue_listener_impl{
 public:
   // ctor (set up work queue for io_service so we don't bail out when executing run())
@@ -109,7 +106,7 @@ private:
     void operator()(){
       // go ahead and do blocking deq() call
       auto ret=tq_->deq();
-      boost::system::error_code ec=(ret.first?boost::asio::error::operation_aborted:boost::system::error_code());
+      boost::system::error_code ec=(!ret.first?boost::asio::error::operation_aborted:boost::system::error_code());
       this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec,ret.second));
     }
   private:

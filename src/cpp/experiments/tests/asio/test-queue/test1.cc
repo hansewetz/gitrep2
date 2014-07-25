@@ -1,7 +1,6 @@
 #include "simple_queue.h"
 #include "queue_listener.h"
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>	// NOTE! Should try to use std::bind instead
 #include <boost/lambda/bind.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
@@ -9,7 +8,9 @@
 #include <iostream>
 #include <memory>
 #include <thread>
+#include <functional>
 using namespace std;
+using namespace std::placeholders;
 
 // some constants
 constexpr size_t maxmsg1{5};
@@ -20,15 +21,15 @@ size_t nreceived1{0};
 template<typename T>
 void qhandler1(boost::system::error_code const&ec,T item,boost::asio::simple_queue_listener<T>*asioq,shared_ptr<boost::asio::simple_queue<string>>q1){
   // print item if error code is OK
-  if(ec==0)BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: <invalid>, ec: "<<ec;
+  if(ec)BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: <invalid>, ec: "<<ec;
   else BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: "<<item<<", ec: "<<ec;
 
   // check if we should reload IO object
   if(++nreceived1>=maxmsg1){
     BOOST_LOG_TRIVIAL(debug)<<"have received eneough messages in qhandler1";
-//    q1->disable_deq(true);
+    q1->disable_deq(true);
   }else{
-    asioq->async_deq(q1,boost::bind(qhandler1<T>,boost::asio::placeholders::error,boost::lambda::_2,asioq,q1));
+    asioq->async_deq(q1,std::bind(qhandler1<T>,_1,_2,asioq,q1));
   }
 }
 // queue sender for queue 1
@@ -50,7 +51,7 @@ int main(){
     // asio stuff
     boost::asio::io_service ios;
     boost::asio::simple_queue_listener<string>qlistener1(ios);
-    qlistener1.async_deq(q1,boost::bind(qhandler1<string>,boost::asio::placeholders::error,boost::lambda::_2,&qlistener1,q1));
+    qlistener1.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener1,q1));
 
     // run a sender thread
     std::thread thrq1{senderq1,q1};
