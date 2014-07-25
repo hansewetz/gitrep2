@@ -12,8 +12,8 @@ using namespace std;
 using namespace std::placeholders;
 
 // some constants
-constexpr size_t maxmsg1{5};
-constexpr size_t tmoSeleepBetweenSendMs1{250};
+constexpr size_t maxmsg1{1000000};
+constexpr size_t tmoSeleepBetweenSendMs1{0};
 
 // queue listener handler for queue 1
 size_t nreceived1{0};
@@ -47,9 +47,13 @@ int main(){
     // underlying queue
     shared_ptr<boost::asio::simple_queue<string>>q1{new boost::asio::simple_queue<string>};
 
-    // asio stuff
+    // asio io service
     boost::asio::io_service ios;
+
+    // bool specifying if queue handler should cancel deq() operations on queue when it has received all messages it needs
     bool q1bailout{true};
+
+    // asio queue listeners
     boost::asio::simple_queue_listener<string>qlistener1(ios);
     qlistener1.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener1,q1,q1bailout));
     boost::asio::simple_queue_listener<string>qlistener2(ios);

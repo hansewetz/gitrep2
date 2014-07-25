@@ -82,7 +82,7 @@ public:
   }
   // dtor (clear work queue, stop io service and join thread)
   ~queue_listener_impl(){
-    impl_work_.reset();
+    impl_work_.reset(nullptr);
     impl_io_service_.stop();
     if(impl_thread_.joinable())impl_thread_.join();
   }
