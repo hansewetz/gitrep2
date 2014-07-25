@@ -7,7 +7,7 @@
 namespace boost{
 namespace asio{
 
-// a simple thread safe queue
+// a simple thread safe queue used as default queue in boost::asio::queue_listener
 template<typename T,typename Container=std::queue<T>>
 class simple_queue{
 public:
@@ -25,12 +25,12 @@ public:
     q_.push(t);
     cond_.notify_all();
   }
-  // dequeue a message (return.first == false if deq() was cancelled)
+  // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(){
     std::unique_lock<std::mutex>lock(mtx_);
     cond_.wait(lock,[&](){return !deq_enabled_||!q_.empty();});
   
-    // if deq iscancelled or queue is empty return 
+    // if deq is disabled or queue is empty return 
     if(!deq_enabled_||q_.empty()){
       return std::make_pair(false,T{});
     }

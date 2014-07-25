@@ -1,7 +1,6 @@
 #include "simple_queue.h"
 #include "queue_listener.h"
 #include <boost/asio.hpp>
-#include <boost/lambda/bind.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
 #include <string>
