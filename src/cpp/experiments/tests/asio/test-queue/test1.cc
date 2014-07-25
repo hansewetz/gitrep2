@@ -19,7 +19,7 @@ constexpr size_t tmoSeleepBetweenSendMs1{250};
 // queue listener handler for queue 1
 size_t nreceived1{0};
 template<typename T>
-void qhandler1(boost::system::error_code const&ec,T item,boost::asio::simple_queue_listener<T>*asioq,shared_ptr<boost::asio::simple_queue<string>>q1){
+void qhandler1(boost::system::error_code const&ec,T item,boost::asio::simple_queue_listener<T>*asioq,shared_ptr<boost::asio::simple_queue<string>>q1,bool bailout){
   // print item if error code is OK
   if(ec)BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: <invalid>, ec: "<<ec;
   else BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: "<<item<<", ec: "<<ec;
@@ -27,9 +27,9 @@ void qhandler1(boost::system::error_code const&ec,T item,boost::asio::simple_que
   // check if we should reload IO object
   if(++nreceived1>=maxmsg1){
     BOOST_LOG_TRIVIAL(debug)<<"have received eneough messages in qhandler1";
-    q1->disable_deq(true);
+    if(bailout)q1->disable_deq(true);
   }else{
-    asioq->async_deq(q1,std::bind(qhandler1<T>,_1,_2,asioq,q1));
+    asioq->async_deq(q1,std::bind(qhandler1<T>,_1,_2,asioq,q1,bailout));
   }
 }
 // queue sender for queue 1
@@ -50,8 +50,11 @@ int main(){
 
     // asio stuff
     boost::asio::io_service ios;
+    bool q1bailout{true};
     boost::asio::simple_queue_listener<string>qlistener1(ios);
-    qlistener1.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener1,q1));
+    qlistener1.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener1,q1,q1bailout));
+    boost::asio::simple_queue_listener<string>qlistener2(ios);
+    qlistener2.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener2,q1,q1bailout));
 
     // run a sender thread
     std::thread thrq1{senderq1,q1};
