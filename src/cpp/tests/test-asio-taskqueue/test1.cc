@@ -45,7 +45,7 @@ size_t nreceived2{0};
 void taskHandler2(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task,TaskQueueIOService*asioq,std::shared_ptr<TaskQueue>tq){
   BOOST_LOG_TRIVIAL(debug)<<"received task in Q2 (via asio): "<<(task?"non-null":"null")<<", ec: "<<ec;
   if(++nreceived2>=maxmsg){
-    BOOST_LOG_TRIVIAL(debug)<<"have received eneough messages in Q1";
+    BOOST_LOG_TRIVIAL(debug)<<"have received eneough messages in Q2";
     tq->blockDeq();
   }else{
     asioq->async_deq(tq,boost::bind(taskHandler2,boost::asio::placeholders::error,boost::lambda::_2,asioq,tq));
@@ -78,7 +78,7 @@ int main(){
       TaskQueueIOService asioq1(ios);
       asioq1.async_deq(tq1,boost::bind(taskHandler1,boost::asio::placeholders::error,boost::lambda::_2,&asioq1,tq1));
       TaskQueueIOService asioq2(ios);
-      asioq2.async_deq(tq2,boost::bind(taskHandler2,boost::asio::placeholders::error,boost::lambda::_2,&asioq1,tq2));
+      asioq2.async_deq(tq2,boost::bind(taskHandler2,boost::asio::placeholders::error,boost::lambda::_2,&asioq2,tq2));
 
       // create a deadline timer and register it
       boost::asio::deadline_timer tmo(ios,boost::posix_time::seconds(tmoSec));
