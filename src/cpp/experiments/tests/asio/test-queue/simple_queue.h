@@ -1,21 +1,23 @@
-#ifndef __SIMPLEQ_H__
-#define __SIMPLEQ_H__
+#ifndef __SIMPLE_QUEUE_H__
+#define __SIMPLE_QUEUE_H__
 #include <utility>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+namespace boost{
+namespace asio{
 
 // a simple thread safe queue
 template<typename T,typename Container=std::queue<T>>
-class simpleq{
+class simple_queue{
 public:
   // ctors,assign,dtor
-  simpleq()=default;
-  simpleq(simpleq const&)=delete;
-  simpleq(simpleq&&)=default;
-  simpleq&operator=(simpleq const&)=delete;
-  simpleq&operator=(simpleq&&)=default;
-  ~simpleq()=default;
+  simple_queue()=default;
+  simple_queue(simple_queue const&)=delete;
+  simple_queue(simple_queue&&)=default;
+  simple_queue&operator=(simple_queue const&)=delete;
+  simple_queue&operator=(simple_queue&&)=default;
+  ~simple_queue()=default;
 
   // put a message into queue
   bool enq(T t){
@@ -54,4 +56,6 @@ private:
   bool deq_enabled_=true;
   Container q_;
 };
+}
+}
 #endif
