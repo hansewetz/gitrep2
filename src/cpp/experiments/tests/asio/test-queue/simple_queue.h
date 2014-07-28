@@ -11,6 +11,10 @@ namespace asio{
 template<typename T,typename Container=std::queue<T>>
 class simple_queue{
 public:
+  // typedef for value stored in queue
+  // (need this so we can create an item with default ctor)
+  using value_type=T;
+
   // ctors,assign,dtor
   simple_queue()=default;
   simple_queue(simple_queue const&)=delete;
@@ -39,7 +43,7 @@ public:
     q_.pop();
     return ret;
   }
-  // cancel deq operations
+  // cancel deq operations (will also release blocking threads)
   void disable_deq(bool disable){
     std::unique_lock<std::mutex>lock(mtx_);
     deq_enabled_=!disable;

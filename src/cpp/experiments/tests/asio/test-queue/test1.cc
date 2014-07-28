@@ -12,23 +12,23 @@ using namespace std;
 using namespace std::placeholders;
 
 // some constants
-constexpr size_t maxmsg1{1000000};
+constexpr size_t maxmsg1{1000};
 constexpr size_t tmoSeleepBetweenSendMs1{0};
 
 // queue listener handler for queue 1
 size_t nreceived1{0};
 template<typename T>
-void qhandler1(boost::system::error_code const&ec,T item,boost::asio::simple_queue_listener<T>*asioq,shared_ptr<boost::asio::simple_queue<string>>q1,bool bailout){
+void qhandler1(boost::system::error_code const&ec,T item,boost::asio::simple_queue_listener<T>*asioq,shared_ptr<boost::asio::simple_queue<string>>q1,bool bailout,string const&info){
   // print item if error code is OK
-  if(ec)BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: <invalid>, ec: "<<ec;
-  else BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: "<<item<<", ec: "<<ec;
+  if(ec)BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: <invalid>, ec: "<<ec<<", with info: "<<info;
+  else BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: "<<item<<", ec: "<<ec<<", with info: "<<info;
 
   // check if we should reload IO object
   if(++nreceived1>=maxmsg1){
     BOOST_LOG_TRIVIAL(debug)<<"have received eneough messages in qhandler1";
     if(bailout)q1->disable_deq(true);
   }else{
-    asioq->async_deq(q1,std::bind(qhandler1<T>,_1,_2,asioq,q1,bailout));
+    asioq->async_deq(q1,std::bind(qhandler1<T>,_1,_2,asioq,q1,bailout,info));
   }
 }
 // queue sender for queue 1
@@ -55,9 +55,12 @@ int main(){
 
     // asio queue listeners
     boost::asio::simple_queue_listener<string>qlistener1(ios);
-    qlistener1.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener1,q1,q1bailout));
+    qlistener1.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener1,q1,q1bailout,"1/1"));
+    qlistener1.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener1,q1,q1bailout,"1/2"));
     boost::asio::simple_queue_listener<string>qlistener2(ios);
-    qlistener2.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener2,q1,q1bailout));
+    qlistener2.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener2,q1,q1bailout,"2/1"));
+    boost::asio::simple_queue_listener<string>qlistener3(ios);
+    qlistener3.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener2,q1,q1bailout,"3/1"));
 
     // run a sender thread
     std::thread thrq1{senderq1,q1};

@@ -4,7 +4,7 @@ LOCAL_SOTARGET  =
 LOCAL_OBJS      = test1.o
 
 # Control.
-LOCAL_LIBS      = -lboost_log
+LOCAL_LIBS      = -lboost_log -lboost_system
 LOCAL_LIBPATH   = -L$(PROJECT_ROOT)/lib/lib -L$(BOOST_LIB)
 LOCAL_INCPATH   = -I${BOOST_INC}
 LOCAL_DEFINES   = -DBOOST_ALL_DYN_LINK -DASIO_STANDALONE
