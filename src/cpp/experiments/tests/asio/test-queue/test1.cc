@@ -7,28 +7,22 @@
 #include <iostream>
 #include <memory>
 #include <thread>
-#include <functional>
 using namespace std;
 using namespace std::placeholders;
 
 // some constants
-constexpr size_t maxmsg1{1000};
-constexpr size_t tmoSeleepBetweenSendMs1{0};
+constexpr size_t maxmsg1{3};
+constexpr size_t tmoSeleepBetweenSendMs1{100};
 
 // queue listener handler for queue 1
 size_t nreceived1{0};
 template<typename T>
-void qhandler1(boost::system::error_code const&ec,T item,boost::asio::simple_queue_listener<T>*asioq,shared_ptr<boost::asio::simple_queue<string>>q1,bool bailout,string const&info){
+void qhandler1(boost::system::error_code const&ec,T item,boost::asio::simple_queue_listener<T>*asioq,shared_ptr<boost::asio::simple_queue<string>>q1){
   // print item if error code is OK
-  if(ec)BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: <invalid>, ec: "<<ec<<", with info: "<<info;
-  else BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: "<<item<<", ec: "<<ec<<", with info: "<<info;
-
-  // check if we should reload IO object
-  if(++nreceived1>=maxmsg1){
-    BOOST_LOG_TRIVIAL(debug)<<"have received eneough messages in qhandler1";
-    if(bailout)q1->disable_deq(true);
-  }else{
-    asioq->async_deq(q1,std::bind(qhandler1<T>,_1,_2,asioq,q1,bailout,info));
+  if(ec)BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: <invalid>, ec: "<<ec;
+  else{
+   BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: "<<item<<", ec: "<<ec;
+    asioq->async_deq(q1,std::bind(qhandler1<T>,_1,_2,asioq,q1));
   }
 }
 // queue sender for queue 1
@@ -40,6 +34,8 @@ void senderq1(shared_ptr<boost::asio::simple_queue<string>>q1){
     q1->enq(item);
     this_thread::sleep_for(std::chrono::milliseconds(tmoSeleepBetweenSendMs1));
   }
+  // disable dequeing (will stop async listener)
+  q1->disable_deq(true);
 }
 // test program
 int main(){
@@ -50,25 +46,13 @@ int main(){
     // asio io service
     boost::asio::io_service ios;
 
-    // bool specifying if queue handler should cancel deq() operations on queue when it has received all messages it needs
-    bool q1bailout{true};
-
     // asio queue listeners
     boost::asio::simple_queue_listener<string>qlistener1(ios);
-    qlistener1.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener1,q1,q1bailout,"1/1"));
-    qlistener1.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener1,q1,q1bailout,"1/2"));
-    boost::asio::simple_queue_listener<string>qlistener2(ios);
-    qlistener2.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener2,q1,q1bailout,"2/1"));
-    boost::asio::simple_queue_listener<string>qlistener3(ios);
-    qlistener3.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener2,q1,q1bailout,"3/1"));
+    qlistener1.async_deq(q1,std::bind(qhandler1<string>,_1,_2,&qlistener1,q1));
 
-    // run a sender thread
+    // run a sender thread, run io service and join sender thread
     std::thread thrq1{senderq1,q1};
-
-    // run io service
     ios.run();
-
-    // join sender thread
     thrq1.join();
   }
   catch(exception const&e){
