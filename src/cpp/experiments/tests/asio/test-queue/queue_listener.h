@@ -104,7 +104,7 @@ private:
     // function calling implementation object - runs in the thread created in ctor
     void operator()(){
       // go ahead and do blocking deq() call
-      auto ret=tq_->deq();
+      std::pair<bool,typename Queue::value_type>ret{tq_->deq()};
       boost::system::error_code ec=(!ret.first?boost::asio::error::operation_aborted:boost::system::error_code());
       this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec,ret.second));
     }
