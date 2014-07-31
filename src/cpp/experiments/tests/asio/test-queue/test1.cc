@@ -7,11 +7,12 @@
 #include <iostream>
 #include <memory>
 #include <thread>
+#include <atomic>
 using namespace std;
 using namespace std::placeholders;
 
 // some constants
-constexpr size_t maxmsg1{3};
+constexpr size_t maxmsg1{10};
 constexpr size_t tmoSeleepBetweenSendMs1{100};
 
 // queue listener handler for queue 1
@@ -22,20 +23,18 @@ void qhandler1(boost::system::error_code const&ec,T item,boost::asio::simple_que
   if(ec)BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: <invalid>, ec: "<<ec;
   else{
    BOOST_LOG_TRIVIAL(debug)<<"received item in qhandler1 (via asio), item: "<<item<<", ec: "<<ec;
-    asioq->async_deq(q1,std::bind(qhandler1<T>,_1,_2,asioq,q1));
+   if(++nreceived1!=maxmsg1)asioq->async_deq(q1,std::bind(qhandler1<T>,_1,_2,asioq,q1));
   }
 }
 // queue sender for queue 1
 size_t nsent{0};
 void senderq1(shared_ptr<boost::asio::simple_queue<string>>q1){
-  for(int i=0;i<maxmsg1;++i){
-    string item{boost::lexical_cast<string>(i)};
+  for(;nsent<maxmsg1;++nsent){
+    string item{boost::lexical_cast<string>(nsent)};
     BOOST_LOG_TRIVIAL(debug)<<"sending item \""<<item<<"\"in separate thread ...";
     q1->enq(item);
     this_thread::sleep_for(std::chrono::milliseconds(tmoSeleepBetweenSendMs1));
   }
-  // disable dequeing (will stop async listener)
-  q1->disable_deq(true);
 }
 // test program
 int main(){
