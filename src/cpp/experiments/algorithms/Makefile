@@ -1,6 +1,6 @@
 SUBDIRS =  \
 	sorting \
-	fast-median \
+	median \
 	find-cycle-list \
 	first-nonrepeating-char \
 	graph-ctor \
@@ -12,8 +12,6 @@ SUBDIRS =  \
 	partition \
 	partition-template \
 	remove-chars-from-strings \
-	running-median \
-	running-median-simple-code \
 	string_permutations \
 	string-reverse-part-of-string \
 	string-reverse-words \
