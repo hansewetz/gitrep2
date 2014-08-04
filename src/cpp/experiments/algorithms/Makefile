@@ -5,6 +5,7 @@ SUBDIRS =  \
 	lists \
 	bits \
 	selection \
+	search \
 	graph-ctor \
 	merge-streams \
 	node-append \
@@ -13,7 +14,6 @@ SUBDIRS =  \
 	swap-vars \
 	tower-hanoi-recurse \
 	tower-hanoi-iterative \
-	binary-search-logn \
 	find-first-1 \
 	test-find-longest-increasing-path-of-items \
 	generate-subsets \
