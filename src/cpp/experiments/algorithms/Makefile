@@ -8,7 +8,6 @@ SUBDIRS =  \
 	search \
 	graph-ctor \
 	merge-streams \
-	node-append \
 	telephone-number-words \
 	word2telephone-number \
 	swap-vars \
