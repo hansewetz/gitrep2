@@ -11,16 +11,10 @@ SUBDIRS =  \
 	node-append \
 	partition \
 	partition-template \
-	remove-chars-from-strings \
-	string_permutations \
-	string-reverse-part-of-string \
-	string-reverse-words \
 	str-reverse \
 	telephone-number-words \
 	track-m-smallest-numbers \
 	word2telephone-number \
-	string-replace-pattern-with-char \
-	string-rotate \
 	swap-vars \
 	add-ints-bits \
 	subtract-ints-bits \
@@ -37,7 +31,6 @@ SUBDIRS =  \
 	find-first-1 \
 	test-find-longest-increasing-path-of-items \
 	generate-subsets \
-	string-permutations-upper-lower-case \
 	partitioned-timed \
 	random-select-m-n \
 	print-tree \
