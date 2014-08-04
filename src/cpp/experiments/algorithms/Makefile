@@ -9,7 +9,6 @@ SUBDIRS =  \
 	graph-ctor \
 	merge-streams \
 	word2telephone-number \
-	swap-vars \
 	tower-hanoi-recurse \
 	tower-hanoi-iterative \
 	test-find-longest-increasing-path-of-items \
