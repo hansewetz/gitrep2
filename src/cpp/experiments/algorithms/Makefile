@@ -3,7 +3,7 @@ SUBDIRS =  \
 	median \
 	heap \
 	tree \
-	find-cycle-list \
+	lists \
 	first-nonrepeating-char \
 	graph-ctor \
 	max-profit \
@@ -17,7 +17,6 @@ SUBDIRS =  \
 	swap-vars \
 	add-ints-bits \
 	subtract-ints-bits \
-	split-list \
 	kth-smallest \
 	tower-hanoi-recurse \
 	tower-hanoi-iterative \
