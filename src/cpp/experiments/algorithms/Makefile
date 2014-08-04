@@ -12,7 +12,6 @@ SUBDIRS =  \
 	swap-vars \
 	tower-hanoi-recurse \
 	tower-hanoi-iterative \
-	find-first-1 \
 	test-find-longest-increasing-path-of-items \
 	check-sum-equal-x
 
