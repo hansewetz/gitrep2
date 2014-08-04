@@ -1,11 +1,10 @@
 SUBDIRS =  \
 	sorting \
 	median \
+	heap \
 	find-cycle-list \
 	first-nonrepeating-char \
 	graph-ctor \
-	heap-siftdown \
-	heap-siftup \
 	max-profit \
 	merge-streams \
 	node-append \
@@ -23,7 +22,6 @@ SUBDIRS =  \
 	tower-hanoi-recurse \
 	tower-hanoi-iterative \
 	little-endian \
-	heap-create-linear \
 	tree-eval-prefix-expr \
 	tree-traversal \
 	tree-copy \
