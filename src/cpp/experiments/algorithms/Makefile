@@ -4,6 +4,7 @@ SUBDIRS =  \
 	heap \
 	tree \
 	lists \
+	bits \
 	graph-ctor \
 	max-profit \
 	merge-streams \
@@ -14,8 +15,6 @@ SUBDIRS =  \
 	track-m-smallest-numbers \
 	word2telephone-number \
 	swap-vars \
-	add-ints-bits \
-	subtract-ints-bits \
 	kth-smallest \
 	tower-hanoi-recurse \
 	tower-hanoi-iterative \

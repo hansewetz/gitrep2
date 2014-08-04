@@ -1,5 +1,5 @@
 SUBDIRS =  \
-	find-cycle-list split-list node-append
+	add-ints-bits subtract-ints-bits
 
 include $(PROJECT_ROOT)/env/makerules/subdirs.rules
 
