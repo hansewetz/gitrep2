@@ -10,7 +10,6 @@ SUBDIRS =  \
 	node-append \
 	partition \
 	partition-template \
-	str-reverse \
 	telephone-number-words \
 	track-m-smallest-numbers \
 	word2telephone-number \
