@@ -6,7 +6,8 @@ SUBDIRS =  \
 	string-reverse-words \
 	string-rotate \
 	string_permutations \
-	str-reverse
+	str-reverse \
+	first-nonrepeating-char
 
 include $(PROJECT_ROOT)/env/makerules/subdirs.rules
 

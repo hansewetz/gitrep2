@@ -4,7 +4,6 @@ SUBDIRS =  \
 	heap \
 	tree \
 	lists \
-	first-nonrepeating-char \
 	graph-ctor \
 	max-profit \
 	merge-streams \
