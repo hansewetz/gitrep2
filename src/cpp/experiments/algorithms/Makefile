@@ -1,23 +1,19 @@
 SUBDIRS =  \
+	sorting \
 	fast-median \
 	find-cycle-list \
 	first-nonrepeating-char \
 	graph-ctor \
 	heap-siftdown \
 	heap-siftup \
-	isort \
 	max-profit \
-	merge-sort \
 	merge-streams \
 	node-append \
 	partition \
 	partition-template \
-	qsort \
-	qsort-lambda \
 	remove-chars-from-strings \
 	running-median \
 	running-median-simple-code \
-	selection-sort \
 	string_permutations \
 	string-reverse-part-of-string \
 	string-reverse-words \
@@ -27,7 +23,6 @@ SUBDIRS =  \
 	word2telephone-number \
 	string-replace-pattern-with-char \
 	string-rotate \
-	merge-sort-list \
 	swap-vars \
 	add-ints-bits \
 	subtract-ints-bits \
@@ -36,9 +31,7 @@ SUBDIRS =  \
 	tower-hanoi-recurse \
 	tower-hanoi-iterative \
 	little-endian \
-	selection-sort-recursive \
 	heap-create-linear \
-	sort-with-2-stacks \
 	tree-eval-prefix-expr \
 	tree-traversal \
 	tree-copy \

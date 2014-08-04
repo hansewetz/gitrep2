@@ -1,13 +1,10 @@
-#include "simple_queue.h"
 #include "queue_listener.h"
 #include <boost/asio.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
 #include <string>
-#include <iostream>
 #include <memory>
 #include <thread>
-#include <atomic>
 using namespace std;
 using namespace std::placeholders;
 
