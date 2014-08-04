@@ -7,11 +7,6 @@ SUBDIRS =  \
 	selection \
 	search \
 	graph-ctor \
-	merge-streams \
-	word2telephone-number \
-	tower-hanoi-recurse \
-	tower-hanoi-iterative \
-	test-find-longest-increasing-path-of-items \
-	check-sum-equal-x
+	merge-streams 
 
 include $(PROJECT_ROOT)/env/makerules/subdirs.rules
