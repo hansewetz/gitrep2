@@ -5,7 +5,6 @@ SUBDIRS =  \
 	lists \
 	bits \
 	selection \
-	search \
-	merge-streams 
+	search
 
 include $(PROJECT_ROOT)/env/makerules/subdirs.rules
