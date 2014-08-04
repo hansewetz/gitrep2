@@ -2,6 +2,7 @@ SUBDIRS =  \
 	sorting \
 	median \
 	heap \
+	tree \
 	find-cycle-list \
 	first-nonrepeating-char \
 	graph-ctor \
@@ -21,16 +22,12 @@ SUBDIRS =  \
 	tower-hanoi-recurse \
 	tower-hanoi-iterative \
 	little-endian \
-	tree-eval-prefix-expr \
-	tree-traversal \
-	tree-copy \
 	binary-search-logn \
 	find-first-1 \
 	test-find-longest-increasing-path-of-items \
 	generate-subsets \
 	partitioned-timed \
 	random-select-m-n \
-	print-tree \
 	check-sum-equal-x
 
 include $(PROJECT_ROOT)/env/makerules/subdirs.rules
