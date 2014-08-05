@@ -30,6 +30,7 @@ public:
     if(!enq_enabled_)return false;
     q_.push(t);
     cond_.notify_all();
+    return true;
   }
   // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(){
