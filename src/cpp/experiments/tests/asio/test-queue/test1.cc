@@ -54,8 +54,7 @@ void timer_handler(const boost::system::error_code&err){
 // test program
 int main(){
   try{
-    // setup time to trigger after 3 seconds
-    // (we'll start listening to messages afetr 3 seconds)
+    // setup time to trigger after 3 seconds after which we start listening to messages
     boost::asio::deadline_timer tmo(::ios,boost::posix_time::seconds(3));
     tmo.async_wait(timer_handler);
 
