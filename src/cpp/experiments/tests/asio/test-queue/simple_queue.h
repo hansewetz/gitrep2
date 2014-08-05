@@ -16,7 +16,7 @@ public:
   using value_type=T;
 
   // ctors,assign,dtor
-  simple_queue()=default;
+  simple_queue(std::size_t maxsize):maxsize_(maxsize){}
   simple_queue(simple_queue const&)=delete;
   simple_queue(simple_queue&&)=default;
   simple_queue&operator=(simple_queue const&)=delete;
@@ -25,7 +25,9 @@ public:
 
   // put a message into queue
   bool enq(T t){
-    std::lock_guard<std::mutex>lock(mtx_);
+    std::unique_lock<std::mutex>lock(mtx_);
+    cond_.wait(lock,[&](){return !enq_enabled_||q_.size()<maxsize_;});
+    if(!enq_enabled_)return false;
     q_.push(t);
     cond_.notify_all();
   }
@@ -41,6 +43,7 @@ public:
     // check if we have a message
     std::pair<bool,T>ret{std::make_pair(true,q_.front())};
     q_.pop();
+    cond_.notify_all();
     return ret;
   }
   // cancel deq operations (will also release blocking threads)
@@ -49,15 +52,33 @@ public:
     deq_enabled_=!disable;
     cond_.notify_all();
   }
+  // set max size of queue
+  void set_maxsize(std::size_t maxsize){
+    std::unique_lock<std::mutex>lock(mtx_);
+    maxsize_=maxsize;
+    cond_.notify_all();
+  }
   // check if queue is empty
   bool empty()const{
     std::unique_lock<std::mutex>lock(mtx_);
     return q_.empty();
   }
+  // get #of items in queue
+  std::size_t size()const{
+    std::unique_lock<std::mutex>lock;
+    return q_.size();
+  }
+  // get max items in queue
+  std::size_t maxsize()const{
+    std::unique_lock<std::mutex>lock(mtx_);
+    return maxsize_;
+  }
 private:
+  std::size_t maxsize_;
   mutable std::mutex mtx_;
   mutable std::condition_variable cond_;
   bool deq_enabled_=true;
+  bool enq_enabled_=true;
   Container q_;
 };
 }
