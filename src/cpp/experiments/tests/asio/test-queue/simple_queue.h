@@ -53,6 +53,12 @@ public:
     deq_enabled_=!disable;
     cond_.notify_all();
   }
+  // cancel enq operations (will also release blocking threads)
+  void disable_enq(bool disable){
+    std::unique_lock<std::mutex>lock(mtx_);
+    enq_enabled_=!disable;
+    cond_.notify_all();
+  }
   // set max size of queue
   void set_maxsize(std::size_t maxsize){
     std::unique_lock<std::mutex>lock(mtx_);
