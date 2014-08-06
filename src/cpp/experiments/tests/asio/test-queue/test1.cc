@@ -71,10 +71,16 @@ void qsender1_handler(boost::system::error_code const&ec,int item){
 // test program
 int main(){
   try{
+    // --------------- setup a timer ticking once per 100 ms, stop when tmo1 disables enq, deq
+    std::atomic<bool>runticker{true};
+    boost::asio::deadline_timer ticker(::ios,boost::posix_time::milliseconds(100));
+    std::function<void(const boost::system::error_code&)>fticker=[&](const boost::system::system_error&ec){BOOST_LOG_TRIVIAL(debug)<<"TICK";if(runticker)ticker.async_wait(fticker);};
+    ticker.async_wait(fticker);
+
     // --------------- setup queue which sends/receives a specific #if messages
 
     // setup timer to trigger in 3 seconds after which we start listening to messages
-    boost::asio::deadline_timer tmo(::ios,boost::posix_time::seconds(3));
+    boost::asio::deadline_timer tmo(::ios,boost::posix_time::seconds(1));
     tmo.async_wait([&](const boost::system::error_code&ec){qlistener.async_deq(std::bind(qlistener_handler<int>,_1,_2,0));});
 
     // start sending messages
@@ -84,8 +90,8 @@ int main(){
     // --------------- setup queue which sends/receives messageses until a timer pops
 
     // setup timer for test - when timer pops, we disable enq and deq
-    boost::asio::deadline_timer tmo1(::ios,boost::posix_time::seconds(4));
-    tmo1.async_wait([&](const boost::system::error_code&ec){q1->disable_enq(true);q1->disable_deq(true);});
+    boost::asio::deadline_timer tmo1(::ios,boost::posix_time::seconds(2));
+    tmo1.async_wait([&](const boost::system::error_code&ec){q1->disable_enq(true);q1->disable_deq(true);runticker=false;});
 
     // listen/send on messages on q1
     qlistener1.async_deq(std::bind(qlistener1_handler<int>,_1,_2));
