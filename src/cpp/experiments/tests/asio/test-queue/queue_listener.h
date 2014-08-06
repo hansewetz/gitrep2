@@ -17,14 +17,16 @@ template<typename Service,typename Queue>
 class basic_queue_listener:public boost::asio::basic_io_object<Service>{
 public:
   // ctor
-  explicit basic_queue_listener(boost::asio::io_service&io_service):
-      boost::asio::basic_io_object<Service>(io_service) {
+  explicit basic_queue_listener(boost::asio::io_service&io_service,std::shared_ptr<Queue>q):
+      boost::asio::basic_io_object<Service>(io_service),q_(q){
   }
   // async deq operation
   template <typename Handler>
-  void async_deq(std::shared_ptr<Queue>q,Handler handler) {
-    this->service.async_deq(this->implementation,q,handler);
+  void async_deq(Handler handler) {
+    this->service.async_deq(this->implementation,q_,handler);
   }
+private:
+  std::shared_ptr<Queue>q_;
 };
 // typedef for using standard service object
 template<typename T>
@@ -89,8 +91,8 @@ public:
 public:
   // deque message (post request to thread)
   template<typename Handler,typename Queue>
-  void async_deq(std::shared_ptr<queue_listener_impl>impl,std::shared_ptr<Queue>tq,Handler handler){
-    impl_io_service_.post(deq_operation<Handler,Queue>(impl,post_io_service_,tq,handler));
+  void async_deq(std::shared_ptr<queue_listener_impl>impl,std::shared_ptr<Queue>q,Handler handler){
+    impl_io_service_.post(deq_operation<Handler,Queue>(impl,post_io_service_,q,handler));
   }
 private:
   // function object calling blocking deq() on queue
@@ -98,8 +100,8 @@ private:
   class deq_operation{
   public:
     // ctor
-    deq_operation(std::shared_ptr<queue_listener_impl>impl,boost::asio::io_service &io_service,std::shared_ptr<Queue>tq, Handler handler):
-        wimpl_(impl),io_service_(io_service),work_(io_service),tq_(tq),handler_(handler) {
+    deq_operation(std::shared_ptr<queue_listener_impl>impl,boost::asio::io_service&io_service,std::shared_ptr<Queue>q,Handler handler):
+        wimpl_(impl),io_service_(io_service),work_(io_service),q_(q),handler_(handler) {
     }
     // function calling implementation object - runs in the thread created in ctor
     void operator()(){
@@ -108,7 +110,7 @@ private:
 
       // if valid, go ahead and do blocking call on queue, otherwise post aborted message
       if(impl){
-        std::pair<bool,typename Queue::value_type>ret{tq_->deq()};
+        std::pair<bool,typename Queue::value_type>ret{q_->deq()};
         boost::system::error_code ec=(!ret.first?boost::asio::error::operation_aborted:boost::system::error_code());
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec,ret.second));
       }else{
@@ -119,7 +121,7 @@ private:
     std::weak_ptr<queue_listener_impl>wimpl_;
     boost::asio::io_service&io_service_;
     boost::asio::io_service::work work_;
-    std::shared_ptr<Queue>tq_;
+    std::shared_ptr<Queue>q_;
     Handler handler_;
   };
   // private data

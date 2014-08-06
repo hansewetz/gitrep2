@@ -17,14 +17,16 @@ template<typename Service,typename Queue>
 class basic_queue_sender:public boost::asio::basic_io_object<Service>{
 public:
   // ctor
-  explicit basic_queue_sender(boost::asio::io_service&io_service):
-      boost::asio::basic_io_object<Service>(io_service) {
+  explicit basic_queue_sender(boost::asio::io_service&io_service,std::shared_ptr<Queue>q):
+      boost::asio::basic_io_object<Service>(io_service),q_(q){
   }
   // async enq operation
   template <typename Handler>
-  void async_enq(std::shared_ptr<Queue>q,typename Queue::value_type val,Handler handler) {
-    this->service.async_enq(this->implementation,q,val,handler);
+  void async_enq(typename Queue::value_type val,Handler handler) {
+    this->service.async_enq(this->implementation,q_,val,handler);
   }
+private:
+  std::shared_ptr<Queue>q_;
 };
 // typedef for using standard service object
 template<typename T>
