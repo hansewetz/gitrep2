@@ -31,7 +31,7 @@ void qlistener_handler(boost::system::error_code const&ec,T item){
   if(ec)BOOST_LOG_TRIVIAL(debug)<<"queue listener interupted (via asio): ignoring callback queue item, ec: "<<ec;
   else{
     BOOST_LOG_TRIVIAL(debug)<<"received item in qlistener_handler (via asio), item: "<<item<<", ec: "<<ec;
-    if(++nreceived!=maxmsg)qlistener.async_deq(std::bind(qlistener_handler<T>,_1,_2));
+    if(++nreceived<maxmsg)qlistener.async_deq(std::bind(qlistener_handler<T>,_1,_2));
   }
 }
 // queue sender handler for queue
@@ -39,10 +39,10 @@ size_t nsent{0};
 template<typename T>
 void qsender_handler(boost::system::error_code const&ec,int item){
   // print item if error code is OK
-  if(ec)BOOST_LOG_TRIVIAL(debug)<<"queue sender interupted (via asio): ignoring callback, ec: "<<ec
+  if(ec)BOOST_LOG_TRIVIAL(debug)<<"queue sender interupted (via asio): ignoring callback, ec: "<<ec;
   else{
     BOOST_LOG_TRIVIAL(debug)<<"sending item in qlistener_handler (via asio), item: "<<item<<", ec: "<<ec;
-    if(++nsent!=maxmsg)qsender.async_enq(item+1,std::bind(qsender_handler<T>,_1,item+1));
+    if(++nsent<maxmsg)qsender.async_enq(item+1,std::bind(qsender_handler<T>,_1,item+1));
   }
 }
 // timer handler
