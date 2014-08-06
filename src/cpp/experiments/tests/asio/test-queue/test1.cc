@@ -1,3 +1,16 @@
+/*
+the program has two queues.
+
+there is a queue sender and a queue listener on each queue
+there is a timer which triggers starting listening on messwges on the first queue - before this the queue is populated by a sender but blocks after 3 messages which is the queues capacity
+this tests that enq() can block when the queue is full and trigger a callback when there is room to send a message in the queue
+
+the second queue has a sender and a listener which contineously runs.
+a timer runs which when popped disables enq and deq on the second queue
+
+there is also a fast timer which pops every 100 ms and is disabled when th enq and deq on the second queue is disabled
+*/
+
 #include "queue_listener.h"
 #include "queue_sender.h"
 #include <boost/asio.hpp>
