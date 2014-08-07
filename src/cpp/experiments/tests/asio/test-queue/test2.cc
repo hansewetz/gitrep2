@@ -43,8 +43,7 @@ void qlistener_handler(boost::system::error_code const&ec,T item){
 }
 // handler for fd from child process
 void fd_handler(boost::system::error_code ec,size_t size){
-// NOTE!
-  if(ec.value()==2&&size==0){
+  if(ec.value()==boost::asio::error::eof&&size==0){
     // we are done  - but can't shut down queues until they are empty
     done=true;
     fd_read.cancel();
