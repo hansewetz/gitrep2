@@ -1,16 +1,7 @@
-# To be built
-LOCAL_TARGET    =  test1
-LOCAL_SOTARGET  =
-LOCAL_OBJS      = test1.o
+all:
+	$(MAKE) -f Makefile.test1
+	$(MAKE) -f Makefile.test2
 
-# Control.
-LOCAL_LIBS      = -lboost_log -lboost_system
-LOCAL_LIBPATH   = -L$(PROJECT_ROOT)/lib/lib -L$(BOOST_LIB)
-LOCAL_INCPATH   = -I${BOOST_INC}
-LOCAL_DEFINES   = -DBOOST_ALL_DYN_LINK -DASIO_STANDALONE
-LOCAL_CXXFLAGS  =
-LOCAL_CPPFLAGS  = 
-LOCAL_LDFLAGS   =
-LOCAL_LDSOFLAGS =
-
-include $(ENV_ROOT)/makerules/build.rules
+clean:
+	$(MAKE) -f Makefile.test1 clean
+	$(MAKE) -f Makefile.test2 clean
