@@ -12,8 +12,8 @@ bison
 gmp-5.0.5
 mpfr-2.4.2
 mpc-0.8.1
-gcc-4.8-20121104
-boost_1_53_0
+gcc-4.10
+boost_1_56_0
 boost-log-2.0
 instantclient_11_2 (C++ occi)
 boost dir_monito
@@ -194,3 +194,6 @@ Tue Apr  8 10:08:36 CEST 2014
 	../../../b2 install --prefix=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs/
 
 ------------------------
+
+Sat Aug  9 15:24:50 CEST 2014
+	#installed boost_1_55
