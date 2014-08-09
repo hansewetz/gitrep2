@@ -111,6 +111,9 @@ Tue Oct 15 08:13:41 CEST 2013
 	cd boost_1_53_0
 	./bootstrap.sh 
 	./b2 install --prefix=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs
+
+	Alternativly, if we need libraries wiyh '-mt.so' extebnsikno do:
+	 sudo ./b2 --prefix=//home/hans/installs --layout=tagged install
 ------------------------
 
 Tue Oct 15 08:13:41 CEST 2013

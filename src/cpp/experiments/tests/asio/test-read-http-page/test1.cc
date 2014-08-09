@@ -1,6 +1,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio.hpp>
 #include <string>
+#include <iostream>
 
 // main.
 int main(int argc,char**argv){

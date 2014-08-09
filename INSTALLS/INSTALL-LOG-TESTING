@@ -70,8 +70,8 @@ Thu Oct 17 09:18:15 CEST 2013
 Thu Oct 17 16:32:49 CEST 2013
 	NOTE! qhen compiling package 3.3 we get warning/error for signal in boost
 	installed wt-3.2.2-p1
-        mkdir build; cd build
-	cmake   -DBOOST_ROOT=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs -DCONFIGDIR=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/wt/etc/wt -DRUNDIR=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/wt/usr/wt -DCMAKE_INSTALL_PREFIX=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/ ../.
+        	mkdir build; cd build
+	cmake   -DBOOST_DIR=/home/hans/installs -DCONFIGDIR=/home/hans/installs/wt/etc/wt -DRUNDIR=/home/hans/installs/wt/usr/wt -DCMAKE_INSTALL_PREFIX=/home/hhans/installs/ -DBOOST_COMPILER=4.10  -DBOOST_VERSION=5.6 ../.
 	#NOTE! Make sure that the variable 'WT_NO_BOOST_RANDOM' is set to OFF in 'CMakeCache.txt'
 	make
 	make install

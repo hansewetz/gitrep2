@@ -1,3 +1,4 @@
+#include <iostream>
 #include <memory>
 #include <istream>
 #include <boost/iostreams/device/file_descriptor.hpp>

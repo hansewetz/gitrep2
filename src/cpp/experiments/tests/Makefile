@@ -6,8 +6,8 @@ resources \
 time \
 thread \
 exceptions \
-occi \
 memory \
+occi \
 system-programming test-SFINAE test-atomic test-boost-log test-boost-regexp test-buffered-fd-channel \
 test-callable test-clucene test-const test-fd-stream test-for test-future test-index-list test-lambda test-lambda-recurse test-libssh-ftp \
 test-list-add-numbers test-numeric-limit test-packaged-task test-param-passing \
