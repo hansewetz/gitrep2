@@ -8,6 +8,9 @@ if [[ ${DEV_ENV} == 'WORK' ]]; then
   INSTALL_HOME=/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs		# basic sintall stuff
   INSTALL_EXTRA_HOME=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs	# extra packages
   INSTALL_TEST=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test	# experimental gcc compiler
+
+  # oracle stuff
+  export ORACLE_HOME=/ec/sw/oracle/client/product/11.2.0.2/
 else
   INSTALL_HOME=/home/hans/installs
   INSTALL_EXTRA_HOME=${INSTALL_HOME}
@@ -37,9 +40,6 @@ export OCCI_LIB=${INSTALL_HOME}/lib/occi
 
 # amend ld library path
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${PROJECT_ROOT}/lib/lib:${PROJECT_ROOT}/lib/test
-
-# oracle stuff
-export ORACLE_HOME=/ec/sw/oracle/client/product/11.2.0.2/
 
 # amend exe library path
 export PATH=${INSTALL_TEST}/bin:${INSTALL_EXTRA_HOME}/bin:${PATH}:${PROJECT_ROOT}/bin/bin:${PROJECT_ROOT}/bin/test

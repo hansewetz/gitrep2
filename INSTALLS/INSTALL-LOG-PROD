@@ -134,7 +134,11 @@ Tue Oct 15 08:13:41 CEST 2013
         #       ln -s libocci.so.11.1 libocci.so
         #       ln -s libclntsh.so.11.1 libclntsh.s
 
-	
+	# NOTICE: in home env I don't have ORACLE installed - all ORACLE libraries/libs are under ~/installs/lib/occi, ~/installs/include/occi
+	#	  they were install by downloading 
+			instantclient-sdk-linux.x64-11.2.0.4.0.zip (header files)
+			instantclient-basic-linux.x64-11.2.0.4.0.zip (oracle client libraries - should normally be under ORACLE_HOME)
+
 ------------------------
 
 Tue Oct 15 08:13:41 CEST 2013
