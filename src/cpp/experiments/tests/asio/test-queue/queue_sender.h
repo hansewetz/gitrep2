@@ -25,7 +25,7 @@ public:
   void async_enq(typename Queue::value_type val,Handler handler) {
     this->service.async_enq(this->implementation,q_,val,handler);
   }
-  // async wait operation
+  // wait until we can put a message in queue in async mode
   template <typename Handler>
   void async_wait(Handler handler) {
     this->service.async_wait(this->implementation,q_,handler);

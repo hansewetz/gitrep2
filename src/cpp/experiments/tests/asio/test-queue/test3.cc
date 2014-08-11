@@ -1,3 +1,17 @@
+/*
+This program tests the wait_enq() functionality on a queue_sender.
+Notice that ones a wait_enq() call has been made, there could be a posibility that no event triggers the handler callback.
+For example, if all messages have been dequeued before a the wait_enq() handler has been invoked, asio still has outstanding work.
+One way to break this is to issue a disable_enq() directly on the queue.
+
+The code is somehat complicated:
+	- insert 3 messages asynchtronously into a queue
+	- setup a timer for 5 seconds
+	- when all messages handler callback have been called, it sets up a wait_enq() handler
+	- when timer pops, it sets up a listener (deq() async handler
+	- when the last message (we count) in the deq() callback has been received, we issue a disable_enq on the queue
+*/
+
 #include "queue_listener.h"
 #include "queue_sender.h"
 #include <boost/asio.hpp>
@@ -12,36 +26,48 @@ using namespace std::placeholders;
 boost::asio::io_service ios;
 
 // asio stuff
-size_t maxmsg{3};
+int maxmsg{3};
 shared_ptr<boost::asio::simple_queue<string>>q{new boost::asio::simple_queue<string>(maxmsg)};
 boost::asio::simple_queue_listener<string>qlistener(::ios,q);
 boost::asio::simple_queue_sender<string>qsender(::ios,q);
-boost::asio::deadline_timer timer(::ios,boost::posix_time::milliseconds(5000));
+boost::asio::deadline_timer timer(::ios,boost::posix_time::milliseconds(1));
 
 // count #of outstanding messages
-size_t nmsg{0};
+int nmsg{0};
 
 // handler for queue listener
 void flisten(boost::system::error_code const&ec,string s){
-  BOOST_LOG_TRIVIAL(debug)<<"dequed message";
   // reload listener only if we have more messages
-  if(--nmsg>0)qlistener.async_deq(flisten);
+  // (if no more messages, we might still have a wait_enq outstanting)
+  if(ec){
+    BOOST_LOG_TRIVIAL(debug)<<"dequed message, ec: "<<ec;
+    return;
+  }
+  BOOST_LOG_TRIVIAL(debug)<<"dequed message";
+  if(--nmsg>0){
+    qlistener.async_deq(flisten);
+  }else{
+    BOOST_LOG_TRIVIAL(debug)<<"disabling enq";
+    q->disable_enq(true);
+    BOOST_LOG_TRIVIAL(debug)<<"disabling deq";
+    q->disable_deq(true);
+  }
 }
 // wait handler
 void fwait(boost::system::error_code const&ec){
-  BOOST_LOG_TRIVIAL(debug)<<"GOT WAIT MESSAGE";
-  // reload listener only if we have more messages
+  BOOST_LOG_TRIVIAL(debug)<<"GOT WAIT MESSAGE - ec: "<<ec;
   if(nmsg>0)qlistener.async_deq(flisten);
 }
+// timer handler
 void ftimer(boost::system::error_code const&ec){
-  BOOST_LOG_TRIVIAL(debug)<<"TICK - starting async read of 1 message ...";
+  BOOST_LOG_TRIVIAL(debug)<<"TICK - starting async read of 1 message ..., ec: "<<ec;
   if(nmsg>0)qlistener.async_deq(flisten);
 }
 // sender handler
 void fsender(boost::system::error_code const&ec){
   // if queue is full, then wait
   if(q->full()){
-    BOOST_LOG_TRIVIAL(debug)<<"starting async_wait() ...";
+    BOOST_LOG_TRIVIAL(debug)<<"starting async_wait() ..., ec: "<<ec;
     qsender.async_wait(fwait);
   }
 }
