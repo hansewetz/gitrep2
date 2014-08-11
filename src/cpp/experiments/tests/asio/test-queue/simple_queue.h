@@ -32,6 +32,14 @@ public:
     cond_.notify_all();
     return true;
   }
+  // wait until we can put a message in queue
+  bool wait_enq(){
+    std::unique_lock<std::mutex>lock(mtx_);
+    cond_.wait(lock,[&](){return !enq_enabled_||q_.size()<maxsize_;});
+    if(!enq_enabled_)return false;
+    cond_.notify_all();
+    return true;
+  }
   // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(){
     std::unique_lock<std::mutex>lock(mtx_);
@@ -69,6 +77,11 @@ public:
   bool empty()const{
     std::unique_lock<std::mutex>lock(mtx_);
     return q_.empty();
+  }
+  // check if queue is full
+  bool full()const{
+    std::unique_lock<std::mutex>lock(mtx_);
+    return q_.size()>=maxsize_;
   }
   // get #of items in queue
   std::size_t size()const{
