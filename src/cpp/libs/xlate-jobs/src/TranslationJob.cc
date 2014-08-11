@@ -63,7 +63,7 @@ shared_ptr<TranslationTask>TranslationJob::getNextTask(){
   // track sements which are in the process of translation
   TranslationTaskId id{ret->id()};
   if(inTranslation_.find(id)!=inTranslation_.end()){
-    THROW_RUNTIME("attempt to insert segmementg in map of segments waiting for translation when segent already exist, id: "<<id);
+    THROW_RUNTIME("attempt to retrieve translation task already in translation, id: "<<id);
   }
   inTranslation_[id]=ret;
 
@@ -78,7 +78,7 @@ void TranslationJob::addTranslatedTask(std::shared_ptr<TranslationTask>task){
   TranslationTaskId id{task->id()};
   decltype(inTranslation_)::const_iterator it{inTranslation_.find(id)};
   if(it==inTranslation_.end()){
-    THROW_RUNTIME("attempt to insert translated segment in map of segments waiting for translation when segent already does not exists, id: "<<id);
+    THROW_RUNTIME("attempt to insert translated task when task is not waiting to be translated, id: "<<id);
   }
   // remove task from tasks waiting for translation
   inTranslation_.erase(id);
