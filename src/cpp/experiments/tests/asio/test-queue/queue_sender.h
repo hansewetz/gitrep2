@@ -27,8 +27,8 @@ public:
   }
   // wait until we can put a message in queue in async mode
   template <typename Handler>
-  void async_wait(Handler handler) {
-    this->service.async_wait(this->implementation,q_,handler);
+  void async_wait_enq(Handler handler) {
+    this->service.async_wait_enq(this->implementation,q_,handler);
   }
 private:
   std::shared_ptr<Queue>q_;
@@ -71,9 +71,9 @@ public:
   }
   // async sync wait operation
   template <typename Handler,typename Queue>
-  void async_wait(implementation_type&impl,std::shared_ptr<Queue>q,Handler handler){
+  void async_wait_enq(implementation_type&impl,std::shared_ptr<Queue>q,Handler handler){
     // this is a non-blocking operation so we are OK calling impl object in this thread
-    impl->async_wait(impl,q,handler);
+    impl->async_wait_enq(impl,q,handler);
   }
 private:
   // shutdown service (required)
@@ -107,8 +107,8 @@ public:
   }
   // wait to enq message (post request to thread)
   template<typename Handler,typename Queue>
-  void async_wait(std::shared_ptr<queue_sender_impl>impl,std::shared_ptr<Queue>tq,Handler handler){
-    impl_io_service_.post(wait_operation<Handler,Queue>(impl,post_io_service_,tq,handler));
+  void async_wait_enq(std::shared_ptr<queue_sender_impl>impl,std::shared_ptr<Queue>tq,Handler handler){
+    impl_io_service_.post(wait_enq_operation<Handler,Queue>(impl,post_io_service_,tq,handler));
   }
 private:
   // function object calling blocking enq() on queue
@@ -143,10 +143,10 @@ private:
   };
   // function object calling blocking wait() on queue
   template <typename Handler,typename Queue>
-  class wait_operation{
+  class wait_enq_operation{
   public:
     // ctor
-    wait_operation(std::shared_ptr<queue_sender_impl>impl,boost::asio::io_service &io_service,std::shared_ptr<Queue>tq,Handler handler):
+    wait_enq_operation(std::shared_ptr<queue_sender_impl>impl,boost::asio::io_service &io_service,std::shared_ptr<Queue>tq,Handler handler):
         wimpl_(impl),io_service_(io_service),work_(io_service),tq_(tq),handler_(handler) {
     }
     // function calling implementation object - runs in the thread created in ctor

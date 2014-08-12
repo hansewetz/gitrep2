@@ -67,8 +67,8 @@ void ftimer(boost::system::error_code const&ec){
 void fsender(boost::system::error_code const&ec){
   // if queue is full, then wait
   if(q->full()){
-    BOOST_LOG_TRIVIAL(debug)<<"starting async_wait() ..., ec: "<<ec;
-    qsender.async_wait(fwait);
+    BOOST_LOG_TRIVIAL(debug)<<"starting async_wait_enq() ..., ec: "<<ec;
+    qsender.async_wait_enq(fwait);
   }
 }
 // test program
