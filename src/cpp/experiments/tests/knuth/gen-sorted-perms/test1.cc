@@ -1,5 +1,6 @@
 // Knuth: Alg. L, section 7.2.1.2, Volume 4A
 // generate all permutations from a sorted list - do not generate duplicate permutation objects
+// (slighly simplified compare dto dscription in Knuth)
 
 #include <iostream>
 #include <string>
@@ -23,22 +24,19 @@ void gen_perm(vector<int>&v){
     // visit perm object
     print_perm(v);
 
-    // find j ('j' specifies where v[j+1] should be spliced in)
-    // (find largest j such that v[j] < v[j+1])
+    // find larjest j such that v[j] < v[j+1]
     int j=n-1;
-    if(v[j]>=v[j+1]){
-      --j;
-      while(v[j]>=v[j+1]){
-        if(--j==0)return;
-      }
+    while(v[j]>=v[j+1]){
+      if(--j==0)return;
     }
+    // find largest l greater than j such that v[j] < v[l]
     int l=n;
-    if(v[j]>=v[l]){
-      --l;
-      while(v[j]>=v[l])--l;
-    }
+    while(v[j]>=v[l])--l;
+
+    // swap values
     swap(v[j],v[l]);
   
+    // reverse the sequence from v[j+1] ...v[n]
     int k=j+1;
     l=n;
     while(k<l){
@@ -48,7 +46,6 @@ void gen_perm(vector<int>&v){
     }
   }
 }
-
 int main(){
   vector<int>v{0,1,2,2,3};
   gen_perm(v);
