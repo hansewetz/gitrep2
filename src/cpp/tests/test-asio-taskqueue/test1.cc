@@ -1,18 +1,35 @@
 #include "asio-extensions/queue_listener.h"
 #include "asio-extensions/queue_sender.h"
 #include "asio-extensions/simple_queue.h"
+
 #include "xlate-jobs/TaskQueue.h"
+#include "xlate-jobs/TranslateRequest.h"
+#include "xlate-jobs/TranslationJobRepository.h"
+#include "xlate-jobs/TranslationJob.h"
 #include "xlate-jobs/TranslationTask.h"
+
 #include <boost/asio.hpp> 
 #include <boost/log/trivial.hpp>
 #include <iostream>
 #include <string>
 #include <ratio>
 #include <memory>
+#include <vector>
+
 using namespace std;
 using namespace std::placeholders;
 using namespace xlate;
 
+// --------------- setup some test data
+// translate request
+vector<string>segs1{"Hello World","Goodbuy World","Last message"};
+LanguagePair lanp1{make_lanpair("en","sv")};
+std::shared_ptr<TranslateRequest>req1{std::make_shared<TranslateRequest>(lanp1,segs1)};
+std::shared_ptr<TranslationJob>job1{std::make_shared<TranslationJob>(req1)};
+std::shared_ptr<TranslationJobRepository>jobrep1{make_shared<TranslationJobRepository>(lanp1)};
+
+
+// --------------- setup asio stuff
 // asio io_sevice
 boost::asio::io_service ios;
 
@@ -25,15 +42,19 @@ boost::asio::simple_queue_listener<std::shared_ptr<TranslationTask>>qreq_listene
 // handler for receiving requests
 void req_receive(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task){
   if(ec)BOOST_LOG_TRIVIAL(debug)<<"got error: "<<ec;
-  else BOOST_LOG_TRIVIAL(debug)<<"got task: "<<*task;
+  else{
+    BOOST_LOG_TRIVIAL(debug)<<"got task: "<<*task;
+    qreq_listener.async_deq(req_receive);
+  }
 }
 // main test program
 int main(){
   try{
-    // test sending a message to queue (handler function won't do anything)
-    std::shared_ptr<TranslationTask>task{make_shared<TranslationTask>(TranslationJobId(),make_lanpair("en","sv"),"Hello world",1)};
-    qreq_sender.async_enq(task,[](boost::system::error_code const&ec){});
-
+    // test sending message
+    std::shared_ptr<TranslationTask>task;
+    while(task=job1->getNextTask()){
+      qreq_sender.async_enq(task,[](boost::system::error_code const&ec){});
+    }
     // test receiving a message
     qreq_listener.async_deq(req_receive);
 
