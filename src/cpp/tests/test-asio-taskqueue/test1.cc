@@ -7,9 +7,11 @@
 #include "xlate-jobs/TranslationJobRepository.h"
 #include "xlate-jobs/TranslationJob.h"
 #include "xlate-jobs/TranslationTask.h"
+#include "xlate-jobs/TaskScheduler.h"
 
 #include <boost/asio.hpp> 
 #include <boost/log/trivial.hpp>
+
 #include <iostream>
 #include <string>
 #include <ratio>
@@ -37,7 +39,7 @@ boost::asio::io_service ios;
 // --------------- setup request queue stuff
 size_t max_outstanding_req{30};
 std::shared_ptr<TaskQueue>qreq{make_shared<TaskQueue>(max_outstanding_req)};
-boost::asio::simple_queue_sender<std::shared_ptr<TranslationTask>>qreq_sender(::ios,qreq);
+//boost::asio::simple_queue_sender<std::shared_ptr<TranslationTask>>qreq_sender(::ios,qreq);
 boost::asio::simple_queue_listener<std::shared_ptr<TranslationTask>>qreq_listener(::ios,qreq);
 
 //  -------------- handler for receiving requests
@@ -54,7 +56,11 @@ int main(){
     // get a populated job repository
     std::shared_ptr<TranslationJobRepository>jobrep1{getJobRepos()};
 
+    // setup a scheduler
+    TaskScheduler scheduler(::ios,jobrep1,qreq);
+
     // get next job from repository and send translation tasks 
+/*
     std::shared_ptr<TranslationJob>job{jobrep1->getNextJob()};
     std::shared_ptr<TranslationTask>task;
     while(task=job->getNextTask()){
@@ -62,7 +68,7 @@ int main(){
     }
     // test receiving a message
     qreq_listener.async_deq(req_receive);
-
+*/
     // run io loop
     ::ios.run();
   }
