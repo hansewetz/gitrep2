@@ -26,7 +26,7 @@ public:
 
   // repository update functions
   void addJob(std::shared_ptr<TranslationJob>);
-  std::shared_ptr<TranslationJob>getNewJob();
+  std::shared_ptr<TranslationJob>getNextJob();
   std::shared_ptr<TranslationJob>getStartedJob(TranslationJobId const&);
   std::shared_ptr<TranslationJob>removeStartedJob(TranslationJobId const&);
 

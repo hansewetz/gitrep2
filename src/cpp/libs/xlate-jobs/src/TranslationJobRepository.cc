@@ -25,7 +25,7 @@ void TranslationJobRepository::addJob(shared_ptr<TranslationJob>job){
   cond_.notify_all();
 }
 // get job for processing
-shared_ptr<TranslationJob>TranslationJobRepository::getNewJob(){
+shared_ptr<TranslationJob>TranslationJobRepository::getNextJob(){
   // block until we have a job
   unique_lock<mutex>lock(mtx_);
   cond_.wait(lock,[&](){return !newJobs_.empty();});
