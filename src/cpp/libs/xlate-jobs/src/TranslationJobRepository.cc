@@ -18,6 +18,17 @@ TranslationJobRepository::TranslationJobRepository(boost::asio::io_service&ios,s
   waitForUnblock();
   waitForNewJob();
 }
+// wait for scheduler queue to unblock
+void TranslationJobRepository::waitForUnblock(){
+  BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::waitForUnblock - enabling unblock events";
+  waiting4unblock_=true;
+  qschedSender_->async_wait_enq(std::bind(&TranslationJobRepository::waitUnblockHandler,this,_1));
+}
+// wait for new job
+void TranslationJobRepository::waitForNewJob(){
+  BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::waitForNewJob - enabling job events";
+  qnewListener_->async_deq(std::bind(&TranslationJobRepository::newJobHandler,this,_1,_2));
+}
 // handler for waiting for scheduler queue to be unblocked
 // (only place from which we send jobs to scheduler)
 void TranslationJobRepository::waitUnblockHandler(boost::system::error_code const&ec){
@@ -52,16 +63,5 @@ void TranslationJobRepository::newJobHandler(boost::system::error_code const&ec,
 
   // check if we should wait for unblock event from scheduler queue
   if(!waiting4unblock_)waitForUnblock();
-}
-// wait for scheduler queue to unblock
-void TranslationJobRepository::waitForUnblock(){
-  BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::waitForUnblock - enabling unblock events";
-  waiting4unblock_=true;
-  qschedSender_->async_wait_enq(std::bind(&TranslationJobRepository::waitUnblockHandler,this,_1));
-}
-// wait for new job
-void TranslationJobRepository::waitForNewJob(){
-  BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::waitForNewJob - enabling job events";
-  qnewListener_->async_deq(std::bind(&TranslationJobRepository::newJobHandler,this,_1,_2));
 }
 }
