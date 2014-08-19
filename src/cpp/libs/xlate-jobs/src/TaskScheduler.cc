@@ -13,9 +13,6 @@ namespace xlate{
 // ctor
 TaskScheduler::TaskScheduler(boost::asio::io_service&ios,shared_ptr<TranslationJobRepository>jobrep,std::shared_ptr<TaskQueue>q):
     ios_(ios),jobrep_(jobrep),q_(q),qsender_(ios,q){
-
-  // do an async wait until we can send on queue
-  qsender_.async_wait_enq(std::bind(&TaskScheduler::waitSend,this,_1));
 }
 // handler for OK to send on queue
 void TaskScheduler::waitSend(boost::system::error_code const&ec){

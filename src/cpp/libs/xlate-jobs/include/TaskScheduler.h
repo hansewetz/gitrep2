@@ -1,7 +1,6 @@
 #ifndef __TASK_SCHEDULER_H__
 #define __TASK_SCHEDULER_H__
 #include "xlate-jobs/TaskQueue.h"
-#include "asio-extensions/queue_sender.h"
 #include <iosfwd>
 #include <memory>
 #include <boost/asio.hpp>
