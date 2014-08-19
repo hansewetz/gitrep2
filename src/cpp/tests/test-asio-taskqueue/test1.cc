@@ -38,7 +38,13 @@ std::shared_ptr<TranslationJob>getNextJob(){
   // create job from request
   return std::make_shared<TranslationJob>(req);
 }
-// main test program
+// --------------- listen on task queue
+std::shared_ptr<TaskQueueListener>qtaskListener;
+void taskqHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task){
+  BOOST_LOG_TRIVIAL(debug)<<"got task: "<<*task;
+  qtaskListener->async_deq(taskqHandler);
+}
+//  -------------- main test program
 int main(){
   try{
     // create job repository and scheduler
@@ -49,6 +55,10 @@ int main(){
     std::shared_ptr<TranslationJob>job{getNextJob()};
     std::shared_ptr<JobQueueSender>qnewjobSender{make_shared<JobQueueSender>(::ios,qnewJob)};
     qnewjobSender->async_enq(job,[](boost::system::error_code const&ec){});
+
+    // listen on task queue
+    qtaskListener=make_shared<TaskQueueListener>(::ios,qschedTask);
+    qtaskListener->async_deq(taskqHandler);
 
     // run io loop
     ::ios.run();
