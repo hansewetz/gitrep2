@@ -30,4 +30,4 @@ TODO:
 	- scheduler should process all jobs simultaneously which it has received. I.e., the job-paralism in the scheduler shiould be controlled through it's input queue
 	- add synchrounous enq in asio queue_sender (we could use it instead of sending asyncrounously)
 	- handle error conditions from asio - right now they are not handled at all
-	- implement clean shutdown of system (must handle iasio interupt on which we should not re-charge queue operations)
+	- we are starting engines in TranslationCt ctor - should start in run() method
