@@ -1,10 +1,7 @@
 #include "xlate-jobs/TranslationCt.h"
-
 #include "xlate-jobs/JobQueue.h"
 #include "xlate-jobs/TranslateRequest.h"
 #include "xlate-jobs/TranslationJob.h"
-
-
 #include "utils/logUtils.h"
 
 #include <boost/asio.hpp> 
@@ -12,7 +9,6 @@
 
 #include <iostream>
 #include <string>
-#include <ratio>
 #include <memory>
 #include <vector>
 #include <thread>
@@ -38,12 +34,11 @@ int main(){
   // set log level (do not log debug messages)
   utils::initBoostFileLogging(false);
   try{
-    // ----------------- setup translation component
+    // setup translation component and run it
     TranslationCt tct{::ios,3,10};
     tct.run();
 
-    // ----------------- setup test
-    // test: create job and send it on new job queue
+    // create test jobs and send them on new job queue
     std::shared_ptr<JobQueue>qnewJob{tct.getNewJobQueue()};
     std::shared_ptr<JobQueueSender>qnewjobSender{make_shared<JobQueueSender>(::ios,qnewJob)};
     size_t njobs{50};
@@ -51,7 +46,7 @@ int main(){
       std::shared_ptr<TranslationJob>job{getNextJob()};
       qnewjobSender->async_enq(job,[](boost::system::error_code const&ec){});
     }
-    // ----------------- run test
+    // run test
     ::ios.run();
   }
   catch(exception const&e){
