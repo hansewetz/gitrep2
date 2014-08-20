@@ -26,6 +26,9 @@ private:
   std::shared_ptr<TaskQueue>qin_;
   std::shared_ptr<TaskQueue>qout_;
   DummyEngineId id_;
+
+  // transate a task
+  void translate(std::shared_ptr<TranslationTask>)const;
 };
 }
 #endif
