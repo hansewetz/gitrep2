@@ -1,3 +1,8 @@
+/*
+TODO:	the scheduling policy should be made more flexible.
+	currently we complete one job before pulling in another job (when no more tasks are available we pull another job)
+	we could process multiple jobs simultaneously in a round robin fashon and keep a maximum number of jobs being process at the same time for example
+*/
 #include "xlate-jobs/TaskScheduler.h"
 #include "xlate-jobs/TranslationJob.h"
 #include "xlate-jobs/TranslationTask.h"

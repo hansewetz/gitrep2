@@ -13,10 +13,10 @@ namespace xlate{
 DummyEngine::DummyEngine(std::shared_ptr<TaskQueue>qin,std::shared_ptr<TaskQueue>qout):
     qin_(qin),qout_(qout){
 }
-// enable wait for new task
+// wait for new task synchronously
 void DummyEngine::run(){
   while(true){
-    BOOST_LOG_TRIVIAL(debug)<<"DummyEngine::waitForNewTask - enabling receiving task";
+    BOOST_LOG_TRIVIAL(debug)<<"DummyEngine::waitForNewTask - sync waiting for new task";
     pair<bool,std::shared_ptr<TranslationTask>>p{qin_->deq()};
     if(p.first==false){
       BOOST_LOG_TRIVIAL(debug)<<"DummyEngine::waitForNewTask (id:"<<id_<<") - received interuption: terminating";

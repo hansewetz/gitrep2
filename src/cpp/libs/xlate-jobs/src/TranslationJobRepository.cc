@@ -1,5 +1,6 @@
 #include "xlate-jobs/TranslationJobRepository.h"
 #include "xlate-jobs/TranslationJob.h"
+#include "xlate-jobs/TranslationTask.h"
 #include "xlate-jobs/LanguageCode.h"
 #include "utils/utility.h"
 #include <boost/log/trivial.hpp>
@@ -10,13 +11,16 @@ using namespace std::placeholders;
 namespace xlate{
 
 // ctor (setup queue listeners and queue senders)
-TranslationJobRepository::TranslationJobRepository(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qnew,std::shared_ptr<JobQueue>qsched,LanguagePair const&lp):
-    ios_(ios),qnewListener_{make_shared<JobQueueListener>(ios_,qnew)},qschedSender_{make_shared<JobQueueSender>(ios_,qsched)},
+TranslationJobRepository::TranslationJobRepository(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qnew,
+                                                   std::shared_ptr<JobQueue>qsched,std::shared_ptr<TaskQueue>qtask,LanguagePair const&lp):
+    ios_(ios),qnewListener_{make_shared<JobQueueListener>(ios_,qnew)},
+    qschedSender_{make_shared<JobQueueSender>(ios_,qsched)},qtaskListener_{make_shared<TaskQueueListener>(ios_,qtask)},
     lp_(lp),waiting4unblock_(true){
 
   // enable events
   waitForUnblock();
   waitForNewJob();
+  waitForTranslatedTask();
 }
 // wait for scheduler queue to unblock
 void TranslationJobRepository::waitForUnblock(){
@@ -28,6 +32,11 @@ void TranslationJobRepository::waitForUnblock(){
 void TranslationJobRepository::waitForNewJob(){
   BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::waitForNewJob - enabling job events";
   qnewListener_->async_deq(std::bind(&TranslationJobRepository::newJobHandler,this,_1,_2));
+}
+// wait for translated task
+void TranslationJobRepository::waitForTranslatedTask(){
+  BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::waitForTranslatedTask - enabling job events";
+  qtaskListener_->async_deq(std::bind(&TranslationJobRepository::translatedTaskHandler,this,_1,_2));
 }
 // handler for waiting for scheduler queue to be unblocked
 // (only place from which we send jobs to scheduler)
@@ -63,5 +72,28 @@ void TranslationJobRepository::newJobHandler(boost::system::error_code const&ec,
 
   // check if we should wait for unblock event from scheduler queue
   if(!waiting4unblock_)waitForUnblock();
+}
+// handle received translated task 
+void TranslationJobRepository::translatedTaskHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task){
+  BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::translatedTaskHandler - got task event: "<<*task;
+
+  // lookup job for task in schedJobs_
+  TranslationJobId jobid{task->jobid()};
+  auto it=schedJobs_.find(jobid);
+  std::shared_ptr<TranslationJob>job{it->second};
+  if(it==schedJobs_.end()){
+    BOOST_LOG_TRIVIAL(warning)<<"TranslationJobRepository::translatedTaskHandler: failed looking up job for translated task: "<<*task;
+  }else{
+    // add translated task to job and check if job is done
+    job->addTranslatedTask(task);
+    if(job->done()){
+      BOOST_LOG_TRIVIAL(info)<<"TranslationJobRepository::translatedTaskHandler - job with id: "<<job->id()<<" is done";
+
+      // NOTE! Not yet done
+      // ...
+    }
+  }
+  // continue and wait for translated tasks
+  waitForTranslatedTask();
 }
 }
