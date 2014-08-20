@@ -50,6 +50,9 @@ private:
   void waitUnblockHandler(boost::system::error_code const&ec);
   void newJobHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationJob>job);
   void translatedTaskHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task);
+
+  // some stats
+  std::size_t ndone_{0};
 };
 }
 #endif
