@@ -32,15 +32,13 @@ std::shared_ptr<JobQueue>qschedJob{make_shared<JobQueue>(1)};
 std::shared_ptr<TaskQueue>qschedTask{make_shared<TaskQueue>(3)};
 std::shared_ptr<TaskQueue>qtransTasks{make_shared<TaskQueue>(1000)};
 
-// language pair we are testing
-LanguagePair lanp{make_lanpair("en","sv")};
-
 // some constants
 constexpr size_t maxengines{10};
 
 // --------------- create a job
 std::shared_ptr<TranslationJob>getNextJob(){
   // create job request
+LanguagePair lanp{make_lanpair("en","sv")};
   vector<string>segs{"Hello World","Goodby World","Last message","24 hours", "many movies"};
   std::shared_ptr<TranslateRequest>req{std::make_shared<TranslateRequest>(lanp,segs)};
 
@@ -53,11 +51,13 @@ int main(){
   utils::initBoostFileLogging(false);
   try{
     // ----------------- create structure 
-    // create job repository, scheduler
-    std::shared_ptr<TranslationJobRepository>jobrep{make_shared<TranslationJobRepository>(::ios,qnewJob,qschedJob,qtransTasks,lanp)};
-    std::shared_ptr<TaskScheduler>schedule{make_shared<TaskScheduler>(::ios,qschedJob,qschedTask)};
+    // create job repository, scheduler and start them
+    std::shared_ptr<TranslationJobRepository>jobrep{make_shared<TranslationJobRepository>(::ios,qnewJob,qschedJob,qtransTasks)};
+    std::shared_ptr<TaskScheduler>scheduler{make_shared<TaskScheduler>(::ios,qschedJob,qschedTask)};
+    jobrep->run();
+    scheduler->run();
 
-    // create engines and starte running each engine in a separate thread
+    // create engines and start running each engine in a separate thread
     vector<std::thread>thr_engines;
     vector<std::shared_ptr<DummyEngine>>engines;
     for(int i=0;i<maxengines;++i){
@@ -69,7 +69,7 @@ int main(){
     // ----------------- setup test
     // test: create job and send it on new job queue
     std::shared_ptr<JobQueueSender>qnewjobSender{make_shared<JobQueueSender>(::ios,qnewJob)};
-    for(int i=0;i<100;++i){
+    for(int i=0;i<2;++i){
       std::shared_ptr<TranslationJob>job{getNextJob()};
       qnewjobSender->async_enq(job,[](boost::system::error_code const&ec){});
     }

@@ -15,8 +15,9 @@ namespace xlate{
 // ctor
 TaskScheduler::TaskScheduler(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qjob,std::shared_ptr<TaskQueue>qtask):
     ios_(ios),qjobListener_(make_shared<JobQueueListener>(ios,qjob)),qtaskSender_(make_shared<TaskQueueSender>(ios,qtask)),waiting4unblock_(true){
-
-  // enable events
+}
+// start listening on events
+void TaskScheduler::run(){
   waitForUnblock();
   waitForNewJob();
 }

@@ -1,6 +1,5 @@
 #ifndef __TRANSLATION_JOB_REPOSITORY_H__
 #define __TRANSLATION_JOB_REPOSITORY_H__
-#include "xlate-jobs/LanguageCode.h"
 #include "xlate-jobs/Identifiers.h"
 #include "xlate-jobs/JobQueue.h"
 #include "xlate-jobs/TaskQueue.h"
@@ -19,12 +18,15 @@ class TranslationTask;
 class TranslationJobRepository{
 public:
   // ctors, dtor
-  TranslationJobRepository(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qnew,std::shared_ptr<JobQueue>qsched,std::shared_ptr<TaskQueue>qtask,LanguagePair const&lp);
+  TranslationJobRepository(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qnew,std::shared_ptr<JobQueue>qsched,std::shared_ptr<TaskQueue>qtask);
   TranslationJobRepository(TranslationJobRepository const&)=delete;
   TranslationJobRepository(TranslationJobRepository&&)=default;
   TranslationJobRepository&operator=(TranslationJobRepository const&)=delete;
   TranslationJobRepository&operator=(TranslationJobRepository&&)=default;
   ~TranslationJobRepository()=default;
+
+  // start listening on events
+  void run();
 private:
   // asio objects
   boost::asio::io_service&ios_;
@@ -35,9 +37,6 @@ private:
   // list of new jobs and map of jobs in progress
   std::list<std::shared_ptr<TranslationJob>>newJobs_;
   std::map<TranslationJobId,std::shared_ptr<TranslationJob>>schedJobs_;
-
-  // language pair for repository
-  LanguagePair lp_;
 
   // track if scheduler queue is blocked
   bool waiting4unblock_;

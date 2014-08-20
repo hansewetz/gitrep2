@@ -10,6 +10,11 @@ use boost::asio queues (see my WIKI) to funnel information as follows:
 	- an engine translates a task, updates the task and sends it to the translated queue (non-asio)
 	- the job repository listens on translated tasks and updates the correpsonding job
 
+Potential changes:
+------------------
+	- DONE: all components starts in their constructors - maybe we should have explicit run functions
+	- all components should have an explicit stop() method
+
 Notes:
 ------
 	- all flows are asio driven except for the engines. The engines must run in separate threads so not to block the asio event loop
@@ -23,4 +28,6 @@ TODO:
 	- add a TranslationCt which manages all the aspects of job repository, scheduler and engines
 	- add controll to the components so we can set various parameters
 	- scheduler should process all jobs simultaneously which it has received. I.e., the job-paralism in the scheduler shiould be controlled through it's input queue
-
+	- add synchrounous enq in asio queue_sender (we could use it instead of sending asyncrounously)
+	- handle error conditions from asio - right now they are not handled at all
+	- implement clean shutdown of system (must handle iasio interupt on which we should not re-charge queue operations)

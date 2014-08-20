@@ -20,6 +20,8 @@ public:
   TaskScheduler&operator=(TaskScheduler&&)=default;
   ~TaskScheduler()=default;
 
+  // start listening on events
+  void run();
 private:
   // asio stuff
   boost::asio::io_service&ios_;

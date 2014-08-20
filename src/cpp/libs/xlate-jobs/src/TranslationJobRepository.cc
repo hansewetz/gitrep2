@@ -1,7 +1,6 @@
 #include "xlate-jobs/TranslationJobRepository.h"
 #include "xlate-jobs/TranslationJob.h"
 #include "xlate-jobs/TranslationTask.h"
-#include "xlate-jobs/LanguageCode.h"
 #include "utils/utility.h"
 #include <boost/log/trivial.hpp>
 #include <iostream>
@@ -12,12 +11,13 @@ namespace xlate{
 
 // ctor (setup queue listeners and queue senders)
 TranslationJobRepository::TranslationJobRepository(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qnew,
-                                                   std::shared_ptr<JobQueue>qsched,std::shared_ptr<TaskQueue>qtask,LanguagePair const&lp):
+                                                   std::shared_ptr<JobQueue>qsched,std::shared_ptr<TaskQueue>qtask):
     ios_(ios),qnewListener_{make_shared<JobQueueListener>(ios_,qnew)},
     qschedSender_{make_shared<JobQueueSender>(ios_,qsched)},qtaskListener_{make_shared<TaskQueueListener>(ios_,qtask)},
-    lp_(lp),waiting4unblock_(true){
-
-  // enable events
+    waiting4unblock_(true){
+}
+// start listening on events
+void TranslationJobRepository::run(){
   waitForUnblock();
   waitForNewJob();
   waitForTranslatedTask();
