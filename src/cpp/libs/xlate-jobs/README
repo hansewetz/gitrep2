@@ -1,0 +1,26 @@
+Idea:
+-----
+
+use boost::asio queues (see my WIKI) to funnel information as follows:
+	- send job to JobRepository (asio)
+	- JobRepository sends job to scheduler when scheduler queue is not blocked (queue has a max #of entries) (asio)
+	- scheduler receives a job (asio)
+	- scheduler sends as many tasks (taken from the job) as possible as long as the queue to the engine is not blocked (asio)
+	- a number of engines running in separate threads listens on the queue from the scheduler (non-asio)
+	- an engine translates a task, updates the task and sends it to the translated queue (non-asio)
+	- the job repository listens on translated tasks and updates the correpsonding job
+
+Notes:
+------
+	- all flows are asio driven except for the engines. The engines must run in separate threads so not to block the asio event loop
+	- it is possible to controll #of jobs processed at the same time by setting max queue value on the scheduler queue
+	- currently the scheduler has a simple policy: process onoy one job at a time even if it holds multiple jobs. This could be changed to
+	  process - say 10 jobs- simultaneously taking tasks form the jobs in a round robin fashon
+	- the scheduler acts as a 'fosset' taking chings of segments in and spreading splitting them after which they are sent to engines
+
+TODO:
+-----
+	- add a TranslationCt which manages all the aspects of job repository, scheduler and engines
+	- add controll to the components so we can set various parameters
+	- scheduler should process all jobs simultaneously which it has received. I.e., the job-paralism in the scheduler shiould be controlled through it's input queue
+
