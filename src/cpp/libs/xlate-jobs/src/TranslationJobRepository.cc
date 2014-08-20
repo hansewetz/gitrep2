@@ -52,7 +52,7 @@ void TranslationJobRepository::waitUnblockHandler(boost::system::error_code cons
     std::shared_ptr<TranslationJob>job{newJobs_.front()};
     newJobs_.pop_front();
     BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::waitUnblockHandler - enq into scheduler queue";
-    qschedSender_->async_enq(job,[](boost::system::error_code const&ec){}); // NOTE! Should be a synchronous send
+    qschedSender_->sync_enq(job);
 
     // insert job into scheduled jobs
     schedJobs_.insert(make_pair(job->id(),job));

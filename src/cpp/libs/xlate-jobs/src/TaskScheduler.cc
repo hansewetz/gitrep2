@@ -44,7 +44,7 @@ void TaskScheduler::waitUnblockHandler(boost::system::error_code const&ec){
   std::shared_ptr<TranslationTask>task{nextTask()};
   if(task){
     BOOST_LOG_TRIVIAL(debug)<<"TaskScheduler::waitUnblockHandler - enq into task queue";
-    qtaskSender_->async_enq(task,[](boost::system::error_code const&ec){}); // NOTE! Should be a synchronous send
+    qtaskSender_->sync_enq(task);
   }
   // if we have a next task, then wait for task queue to unblock
   if(hasNextTask())waitForUnblock();
