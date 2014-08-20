@@ -7,28 +7,28 @@ using namespace std::placeholders;
 namespace xlate{
 
 // ctor
-DummyEngine::DummyEngine(boost::asio::io_service&ios,std::shared_ptr<TaskQueue>qin,std::shared_ptr<TaskQueue>qout):
-    ios_(ios),qlistener_{make_shared<TaskQueueListener>(ios,qin)},qsender_{make_shared<TaskQueueSender>(ios,qout)}{
-
-  // start listening on events
-  waitForNewTask();
+DummyEngine::DummyEngine(std::shared_ptr<TaskQueue>qin,std::shared_ptr<TaskQueue>qout):
+    qin_(qin),qout_(qout){
 }
 // enable wait for new task
-void DummyEngine::waitForNewTask(){
-  BOOST_LOG_TRIVIAL(debug)<<"DummyEngine::waitForNewTask - enabling receiving task";
-  qlistener_->async_deq(std::bind(&DummyEngine::taskHandler,this,_1,_2));
+void DummyEngine::run(){
+  while(true){
+    BOOST_LOG_TRIVIAL(debug)<<"DummyEngine::waitForNewTask - enabling receiving task";
+    pair<bool,std::shared_ptr<TranslationTask>>p{qin_->deq()};
+    if(p.first==false){
+      BOOST_LOG_TRIVIAL(debug)<<"DummyEngine::waitForNewTask (id:"<<id_<<") - received interuption: terminating";
+      break;
+    }
+    // get task and process it
+    std::shared_ptr<TranslationTask>task{p.second};
+    task->setTargetSeg(task->srcSeg()+" [engine id: "+id_.asString()+"]");    // NOTE! Should translate here
+
+    // send task to output queue
+    qout_->enq(task);
+  }
 }
-// handle a received task
-void DummyEngine::taskHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task){
-  BOOST_LOG_TRIVIAL(debug)<<"DummyEngine::taskHandler - received task: "<<*task;
-
-  // NOTE! Should do some processing here
-  task->setTargetSeg(task->srcSeg()+" - xlate");
-
-  // send translated segment
-  qsender_->async_enq(task,[](boost::system::error_code const&ec){}); // NOTE! Should be a synchronous send
-
-  // wait for next task
-  waitForNewTask();
+// get engine id
+DummyEngineId DummyEngine::id()const{
+  return id_;
 }
 }

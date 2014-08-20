@@ -2,7 +2,6 @@
 #define __DUMMY_ENGINE_H__
 #include "xlate-jobs/TaskQueue.h"
 #include <memory>
-#include <boost/asio.hpp>
 namespace xlate{
 
 // forward decl.
@@ -11,22 +10,22 @@ class TranslationTask;
 // class scheduling tasks taken from a job repository
 class DummyEngine{
 public:
-  DummyEngine(boost::asio::io_service&ios,std::shared_ptr<TaskQueue>qin,std::shared_ptr<TaskQueue>qout);
+  DummyEngine(std::shared_ptr<TaskQueue>qin,std::shared_ptr<TaskQueue>qout);
   DummyEngine(DummyEngine const&)=delete;
   DummyEngine(DummyEngine&&)=default;
   DummyEngine&operator=(DummyEngine const&)=delete;
   DummyEngine&operator=(DummyEngine&&)=default;
   ~DummyEngine()=default;
 
-private:
-  // asio stuff
-  boost::asio::io_service&ios_;
-  std::shared_ptr<TaskQueueListener>qlistener_;
-  std::shared_ptr<TaskQueueSender>qsender_;
+  // run engine
+  void run();
 
-  // helper functions
-  void waitForNewTask();
-  void taskHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task);
+  // getters
+  DummyEngineId id()const;
+private:
+  std::shared_ptr<TaskQueue>qin_;
+  std::shared_ptr<TaskQueue>qout_;
+  DummyEngineId id_;
 };
 }
 #endif
