@@ -23,13 +23,13 @@ using namespace xlate;
 //  -------------- main test program
 int main(){
   // setup asio stuff
-  boost::asio::io_service ioservice;
+  boost::asio::io_service io_service;
 
   // set log level (do not log debug messages)
   utils::initBoostFileLogging(false);
   try{
     // run translation component
-    TranslationCt tct{ioservice,1,1};
+    TranslationCt tct{io_service,1,1};
     tct.run();
 
     // create a request from a file and then a job
@@ -40,11 +40,11 @@ int main(){
 
     // send job to translation
     std::shared_ptr<JobQueue>qjob{tct.getNewJobQueue()};
-    std::shared_ptr<JobQueueSender>qsender{make_shared<JobQueueSender>(ioservice,qjob)};
+    std::shared_ptr<JobQueueSender>qsender{make_shared<JobQueueSender>(io_service,qjob)};
     qsender->async_enq(job,[](boost::system::error_code const&ec){});
 
     // run test
-    ioservice.run();
+    io_service.run();
   }
   catch(exception const&e){
     BOOST_LOG_TRIVIAL(debug)<<"cought exception: "<<e.what();
