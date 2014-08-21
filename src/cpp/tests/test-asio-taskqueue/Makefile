@@ -4,7 +4,7 @@ LOCAL_SOTARGET  =
 LOCAL_OBJS      = test1.o
 
 # Control.
-LOCAL_LIBS      = -lxlate-jobs -lutils \
+LOCAL_LIBS      = -lxlate-jobs -lxlate-tools -lutils \
 		  -lboost_thread -lboost_system -lboost_filesystem -lboost_iostreams -lboost_log
 LOCAL_LIBPATH   = -L$(PROJECT_ROOT)/lib
 LOCAL_INCPATH   = -I$(PROJECT_ROOT)/src/cpp/include/
