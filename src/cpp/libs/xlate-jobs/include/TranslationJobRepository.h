@@ -52,7 +52,7 @@ private:
   void translatedTaskHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task);
 
   // some stats
-  std::size_t ndone_{0};
+  std::size_t ncompleted_{0};
 };
 }
 #endif

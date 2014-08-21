@@ -87,8 +87,8 @@ void TranslationJobRepository::translatedTaskHandler(boost::system::error_code c
     // add translated task to job and check if job is done
     job->addTranslatedTask(task);
     if(job->done()){
-      ++ndone_;
-      BOOST_LOG_TRIVIAL(info)<<"TranslationJobRepository::translatedTaskHandler - job with id: "<<job->id()<<" is done, ndone: "<<ndone_;
+      ++ncompleted_;
+      BOOST_LOG_TRIVIAL(info)<<"TranslationJobRepository::translatedTaskHandler - job with id: "<<job->id()<<" is done, ncompleted: "<<ncompleted_;
 
       // NOTE! Not yet done
       // ...
