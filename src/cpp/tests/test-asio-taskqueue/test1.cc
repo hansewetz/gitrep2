@@ -33,11 +33,14 @@ std::shared_ptr<TranslationJob>getNextJob(){
 }
 // testing: deadline timer handler sending jobs
 size_t nsent{0};
-boost::asio::deadline_timer tmo(::ios,boost::posix_time::milliseconds(3000));
+boost::asio::deadline_timer tmo(::ios,boost::posix_time::milliseconds(2250));
 void tmo_handler(const boost::system::error_code&ec,std::shared_ptr<JobQueueSender>sender){
+  // create job and send it
   std::shared_ptr<TranslationJob>job{getNextJob()};
   BOOST_LOG_TRIVIAL(info)<<"tmo_handler: sending job, id: "<<job->id()<<", nsent: "<<++::nsent;
   sender->async_enq(job,[](boost::system::error_code const&ec){});
+
+  // re-arm timer
   tmo.expires_from_now(boost::posix_time::milliseconds(2250));
   tmo.async_wait(std::bind(tmo_handler,_1,sender));
 }
