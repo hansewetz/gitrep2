@@ -1,7 +1,7 @@
 # To be built
 LOCAL_TARGET    =
-LOCAL_SOTARGET  = $(PROJECT_ROOT)/lib/libxlate-seg.so
-LOCAL_OBJS      = SegBase.o
+LOCAL_SOTARGET  = $(PROJECT_ROOT)/lib/libxlate-tools.so
+LOCAL_OBJS      = 
 
 # Control.
 LOCAL_LIBS      = 
