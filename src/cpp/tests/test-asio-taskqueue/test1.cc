@@ -26,7 +26,7 @@ int main(){
   boost::asio::io_service io_service;
 
   // set log level (do not log debug messages)
-  utils::initBoostFileLogging(false);
+  utils::initBoostFileLogging(true);
   try{
     // run translation component
     TranslationCt tct{io_service,1,1};

@@ -7,6 +7,12 @@
 #include <iosfwd>
 namespace utils{
 
+// --- open a file for writing given filename in binary mode
+std::shared_ptr<std::ostream>openWriteFileName(boost::filesystem::path const&filePath);
+
+// --- open a file for reading given filename in binary mode
+std::shared_ptr<std::istream>openReadFileName(boost::filesystem::path const&filePath);
+
 // get files ordered by timestamp in a map (with newest file first)
 std::multimap<time_t,boost::filesystem::path>getTsOrderedFiles(boost::filesystem::path const&dirPath);
 

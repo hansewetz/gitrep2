@@ -1,7 +1,9 @@
 #include "utils/fileUtils.h"
+#include "utils/utility.h"
 #include <memory>
 #include <ostream>
 #include <istream>
+#include <fstream>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
 using namespace boost::filesystem;
@@ -9,6 +11,18 @@ using namespace std;
 namespace io=boost::iostreams;
 namespace utils{
 
+// --- open a file for writing given: filename
+std::shared_ptr<ostream>openWriteFileName(boost::filesystem::path const&filePath){
+  std::shared_ptr<ostream>ret{std::shared_ptr<ostream>(new ofstream(filePath.string(),ofstream::trunc|ofstream::binary))};
+  if(!*ret)THROW_RUNTIME("failed opening file: "<<filePath.string());
+  return ret;
+}
+// --- open a file for reading given: filename
+std::shared_ptr<istream>openReadFileName(boost::filesystem::path const&filePath){
+  std::shared_ptr<istream>ret{std::shared_ptr<istream>(new ifstream(filePath.string(),ifstream::binary))};
+  if(!*ret)THROW_RUNTIME("failed opening file: "<<filePath.string());
+  return ret;
+}
 // get files ordered by timestamp in a map (with newest file first)
 multimap<time_t,path>getTsOrderedFiles(path const&dirPath){
   // make sure path is a directory
