@@ -31,19 +31,6 @@ std::shared_ptr<TranslationJob>getNextJob(){
   // create job from request
   return std::make_shared<TranslationJob>(req);
 }
-// testing: deadline timer handler sending jobs
-size_t nsent{0};
-boost::asio::deadline_timer tmo(::ios,boost::posix_time::milliseconds(2250));
-void tmo_handler(const boost::system::error_code&ec,std::shared_ptr<JobQueueSender>sender){
-  // create job and send it
-  std::shared_ptr<TranslationJob>job{getNextJob()};
-  BOOST_LOG_TRIVIAL(info)<<"tmo_handler: sending job, id: "<<job->id()<<", nsent: "<<++::nsent;
-  sender->async_enq(job,[](boost::system::error_code const&ec){});
-
-  // re-arm timer
-  tmo.expires_from_now(boost::posix_time::milliseconds(2250));
-  tmo.async_wait(std::bind(tmo_handler,_1,sender));
-}
 //  -------------- main test program
 int main(){
   // set log level (do not log debug messages)
@@ -52,10 +39,6 @@ int main(){
     // run translation component
     TranslationCt tct{::ios,3,10};
     tct.run();
-
-    // arm a timer which sends jobs
-    std::shared_ptr<JobQueueSender>sender{make_shared<JobQueueSender>(::ios,tct.getNewJobQueue())};
-    tmo.async_wait(std::bind(tmo_handler,_1,sender));
 
     // run test
     ::ios.run();
