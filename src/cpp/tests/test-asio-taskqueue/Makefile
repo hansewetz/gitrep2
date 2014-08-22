@@ -1,17 +1,5 @@
-# To be built
-LOCAL_TARGET    =  test1
-LOCAL_SOTARGET  =
-LOCAL_OBJS      = test1.o
+all:
+	make -f Makefile.test1
 
-# Control.
-LOCAL_LIBS      = -lxlate-jobs -lxlate-tools -lutils \
-		  -lboost_thread -lboost_system -lboost_filesystem -lboost_iostreams -lboost_log
-LOCAL_LIBPATH   = -L$(PROJECT_ROOT)/lib
-LOCAL_INCPATH   = -I$(PROJECT_ROOT)/src/cpp/include/
-LOCAL_DEFINES   = -DBOOST_ALL_DYN_LINK  -DASIO_STANDALONE
-LOCAL_CXXFLAGS  =
-LOCAL_CPPFLAGS  = 
-LOCAL_LDFLAGS   =
-LOCAL_LDSOFLAGS =
-
-include $(ENV_ROOT)/makerules/build.rules
+clean:
+	make -f Makefile.test1 clean
