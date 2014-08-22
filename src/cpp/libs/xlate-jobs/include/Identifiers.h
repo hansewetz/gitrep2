@@ -16,7 +16,7 @@ class TranslationTask;
 using TranslationTaskId=utils::Id<TranslationTask,std::string,true>;
 
 // dummy engine id
-class DummyEngine;
-using DummyEngineId=utils::Id<DummyEngine,std::string,true>;
+class EngineAdaptor;
+using EngineAdaptorId=utils::Id<EngineAdaptor,std::string,true>;
 }
 #endif
