@@ -13,8 +13,7 @@ namespace xlate{
 // forward decl
 class TranslationJobRepository;
 class TaskScheduler;
-class DummyEngine;
-class DummyEngine;
+class EngineProxy;
 
 // translation component for a language pair
 class TranslationCt{
@@ -54,7 +53,7 @@ private:
   // components
   std::shared_ptr<TranslationJobRepository>jobrep_;
   std::shared_ptr<TaskScheduler>scheduler_;
-  std::vector<std::shared_ptr<DummyEngine>>engines_;
+  std::vector<std::shared_ptr<EngineProxy>>engines_;
   std::vector<std::thread>thr_engines_;
 };
 }

@@ -1,4 +1,4 @@
-#include "xlate-jobs/EngineAdaptor.h"
+#include "xlate-jobs/EngineProxy.h"
 #include "xlate-jobs/TranslationTask.h"
 #include <boost/log/trivial.hpp>
 #include <functional>
@@ -10,16 +10,16 @@ using namespace std::placeholders;
 namespace xlate{
 
 // ctor
-EngineAdaptor::EngineAdaptor(std::shared_ptr<TaskQueue>qin,std::shared_ptr<TaskQueue>qout):
+EngineProxy::EngineProxy(std::shared_ptr<TaskQueue>qin,std::shared_ptr<TaskQueue>qout):
     qin_(qin),qout_(qout){
 }
 // wait for new task synchronously
-void EngineAdaptor::run(){
+void EngineProxy::run(){
   while(true){
-    BOOST_LOG_TRIVIAL(debug)<<"EngineAdaptor::waitForNewTask - sync waiting for new task";
+    BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::waitForNewTask - sync waiting for new task";
     pair<bool,std::shared_ptr<TranslationTask>>p{qin_->deq()};
     if(p.first==false){
-      BOOST_LOG_TRIVIAL(debug)<<"EngineAdaptor::waitForNewTask (id:"<<id_<<") - received interuption: terminating";
+      BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::waitForNewTask (id:"<<id_<<") - received interuption: terminating";
       break;
     }
     // translate task and sent it on output queue
@@ -28,11 +28,11 @@ void EngineAdaptor::run(){
   }
 }
 // get engine id
-EngineAdaptorId EngineAdaptor::id()const{
+EngineProxyId EngineProxy::id()const{
   return id_;
 }
 // transate a task
-void EngineAdaptor::translate(std::shared_ptr<TranslationTask>task)const{
+void EngineProxy::translate(std::shared_ptr<TranslationTask>task)const{
   // generate a random sleep time
   std::random_device rd;
   std::default_random_engine e1(rd());

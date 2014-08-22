@@ -3,7 +3,7 @@
 #include "xlate-jobs/TranslationJob.h"
 #include "xlate-jobs/TranslationJobRepository.h"
 #include "xlate-jobs/TaskScheduler.h"
-#include "xlate-jobs/DummyEngine.h"
+#include "xlate-jobs/EngineProxy.h"
 using namespace std;
 namespace xlate{
 
@@ -19,9 +19,9 @@ TranslationCt::TranslationCt(boost::asio::io_service&ios,size_t maxScheduledJobs
 
   // create engines and start running each engine in a separate thread
   for(size_t i=0;i<maxEngines_;++i){
-    std::shared_ptr<DummyEngine>engine{make_shared<DummyEngine>(qschedTask_,qtransTasks_)};
+    std::shared_ptr<EngineProxy>engine{make_shared<EngineProxy>(qschedTask_,qtransTasks_)};
     engines_.push_back(engine);
-    std::thread thr(&DummyEngine::run,engine);
+    std::thread thr(&EngineProxy::run,engine);
     thr_engines_.push_back(std::move(thr));
   }
 }
