@@ -26,23 +26,29 @@ int main(){
   boost::asio::io_service io_service;
 
   // set log level (do not log debug messages)
-  utils::initBoostFileLogging(true);
+  utils::initBoostFileLogging(false);
   try{
-    // run translation component
-    TranslationCt tct{io_service,1,1};
+    // create and arm translation component
+    TranslationCt tct{io_service,1,3};
     tct.run();
 
-    // create a request from a file and then a job
-    boost::filesystem::path file{"./seg1.txt"};
+    // create a request factory
     TranslationRequestFactory reqFact;
-    std::shared_ptr<TranslateRequest>req{reqFact.requestFromSegmentedFile(make_lanpair("en","sv"),file)};
-    std::shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};
 
-    // send job to translation
+    // create sender to translation repository
     std::shared_ptr<JobQueue>qjob{tct.getNewJobQueue()};
     std::shared_ptr<JobQueueSender>qsender{make_shared<JobQueueSender>(io_service,qjob)};
-    qsender->async_enq(job,[](boost::system::error_code const&ec){});
 
+    // send jobs to translation component
+    for(int i=0;i<5;++i){
+      // create request from file
+      boost::filesystem::path file{"./seg1.txt"};
+      std::shared_ptr<TranslateRequest>req{reqFact.requestFromSegmentedFile(make_lanpair("en","sv"),file)};
+
+      // create job from request and send it
+      std::shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};
+      qsender->async_enq(job,[](boost::system::error_code const&ec){});
+    }
     // run test
     io_service.run();
   }

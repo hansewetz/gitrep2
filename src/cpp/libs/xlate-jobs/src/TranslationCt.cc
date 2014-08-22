@@ -10,7 +10,8 @@ namespace xlate{
 // ctor
 TranslationCt::TranslationCt(boost::asio::io_service&ios,size_t maxScheduledJobs,size_t maxEngines):
     ios_(ios),
-    qschedTaskSize_(maxScheduledJobs),maxEngines_(maxEngines),
+    qschedTaskSize_(maxEngines),qschedJobSize_(maxScheduledJobs),
+    maxEngines_(maxEngines),
     qnewJob_{make_shared<JobQueue>(qnewJobSize_)},qschedJob_{make_shared<JobQueue>(qschedJobSize_)},
     qschedTask_{make_shared<TaskQueue>(qschedTaskSize_)},qtransTasks_{make_shared<TaskQueue>(qtransTasksSize_)},
     jobrep_{make_shared<TranslationJobRepository>(ios_,qnewJob_,qschedJob_,qtransTasks_)},
