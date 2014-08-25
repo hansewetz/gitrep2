@@ -39,16 +39,13 @@ int main(){
 
   // run program
   // (must make sure sink closes so that we'll terminate when reading from other end of pipe)
-  {
-    bios::file_descriptor_sink sink(p.sink,bios::close_handle);
-    vector<string>prog{"/bin/ls","-l"};
-    bp::child c{bp::execute(bp::initializers::set_args(prog),
-                bp::initializers::bind_stdout(sink),
-                bp::initializers::throw_on_error())};
+  bios::file_descriptor_sink sink(p.sink,bios::close_handle);
+  vector<string>prog{"/bin/ls","-l",".."};
+  bp::child c{bp::execute(bp::initializers::set_args(prog),
+              bp::initializers::bind_stdout(sink),
+              bp::initializers::throw_on_error())};
+  sink.close();
   
-    // wait for child to exit
-    bp::wait_for_exit(c);
-  }
   // read from other end of pipe asynchronously
   asio::posix::stream_descriptor ais(ios,p.source);
   asio::async_read(ais,buf,std::bind(read_handler,_1,_2,&ais));
@@ -56,4 +53,7 @@ int main(){
 
   // run asio
   ios.run();
+
+  // wait for child to exit
+  bp::wait_for_exit(c);
 }
