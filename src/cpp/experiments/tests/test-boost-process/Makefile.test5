@@ -1,0 +1,16 @@
+# To be built
+LOCAL_TARGET    =  test5
+LOCAL_SOTARGET  =
+LOCAL_OBJS      = test5.o
+
+# Control.
+LOCAL_LIBS      = -lboost_system -lboost_iostreams
+LOCAL_LIBPATH   = -L$(BOOST_LIB)
+LOCAL_INCPATH   = -I$(BOOST_INC)
+LOCAL_DEFINES   = -DBOOST_ALL_DYN_LINK -DBOOST_IOSTREAMS_NO_LIB -DASIO_STANDALONE
+LOCAL_CXXFLAGS  =
+LOCAL_CPPFLAGS  = 
+LOCAL_LDFLAGS   =
+LOCAL_LDSOFLAGS =
+
+include $(ENV_ROOT)/makerules/build.rules
