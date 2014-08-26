@@ -49,7 +49,6 @@ int main(){
   // read from other end of pipe asynchronously
   asio::posix::stream_descriptor ais(ios,p.source);
   asio::async_read(ais,buf,std::bind(read_handler,_1,_2,&ais));
-  bios::file_descriptor_source source(p.source,bios::close_handle);
 
   // run asio
   ios.run();
