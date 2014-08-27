@@ -47,10 +47,31 @@ void read_handler(boost::system::error_code const&err,size_t nbytes,asio::posix:
     ais->close();
   }
 }
+// close a file descriptor
+int eclose(int fd,bool throwExcept=true){
+  while(close(fd)<0&&errno==EINTR);
+  if(errno&&throwExcept){
+    string err{strerror(errno)};
+    THROW_RUNTIME("eclose: failed closing fd: "<<err);
+  }
+  return errno;
+}
+// dup an fd
+int edup(int fd){
+  int ret{dup(fd)};
+  if(ret<0){
+    string err{strerror(errno)};
+    THROW_RUNTIME("edup: failed dup() call: "<<err);
+  }
+  return ret;
+}
 // set fd to non-blocking
 void setFdNonblock(int fd){
   int flags = fcntl(fd,F_GETFL,0);
-  fcntl(fd, F_SETFL,flags|O_NONBLOCK); 
+  if(fcntl(fd, F_SETFL,flags|O_NONBLOCK)<0){
+    string err{strerror(errno)};
+    THROW_RUNTIME("setFdNonblock: failed setting fd in non-blocking mode: "<<err);
+  }
 }
 // spawn child process setting up stdout and stdin as a pipe
 // (returns child process pid)
@@ -69,13 +90,15 @@ int spawnPipeChild(string const&exec,int&fdRead,int&fdWrite,bool dieWhenParentDi
   int stat=fork();
   if(stat==0){ // child
     // die if parent dies so we won't become a zombie
-    if(dieWhenParentDies)prctl(PR_SET_PDEATHSIG,SIGHUP);
-
+    if(dieWhenParentDies&&prctl(PR_SET_PDEATHSIG,SIGHUP)<0){
+      string err{strerror(errno)};
+      THROW_RUNTIME("spawnPipeChild: failed call to prctl(...): "<<err);
+    }
     // dup stdin/stdout ---> pipe, and close original pipe fds
-    close(0);close(1);
-    dup(toChild[0]);dup(fromChild[1]);
-    close(toChild[1]);close(fromChild[0]);
-    close(toChild[0]);close(fromChild[1]);
+    eclose(0);eclose(1);
+    edup(toChild[0]);edup(fromChild[1]);
+    eclose(toChild[1]);eclose(fromChild[0]);
+    eclose(toChild[0]);eclose(fromChild[1]);
 
     // execute cat program
     if(execl(exec.c_str(),'\0')<0){
@@ -89,7 +112,7 @@ int spawnPipeChild(string const&exec,int&fdRead,int&fdWrite,bool dieWhenParentDi
   }else
   if(stat>0){ // parent
     // close fds we don't use
-    close(fromChild[1]);close(toChild[0]);
+    eclose(fromChild[1]);eclose(toChild[0]);
 
     // set return parameters and return child pid
     fdRead=fromChild[0];
@@ -103,40 +126,45 @@ int spawnPipeChild(string const&exec,int&fdRead,int&fdWrite,bool dieWhenParentDi
 }
 // main test program
 int main(){
-  // io_service object
-  asio::io_service ios;
+  try{
+    // io_service object
+    asio::io_service ios;
 
-  // spawn child
-  int fdRead;
-  int fdWrite;
-  string exec{"/bin/cat"};
-  int cpid=spawnPipeChild(exec,fdRead,fdWrite,true);
+    // spawn child
+    int fdRead;
+    int fdWrite;
+    string exec{"/bin/cat"};
+    int cpid=spawnPipeChild(exec,fdRead,fdWrite,true);
 
-  // write to child
-  asio::posix::stream_descriptor aos(ios,fdWrite);
-  asio::streambuf tmpbuf{1024};
-  ostream os{&tmpbuf};
-  os<<"Hello world"<<endl<<flush;
-  asio::write(aos,tmpbuf);
+    // write to child
+    asio::posix::stream_descriptor aos(ios,fdWrite);
+    asio::streambuf tmpbuf{1024};
+    ostream os{&tmpbuf};
+    os<<"Hello world"<<endl<<flush;
+    asio::write(aos,tmpbuf);
 
-  // read from child asynchronously
-  asio::posix::stream_descriptor ais(ios,fdRead);
-  asio::async_read(ais,buf,std::bind(read_handler,_1,_2,&ais));
+    // read from child asynchronously
+    asio::posix::stream_descriptor ais(ios,fdRead);
+    asio::async_read(ais,buf,std::bind(read_handler,_1,_2,&ais));
 
-  // setup deadline timer to close write fd to child after a few seconds
-  boost::asio::deadline_timer ticker(ios,boost::posix_time::milliseconds(1000));
-  std::function<void(const boost::system::error_code&)>fticker=[&](const boost::system::system_error&ec){
-    cerr<<"ticker: closing write to child fd ..."<<endl;
-    close(fdWrite);
-  };
-  ticker.async_wait(fticker);
+    // setup deadline timer to close write fd to child after a few seconds
+    boost::asio::deadline_timer ticker(ios,boost::posix_time::milliseconds(1000));
+    std::function<void(const boost::system::error_code&)>fticker=[&](const boost::system::system_error&ec){
+      cerr<<"ticker: closing write to child fd ..."<<endl;
+      eclose(fdWrite,false);
+    };
+    ticker.async_wait(fticker);
 
-  // run asio
-  cerr<<"running asio ..."<<endl;
-  ios.run();
+    // run asio
+    cerr<<"running asio ..."<<endl;
+    ios.run();
 
-  // wait for child
-  cerr<<"waiting for child ..."<<endl;
-  int waitstat;
-  waitpid(-1,&waitstat,0);
+    // wait for child
+    cerr<<"waiting for child ..."<<endl;
+    int waitstat;
+    waitpid(-1,&waitstat,0);
+  }
+  catch(std::exception const&e){
+    cerr<<"main: coufg exception: "<<e.what()<<endl;
+  }
 }
