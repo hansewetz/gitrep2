@@ -32,16 +32,13 @@ namespace asio=boost::asio;
     std::string s{strm.str()};\
     throw std::runtime_error(s);\
 }
-// global buffer
-asio::streambuf buf{1};
-
 // callback handler for read
-void read_handler(boost::system::error_code const&err,size_t nbytes,asio::posix::stream_descriptor*ais){
+void read_handler(boost::system::error_code const&err,size_t nbytes,asio::posix::stream_descriptor*ais,asio::streambuf*pbuf){
   if(nbytes!=0){
     istreambuf_iterator<char>end;
-    istreambuf_iterator<char>it{&buf};
+    istreambuf_iterator<char>it{pbuf};
     for(;it!=end;++it)cerr<<*it;
-    asio::async_read(*ais,buf,std::bind(read_handler,_1,_2,ais));
+    asio::async_read(*ais,*pbuf,std::bind(read_handler,_1,_2,ais,pbuf));
   }else{
     ais->cancel();
     ais->close();
@@ -75,7 +72,7 @@ void setFdNonblock(int fd){
 }
 // spawn child process setting up stdout and stdin as a pipe
 // (returns child process pid)
-int spawnPipeChild(string const&exec,int&fdRead,int&fdWrite,bool dieWhenParentDies){
+int spawnPipeChild(string const&file,vector<string>args,int&fdRead,int&fdWrite,bool dieWhenParentDies){
   // create pipe between child and parent
   int fromChild[2];
   int toChild[2];
@@ -100,8 +97,19 @@ int spawnPipeChild(string const&exec,int&fdRead,int&fdWrite,bool dieWhenParentDi
     eclose(toChild[1]);eclose(fromChild[0]);
     eclose(toChild[0]);eclose(fromChild[1]);
 
+    // setup for calling execv 
+    // (we don't care if we leak memory since we'll overlay process using exec)
+    char*const*tmpargs=(char*const*)malloc((args.size()+1)*sizeof(char*const*));
+    if(tmpargs==0){
+      string err{strerror(errno)};
+      THROW_RUNTIME("spawnPipeChild: failed call to malloc(...): "<<err);
+    }
+    char**ptmpargs=const_cast<char**>(tmpargs);
+    for(int i=0;i<args.size();++i)ptmpargs[i]=const_cast<char*>(args[i].c_str());
+    ptmpargs[args.size()]=0;
+
     // execute cat program
-    if(execl(exec.c_str(),'\0')<0){
+    if(execv(file.c_str(),tmpargs)<0){
       string err{strerror(errno)};
       THROW_RUNTIME("spawnPipeChild: failed executing execl: "<<err);
     }else{
@@ -133,8 +141,9 @@ int main(){
     // spawn child
     int fdRead;
     int fdWrite;
-    string exec{"/bin/cat"};
-    int cpid=spawnPipeChild(exec,fdRead,fdWrite,true);
+    string execFile{"/bin/cat"};
+    vector<string>execArgs{"cat"};
+    int cpid=spawnPipeChild(execFile,execArgs,fdRead,fdWrite,true);
 
     // write to child
     asio::posix::stream_descriptor aos(ios,fdWrite);
@@ -144,8 +153,9 @@ int main(){
     asio::write(aos,tmpbuf);
 
     // read from child asynchronously
+    asio::streambuf buf{1}; // NOTE! Should not have to be of size '1'
     asio::posix::stream_descriptor ais(ios,fdRead);
-    asio::async_read(ais,buf,std::bind(read_handler,_1,_2,&ais));
+    asio::async_read(ais,buf,std::bind(read_handler,_1,_2,&ais,&buf));
 
     // setup deadline timer to close write fd to child after a few seconds
     boost::asio::deadline_timer ticker(ios,boost::posix_time::milliseconds(1000));
