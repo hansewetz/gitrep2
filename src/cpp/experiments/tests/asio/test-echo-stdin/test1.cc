@@ -16,6 +16,7 @@ std::array<char,5>buf;
 // read handler
 void handleRead(boost::system::error_code const&err,size_t nread,boost::asio::posix::stream_descriptor*in){
   cout<<"nread: "<<nread<<endl;
+  for(int i=0;i<nread;++i)cout<<buf[i];
 
   // start reading async from stdin
   in->async_read_some(boost::asio::buffer(buf),

@@ -1,10 +1,10 @@
 # To be built
-LOCAL_TARGET    =  test5
+LOCAL_TARGET    =  test4
 LOCAL_SOTARGET  =
-LOCAL_OBJS      = test5.o
+LOCAL_OBJS      = test4.o
 
 # Control.
-LOCAL_LIBS      = -lboost_system
+LOCAL_LIBS      = -lboost_system -lboost_iostreams
 LOCAL_LIBPATH   = -L$(BOOST_LIB)
 LOCAL_INCPATH   = -I$(BOOST_INC)
 LOCAL_DEFINES   = -DBOOST_ALL_DYN_LINK -DBOOST_IOSTREAMS_NO_LIB -DASIO_STANDALONE
