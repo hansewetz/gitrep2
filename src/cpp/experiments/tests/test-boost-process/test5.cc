@@ -139,29 +139,41 @@ int main(){
     asio::io_service ios;
 
     // spawn child
-    int fdRead;
-    int fdWrite;
+    int fdRead1,fdWrite1;
+    int fdRead2,fdWrite2;
     string execFile{"/bin/cat"};
     vector<string>execArgs{"cat"};
-    int cpid=spawnPipeChild(execFile,execArgs,fdRead,fdWrite,true);
+    int cpid1=spawnPipeChild(execFile,execArgs,fdRead1,fdWrite1,true);
+    int cpid2=spawnPipeChild(execFile,execArgs,fdRead2,fdWrite2,true);
 
     // write to child
-    asio::posix::stream_descriptor aos(ios,fdWrite);
-    asio::streambuf tmpbuf{1024};
-    ostream os{&tmpbuf};
-    os<<"Hello world"<<endl<<flush;
-    asio::write(aos,tmpbuf);
+    asio::posix::stream_descriptor aos1(ios,fdWrite1);
+    asio::streambuf tmpbuf1{1024};
+    ostream os1{&tmpbuf1};
+    os1<<"Hello world 1"<<endl<<flush;
+    asio::write(aos1,tmpbuf1);
+
+    asio::posix::stream_descriptor aos2(ios,fdWrite2);
+    asio::streambuf tmpbuf2{1024};
+    ostream os2{&tmpbuf2};
+    os2<<"Hello world 2"<<endl<<flush;
+    asio::write(aos1,tmpbuf2);
 
     // read from child asynchronously
-    asio::streambuf buf{1}; // NOTE! Should not have to be of size '1'
-    asio::posix::stream_descriptor ais(ios,fdRead);
-    asio::async_read(ais,buf,std::bind(read_handler,_1,_2,&ais,&buf));
+    asio::streambuf buf1{1}; // NOTE! Should not have to be of size '1'
+    asio::posix::stream_descriptor ais1(ios,fdRead1);
+    asio::async_read(ais1,buf1,std::bind(read_handler,_1,_2,&ais1,&buf1));
+
+    asio::streambuf buf2{1}; // NOTE! Should not have to be of size '1'
+    asio::posix::stream_descriptor ais2(ios,fdRead2);
+    asio::async_read(ais2,buf2,std::bind(read_handler,_1,_2,&ais2,&buf2));
 
     // setup deadline timer to close write fd to child after a few seconds
     boost::asio::deadline_timer ticker(ios,boost::posix_time::milliseconds(1000));
     std::function<void(const boost::system::error_code&)>fticker=[&](const boost::system::system_error&ec){
       cerr<<"ticker: closing write to child fd ..."<<endl;
-      eclose(fdWrite,false);
+      eclose(fdWrite1,false);
+      eclose(fdWrite2,false);
     };
     ticker.async_wait(fticker);
 
@@ -172,7 +184,7 @@ int main(){
     // wait for child
     cerr<<"waiting for child ..."<<endl;
     int waitstat;
-    waitpid(-1,&waitstat,0);
+    while(waitpid(-1,&waitstat,0)>0);
   }
   catch(std::exception const&e){
     cerr<<"main: coufg exception: "<<e.what()<<endl;
