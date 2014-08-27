@@ -13,6 +13,7 @@ should instead use 'async_read_until(...) or something else
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/prctl.h>
 
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -59,6 +60,9 @@ int main(){
   // fork child process
   int stat=fork();
   if(stat==0){ // child
+    // die if parent dies so we won't become a zombie
+    prctl(PR_SET_PDEATHSIG,SIGHUP);
+
     // dup stdin/stdout ---> pipe
     close(0);close(1);
     dup(toChild[0]);dup(fromChild[1]);
