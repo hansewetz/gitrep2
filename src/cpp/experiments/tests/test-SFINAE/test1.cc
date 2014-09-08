@@ -23,11 +23,18 @@ struct Foo{
   Foo(string const&s):s_(s){};
   string s_;
 };
-
+/*
 template<typename T>
 void printit(typename T::type const& t){
   cout<<t<<endl;
 }
+*/
+
+template<typename T>
+void printit(typename std::enable_if<!is_pod<typename T::type>::value,typename T::type>::type t){
+  cout<<t<<endl;
+}
+
 template<typename T>
 void printit(T t){
   cout<<t<<endl;
