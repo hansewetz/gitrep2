@@ -1,0 +1,87 @@
+g++ -std=c++11 -o test1 test1.cc -I/ec/prod/exodus/dgt/local/exodus/user/mtdata/installs/include
+test1.cc: In function ‘std::vector<Cluster> buildClusters(int, char*, int**)’:
+test1.cc:131:30: error: invalid user-defined conversion from ‘char’ to ‘const string& {aka const std::basic_string<char>&}’ [-fpermissive]
+     clusters[i].add(i,names[i],-1);
+                              ^
+In file included from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/string:52:0,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/locale_classes.h:40,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/ios_base.h:41,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/ios:42,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/ostream:38,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/iostream:39,
+                 from test1.cc:1:
+/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/basic_string.h:490:7: note: candidate is: std::basic_string<_CharT, _Traits, _Alloc>::basic_string(const _CharT*, const _Alloc&) [with _CharT = char; _Traits = std::char_traits<char>; _Alloc = std::allocator<char>] <near match>
+       basic_string(const _CharT* __s, const _Alloc& __a = _Alloc());
+       ^
+/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/basic_string.h:490:7: note:   no known conversion for argument 1 from ‘char’ to ‘const char*’
+test1.cc:131:30: error: invalid conversion from ‘char’ to ‘const char*’ [-fpermissive]
+     clusters[i].add(i,names[i],-1);
+                              ^
+In file included from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/string:52:0,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/locale_classes.h:40,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/ios_base.h:41,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/ios:42,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/ostream:38,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/iostream:39,
+                 from test1.cc:1:
+/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/basic_string.h:490:7: note: initializing argument 1 of ‘std::basic_string<_CharT, _Traits, _Alloc>::basic_string(const _CharT*, const _Alloc&) [with _CharT = char; _Traits = std::char_traits<char>; _Alloc = std::allocator<char>]’
+       basic_string(const _CharT* __s, const _Alloc& __a = _Alloc());
+       ^
+test1.cc:136:33: error: invalid conversion from ‘int*’ to ‘int’ [-fpermissive]
+       int score{scores[i*count+j]};
+                                 ^
+test1.cc:139:34: error: invalid user-defined conversion from ‘char’ to ‘const string& {aka const std::basic_string<char>&}’ [-fpermissive]
+         clusters[i].add(j,names[j],score);
+                                  ^
+In file included from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/string:52:0,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/locale_classes.h:40,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/ios_base.h:41,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/ios:42,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/ostream:38,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/iostream:39,
+                 from test1.cc:1:
+/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/basic_string.h:490:7: note: candidate is: std::basic_string<_CharT, _Traits, _Alloc>::basic_string(const _CharT*, const _Alloc&) [with _CharT = char; _Traits = std::char_traits<char>; _Alloc = std::allocator<char>] <near match>
+       basic_string(const _CharT* __s, const _Alloc& __a = _Alloc());
+       ^
+/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/basic_string.h:490:7: note:   no known conversion for argument 1 from ‘char’ to ‘const char*’
+test1.cc:139:34: error: invalid conversion from ‘char’ to ‘const char*’ [-fpermissive]
+         clusters[i].add(j,names[j],score);
+                                  ^
+In file included from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/string:52:0,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/locale_classes.h:40,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/ios_base.h:41,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/ios:42,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/ostream:38,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/iostream:39,
+                 from test1.cc:1:
+/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/basic_string.h:490:7: note: initializing argument 1 of ‘std::basic_string<_CharT, _Traits, _Alloc>::basic_string(const _CharT*, const _Alloc&) [with _CharT = char; _Traits = std::char_traits<char>; _Alloc = std::allocator<char>]’
+       basic_string(const _CharT* __s, const _Alloc& __a = _Alloc());
+       ^
+test1.cc:140:34: error: invalid user-defined conversion from ‘char’ to ‘const string& {aka const std::basic_string<char>&}’ [-fpermissive]
+         clusters[j].add(i,names[i],score);
+                                  ^
+In file included from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/string:52:0,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/locale_classes.h:40,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/ios_base.h:41,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/ios:42,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/ostream:38,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/iostream:39,
+                 from test1.cc:1:
+/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/basic_string.h:490:7: note: candidate is: std::basic_string<_CharT, _Traits, _Alloc>::basic_string(const _CharT*, const _Alloc&) [with _CharT = char; _Traits = std::char_traits<char>; _Alloc = std::allocator<char>] <near match>
+       basic_string(const _CharT* __s, const _Alloc& __a = _Alloc());
+       ^
+/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/basic_string.h:490:7: note:   no known conversion for argument 1 from ‘char’ to ‘const char*’
+test1.cc:140:34: error: invalid conversion from ‘char’ to ‘const char*’ [-fpermissive]
+         clusters[j].add(i,names[i],score);
+                                  ^
+In file included from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/string:52:0,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/locale_classes.h:40,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/ios_base.h:41,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/ios:42,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/ostream:38,
+                 from /ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/iostream:39,
+                 from test1.cc:1:
+/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/include/c++/4.9.0/bits/basic_string.h:490:7: note: initializing argument 1 of ‘std::basic_string<_CharT, _Traits, _Alloc>::basic_string(const _CharT*, const _Alloc&) [with _CharT = char; _Traits = std::char_traits<char>; _Alloc = std::allocator<char>]’
+       basic_string(const _CharT* __s, const _Alloc& __a = _Alloc());
+       ^
+make: *** [all] Error 1

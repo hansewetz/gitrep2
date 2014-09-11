@@ -14,7 +14,8 @@ test-callable test-clucene test-const test-fd-stream test-for test-future test-i
 test-list-add-numbers test-numeric-limit test-packaged-task test-param-passing \
 test-readlines test-sqlite test-streambuf test-tuplet-apply test-type-printer \
 test-utf test-variadic-count test-variadic-printf test-xml-beans test1_db \
-test-libxml c-strange-index  rvalue-function-qualifiers boost-fd-stream test-func-wrapper test-boost-process
+test-libxml c-strange-index  rvalue-function-qualifiers boost-fd-stream test-func-wrapper test-boost-process \
+ibm-task
 
 
 # test-c++1y
