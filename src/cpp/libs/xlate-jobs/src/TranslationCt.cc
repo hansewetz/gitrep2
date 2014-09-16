@@ -12,9 +12,12 @@ TranslationCt::TranslationCt(boost::asio::io_service&ios,size_t maxScheduledJobs
     ios_(ios),
     qschedTaskSize_(maxEngines),qschedJobSize_(maxScheduledJobs),
     maxEngines_(maxEngines),
-    qnewJob_{make_shared<JobQueue>(qnewJobSize_)},qschedJob_{make_shared<JobQueue>(qschedJobSize_)},
-    qschedTask_{make_shared<TaskQueue>(qschedTaskSize_)},qtransTasks_{make_shared<TaskQueue>(qtransTasksSize_)},
-    jobrep_{make_shared<TranslationJobRepository>(ios_,qnewJob_,qschedJob_,qtransTasks_)},
+    qnewJob_{make_shared<JobQueue>(qnewJobSize_)},
+    qschedJob_{make_shared<JobQueue>(qschedJobSize_)},
+    qschedTask_{make_shared<TaskQueue>(qschedTaskSize_)},
+    qtransTasks_{make_shared<TaskQueue>(qtransTasksSize_)},
+    qtransJobs_{make_shared<JobQueue>(qtransJobSize_)},
+    jobrep_{make_shared<TranslationJobRepository>(ios_,qnewJob_,qschedJob_,qtransTasks_,qtransJobs_)},
     scheduler_{make_shared<TaskScheduler>(ios_,qschedJob_,qschedTask_)}{
 
   // create engines and start running each engine in a separate thread
@@ -40,5 +43,9 @@ void TranslationCt::run(){
 // get job queue for new jobs
 std::shared_ptr<JobQueue>TranslationCt::getNewJobQueue()const{
   return qnewJob_;
+}
+// get queue with translated jobs
+std::shared_ptr<JobQueue>TranslationCt::getTranslatedJobQueue()const{
+  return qtransJobs_;
 }
 }

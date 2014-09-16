@@ -18,7 +18,7 @@ class TranslationTask;
 class TranslationJobRepository{
 public:
   // ctors, dtor
-  TranslationJobRepository(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qnew,std::shared_ptr<JobQueue>qsched,std::shared_ptr<TaskQueue>qtask);
+  TranslationJobRepository(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qnew,std::shared_ptr<JobQueue>qsched,std::shared_ptr<TaskQueue>qtask,std::shared_ptr<JobQueue>qtranslated);
   TranslationJobRepository(TranslationJobRepository const&)=delete;
   TranslationJobRepository(TranslationJobRepository&&)=default;
   TranslationJobRepository&operator=(TranslationJobRepository const&)=delete;
@@ -33,6 +33,7 @@ private:
   std::shared_ptr<JobQueueListener>qnewListener_;     // new jobs
   std::shared_ptr<JobQueueSender>qschedSender_;       // jobs to be scheduled
   std::shared_ptr<TaskQueueListener>qtaskListener_;   // translated tasks
+  std::shared_ptr<JobQueueSender>qtransSender_;       // output queue from job repository of translated jobs
 
   // list of new jobs and map of jobs in progress
   std::list<std::shared_ptr<TranslationJob>>newJobs_;

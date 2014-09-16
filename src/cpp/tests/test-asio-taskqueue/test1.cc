@@ -20,6 +20,11 @@ using namespace std;
 using namespace std::placeholders;
 using namespace xlate;
 
+// translated job handler
+void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationJob>job, std::shared_ptr<JobQueueListener>qtransjobreceiver){
+  BOOST_LOG_TRIVIAL(info)<<"translated job: "<<*job;
+  qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver));
+}
 //  -------------- main test program
 int main(){
   // setup asio stuff
@@ -36,8 +41,11 @@ int main(){
     TranslationRequestFactory reqFact;
 
     // create sender to translation repository
-    std::shared_ptr<JobQueue>qjob{tct.getNewJobQueue()};
-    std::shared_ptr<JobQueueSender>qsender{make_shared<JobQueueSender>(io_service,qjob)};
+    std::shared_ptr<JobQueueSender>qnewjobsender{make_shared<JobQueueSender>(io_service,tct.getNewJobQueue())};
+
+    // create receive of translated jobs and arm it
+    std::shared_ptr<JobQueueListener>qtransjobreceiver{make_shared<JobQueueListener>(io_service,tct.getTranslatedJobQueue())};
+    qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver));
 
     // send jobs to translation component
     for(int i=0;i<5;++i){
@@ -47,7 +55,7 @@ int main(){
 
       // create job from request and send it
       std::shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};
-      qsender->async_enq(job,[](boost::system::error_code const&ec){});
+      qnewjobsender->async_enq(job,[](boost::system::error_code const&ec){});
     }
     // run test
     io_service.run();

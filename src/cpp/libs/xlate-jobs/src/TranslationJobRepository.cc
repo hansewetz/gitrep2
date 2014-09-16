@@ -11,9 +11,12 @@ namespace xlate{
 
 // ctor (setup queue listeners and queue senders)
 TranslationJobRepository::TranslationJobRepository(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qnew,
-                                                   std::shared_ptr<JobQueue>qsched,std::shared_ptr<TaskQueue>qtask):
+                                                   std::shared_ptr<JobQueue>qsched,std::shared_ptr<TaskQueue>qtask,
+                                                   std::shared_ptr<JobQueue>qtranslated):
     ios_(ios),qnewListener_{make_shared<JobQueueListener>(ios_,qnew)},
-    qschedSender_{make_shared<JobQueueSender>(ios_,qsched)},qtaskListener_{make_shared<TaskQueueListener>(ios_,qtask)},
+    qschedSender_{make_shared<JobQueueSender>(ios_,qsched)},
+    qtaskListener_{make_shared<TaskQueueListener>(ios_,qtask)},
+    qtransSender_{make_shared<JobQueueSender>(ios_,qtranslated)},
     waiting4unblock_(true){
 }
 // start listening on events
@@ -87,8 +90,12 @@ void TranslationJobRepository::translatedTaskHandler(boost::system::error_code c
     // add translated task to job and check if job is done
     job->addTranslatedTask(task);
     if(job->done()){
+      // remove job form scheduled jobs and enq job on output queue
+      if(it!=schedJobs_.end())schedJobs_.erase(it);
+      qtransSender_->sync_enq(job);
+
       ++ncompleted_;
-      BOOST_LOG_TRIVIAL(info)<<"TranslationJobRepository::translatedTaskHandler - job DONE with id: "<<*job;
+      BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::translatedTaskHandler - job DONE with id: "<<*job;
 
       // NOTE! Not yet done
       // ...
