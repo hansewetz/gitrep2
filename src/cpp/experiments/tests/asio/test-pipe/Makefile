@@ -1,7 +1,7 @@
 # To be built
-LOCAL_TARGET    =  test5
+LOCAL_TARGET    =  test1
 LOCAL_SOTARGET  =
-LOCAL_OBJS      = test5.o
+LOCAL_OBJS      = test1.o
 
 # Control.
 LOCAL_LIBS      = -lboost_system
