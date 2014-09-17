@@ -13,14 +13,14 @@
 #include <iostream>
 #include <string>
 #include <memory>
-#include <vector>
 #include <thread>
 
 using namespace std;
 using namespace std::placeholders;
 using namespace xlate;
 
-// translated job handler
+// handler for jobs that have been translated
+// (output queue from job repository)
 void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationJob>job, std::shared_ptr<JobQueueListener>qtransjobreceiver){
   BOOST_LOG_TRIVIAL(info)<<"translated job: "<<*job;
   qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver));
@@ -57,7 +57,7 @@ int main(){
       std::shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};
       qnewjobsender->async_enq(job,[](boost::system::error_code const&ec){});
     }
-    // run test
+    // run asynchronous machinery
     io_service.run();
   }
   catch(exception const&e){
