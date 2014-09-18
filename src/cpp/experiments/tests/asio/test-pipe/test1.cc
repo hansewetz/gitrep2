@@ -34,10 +34,11 @@ namespace asio=boost::asio;
     throw std::runtime_error(s);\
 }
 // class representing parent reading side
+template<size_t BUFSIZE>
 class FdReasyncRead{
 public:
   FdReasyncRead(asio::posix::stream_descriptor*ais):ais_(ais){
-    ais->async_read_some(boost::asio::buffer(buf_,bufsize_),std::bind(&FdReasyncRead::read_handler,this,_1,_2));
+    ais->async_read_some(boost::asio::buffer(buf_,BUFSIZE),std::bind(&FdReasyncRead::read_handler,this,_1,_2));
   }
   ~FdReasyncRead(){
     ais_->cancel();
@@ -47,11 +48,10 @@ private:
   void read_handler(boost::system::error_code const&err,size_t nbytes){
     if(nbytes!=0){
       for(int i=0;i<nbytes;++i)cerr<<buf_[i];
-      ais_->async_read_some(boost::asio::buffer(buf_,bufsize_),std::bind(&FdReasyncRead::read_handler,this,_1,_2));
+      ais_->async_read_some(boost::asio::buffer(buf_,BUFSIZE),std::bind(&FdReasyncRead::read_handler,this,_1,_2));
     }
   }
-  static constexpr size_t bufsize_{3};
-  array<char,bufsize_>buf_;
+  array<char,BUFSIZE>buf_;
   asio::posix::stream_descriptor*ais_;
 };
 
@@ -161,7 +161,7 @@ int main(){
 
     // setup reading from child asynchronously
     asio::posix::stream_descriptor ais1(ios,fdRead1);
-    FdReasyncRead fdr{&ais1};
+    FdReasyncRead<3>fdr{&ais1};
 
     // setup deadline timer to close write fd to child after a few seconds
     boost::asio::deadline_timer ticker(ios,boost::posix_time::milliseconds(1000));
