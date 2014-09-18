@@ -13,20 +13,21 @@ int main(){
     // io_service object
     boost::asio::io_service ios;
 
-    // spawn /bin/cat as child program
+    // spawn '/bin/cat' as child process
     int fdRead,fdWrite;
     int cpid=spawnPipeChild("/bin/cat",vector<string>{"cat"},fdRead,fdWrite,true);
 
     // setup reading from child asynchronously and capture each read line (and error) in a callback function
     // (will invoke callback function with a string after stripping it form newline)
-    function<void(string const&)>linecb=[](string const&line){cerr<<line<<endl;};
-    function<void(boost::system::error_code const&err)>errcb=[](boost::system::error_code const&err){cerr<<err.message()<<endl;};
-    FdAsyncLineReader fdr{ios,fdRead,3,linecb,errcb};
+    function<void(string const&)>linecb=[](string const&line){cerr<<"main-linecb: "<<line<<endl;};
+    function<void(boost::system::error_code const&err)>errcb=[](boost::system::error_code const&err){cerr<<"main-errcb: "<<err.message()<<endl;};
+    size_t bufsize{3};
+    FdAsyncLineReader fdr{ios,fdRead,bufsize,linecb,errcb};
 
     // setup deadline timer to close write fd to child after a few seconds
     boost::asio::deadline_timer ticker(ios,boost::posix_time::milliseconds(1000));
     std::function<void(const boost::system::error_code&)>fticker=[&](const boost::system::system_error&ec){
-      cerr<<"ticker: closing pipe to child fd ..."<<endl;
+      cerr<<"main-ticker: closing pipe to child fd ..."<<endl;
       eclose(fdWrite,false);
     };
     ticker.async_wait(fticker);
@@ -36,13 +37,13 @@ int main(){
     write(fdWrite,msg,sizeof(msg));
 
     // run asio
-    cerr<<"running asio ..."<<endl;
+    cerr<<"main: running asio ..."<<endl;
     ios.run();
 
     // wait for child
-    cerr<<"waiting for child ..."<<endl;
+    cerr<<"main: waiting for child (pid: "<<cpid<<") ..."<<endl;
     int waitstat;
-    while(waitpid(-1,&waitstat,0)>0);
+    while(waitpid(cpid,&waitstat,0)!=cpid);
   }
   catch(std::exception const&e){
     cerr<<"main: cought exception: "<<e.what()<<endl;
