@@ -73,7 +73,7 @@ int spawnPipeChild(string const&file,vector<string>args,int&fdRead,int&fdWrite,b
     for(int i=0;i<args.size();++i)ptmpargs[i]=const_cast<char*>(args[i].c_str());
     ptmpargs[args.size()]=0;
 
-    // execute cat program
+    // execute child process
     if(execv(file.c_str(),tmpargs)<0){
       string err{strerror(errno)};
       THROW_RUNTIME("spawnPipeChild: failed executing execl: "<<err);
