@@ -39,7 +39,7 @@ class FdAsyncLineReader{
 public:
   // ctor,assign,dtor
   FdAsyncLineReader(asio::io_service&ios,int fd,size_t bufsize,function<void(string const&)>linecb):
-      ios_(ios),fd_(fd),ais_(ios_,fd_),buf_(bufsize),bufsize_(bufsize),linecb_(linecb){
+      ios_(ios),fd_(fd),ais_(ios_,fd_),bufsize_(bufsize),buf_(bufsize_),linecb_(linecb){
     ais_.async_read_some(boost::asio::buffer(buf_,bufsize_),std::bind(&FdAsyncLineReader::read_handler,this,_1,_2));
   }
   FdAsyncLineReader(FdAsyncLineReader const&)=delete;
@@ -83,8 +83,8 @@ private:
   asio::io_service&ios_;
   int fd_;
   asio::posix::stream_descriptor ais_;
-  vector<char>buf_;
   size_t bufsize_;
+  vector<char>buf_;
   function<void(string const&)>linecb_;
   string line_;
 };
