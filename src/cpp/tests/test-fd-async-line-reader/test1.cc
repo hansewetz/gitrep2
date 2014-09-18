@@ -17,7 +17,7 @@ int main(){
     int fdRead,fdWrite;
     int cpid=spawnPipeChild("/bin/cat",vector<string>{"cat"},fdRead,fdWrite,true);
 
-    // setup reading from child asynchronously and capture each read line in a callback function
+    // setup reading from child asynchronously and capture each read line (and error) in a callback function
     // (will invoke callback function with a string after stripping it form newline)
     function<void(string const&)>linecb=[](string const&line){cerr<<line<<endl;};
     function<void(boost::system::error_code const&err)>errcb=[](boost::system::error_code const&err){cerr<<err.message()<<endl;};
