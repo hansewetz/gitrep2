@@ -38,26 +38,29 @@ namespace asio=boost::asio;
 class FdAsyncLineReader{
 public:
   // ctor,assign,dtor
-  FdAsyncLineReader(size_t bufsize,asio::posix::stream_descriptor*ais,function<void(string const&)>linecb):buf_(bufsize),bufsize_(bufsize),ais_(ais),linecb_(linecb){
-    ais->async_read_some(boost::asio::buffer(buf_,bufsize_),std::bind(&FdAsyncLineReader::read_handler,this,_1,_2));
+  FdAsyncLineReader(asio::io_service&ios,int fd,size_t bufsize,function<void(string const&)>linecb):
+      ios_(ios),fd_(fd),ais_(ios_,fd_),buf_(bufsize),bufsize_(bufsize),linecb_(linecb){
+    ais_.async_read_some(boost::asio::buffer(buf_,bufsize_),std::bind(&FdAsyncLineReader::read_handler,this,_1,_2));
   }
   FdAsyncLineReader(FdAsyncLineReader const&)=delete;
   FdAsyncLineReader(FdAsyncLineReader&&)=default;
   FdAsyncLineReader&operator=(FdAsyncLineReader const&)=delete;
   FdAsyncLineReader&operator=(FdAsyncLineReader&&)=default;
   ~FdAsyncLineReader(){
-    ais_->cancel();
-    ais_->close();
+    ais_.cancel();
+    ais_.close();
   }
   // getters
+  asio::io_service&ios()const{return ios_;}
+  int fd()const{return fd_;}
   size_t bufsize()const{return bufsize_;}
-  vector<char> const&buf()const{return buf_;}
+  vector<char>const&buf()const{return buf_;}
 private:
   // async read handler
   void read_handler(boost::system::error_code const&err,size_t nbytes){
     if(nbytes!=0){
       process_data(nbytes);
-      ais_->async_read_some(boost::asio::buffer(buf_,bufsize_),std::bind(&FdAsyncLineReader::read_handler,this,_1,_2));
+      ais_.async_read_some(boost::asio::buffer(buf_,bufsize_),std::bind(&FdAsyncLineReader::read_handler,this,_1,_2));
     }else{
       // error
       // NOTE! Not yet done
@@ -76,9 +79,12 @@ private:
       }
     }
   }
+  // private data
+  asio::io_service&ios_;
+  int fd_;
+  asio::posix::stream_descriptor ais_;
   vector<char>buf_;
   size_t bufsize_;
-  asio::posix::stream_descriptor*ais_;
   function<void(string const&)>linecb_;
   string line_;
 };
@@ -184,12 +190,11 @@ int main(){
     int cpid1=spawnPipeChild(execFile,execArgs,fdRead1,fdWrite1,true);
 
     // write to child
-    constexpr char msg[]="Hello world 1\nAgain and again\n";
+    constexpr char msg[]="Hello world 1\nAgain and again\nTesting translation again ...\n";
     write(fdWrite1,msg,sizeof(msg));
 
     // setup reading from child asynchronously and capture each read line in a callback function
-    asio::posix::stream_descriptor ais1(ios,fdRead1);
-    FdAsyncLineReader fdr{3,&ais1,[](string const&line){cerr<<line<<endl;}};
+    FdAsyncLineReader fdr{ios,fdRead1,3,[](string const&line){cerr<<line<<endl;}};
 
     // setup deadline timer to close write fd to child after a few seconds
     boost::asio::deadline_timer ticker(ios,boost::posix_time::milliseconds(1000));
