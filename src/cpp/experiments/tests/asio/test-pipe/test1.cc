@@ -50,11 +50,6 @@ public:
   ~FdAsyncLineReader(){
     close();
   }
-  // getters
-  asio::io_service&ios()const{return ios_;}
-  int fd()const{return fd_;}
-  size_t bufsize()const{return bufsize_;}
-  vector<char>const&buf()const{return buf_;}
 private:
   // async read handler
   void read_handler(boost::system::error_code const&err,size_t nbytes){
@@ -206,10 +201,6 @@ int main(){
     vector<string>execArgs{"cat"};
     int cpid1=spawnPipeChild(execFile,execArgs,fdRead1,fdWrite1,true);
 
-    // write to child
-    constexpr char msg[]="Hello world 1\nAgain and again\nTesting translation again ...\n";
-    write(fdWrite1,msg,sizeof(msg));
-
     // setup reading from child asynchronously and capture each read line in a callback function
     // (will invoke callback function with a string after stripping it form newline)
     FdAsyncLineReader fdr{ios,fdRead1,3,[](string const&line){cerr<<line<<endl;}};
@@ -221,6 +212,10 @@ int main(){
       eclose(fdWrite1,false);
     };
     ticker.async_wait(fticker);
+
+    // write to child
+    constexpr char msg[]="Hello world 1\nAgain and again\nTesting translation again ...\n";
+    write(fdWrite1,msg,sizeof(msg));
 
     // run asio
     cerr<<"running asio ..."<<endl;
