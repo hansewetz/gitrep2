@@ -34,7 +34,8 @@ namespace asio=boost::asio;
     std::string s{strm.str()};\
     throw std::runtime_error(s);\
 }
-// read async from fd and invoke a callback function for each read line
+// read asynchrounosly from fd and invoke a callback function for each read line
+// (the callback function is called with a string which have had the newline ('\n') stripped)
 class FdAsyncLineReader{
 public:
   // ctor,assign,dtor
@@ -47,8 +48,7 @@ public:
   FdAsyncLineReader&operator=(FdAsyncLineReader const&)=delete;
   FdAsyncLineReader&operator=(FdAsyncLineReader&&)=default;
   ~FdAsyncLineReader(){
-    ais_.cancel();
-    ais_.close();
+    close();
   }
   // getters
   asio::io_service&ios()const{return ios_;}
@@ -58,12 +58,20 @@ public:
 private:
   // async read handler
   void read_handler(boost::system::error_code const&err,size_t nbytes){
+    if(err==boost::asio::error::eof){
+      close();
+    }else
+    if(err!=0){
+      close();
+      THROW_RUNTIME("FdAsyncLineReader::read_handler: error code: "<<err.value()<<", error: "<<err.message();)
+    }else
     if(nbytes!=0){
       process_data(nbytes);
       ais_.async_read_some(boost::asio::buffer(buf_,bufsize_),std::bind(&FdAsyncLineReader::read_handler,this,_1,_2));
     }else{
-      // error
-      // NOTE! Not yet done
+      // unknown error
+      close();
+      THROW_RUNTIME("FdAsyncLineReader::read_handler: unknown error, read 0 bytes");
     }
   }
   // process read data
@@ -79,6 +87,14 @@ private:
       }
     }
   }
+  // close connection
+  void close(){
+    if(!closed_){
+      ais_.cancel();
+      ais_.close();
+      closed_=true;
+    }
+  }
   // private data
   asio::io_service&ios_;
   int fd_;
@@ -87,6 +103,7 @@ private:
   vector<char>buf_;
   function<void(string const&)>linecb_;
   string line_;
+  bool closed_=false;
 };
 
 // close a file descriptor
@@ -194,6 +211,7 @@ int main(){
     write(fdWrite1,msg,sizeof(msg));
 
     // setup reading from child asynchronously and capture each read line in a callback function
+    // (will invoke callback function with a string after stripping it form newline)
     FdAsyncLineReader fdr{ios,fdRead1,3,[](string const&line){cerr<<line<<endl;}};
 
     // setup deadline timer to close write fd to child after a few seconds
@@ -214,6 +232,6 @@ int main(){
     while(waitpid(-1,&waitstat,0)>0);
   }
   catch(std::exception const&e){
-    cerr<<"main: coufg exception: "<<e.what()<<endl;
+    cerr<<"main: cought exception: "<<e.what()<<endl;
   }
 }
