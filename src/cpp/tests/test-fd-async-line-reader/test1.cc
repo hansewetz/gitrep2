@@ -14,26 +14,26 @@ int main(){
     boost::asio::io_service ios;
 
     // spawn /bin/cat as child program
-    int fdRead1,fdWrite1;
-    string execFile{"/bin/cat"};
-    vector<string>execArgs{"cat"};
-    int cpid1=spawnPipeChild(execFile,execArgs,fdRead1,fdWrite1,true);
+    int fdRead,fdWrite;
+    int cpid=spawnPipeChild("/bin/cat",vector<string>{"cat"},fdRead,fdWrite,true);
 
     // setup reading from child asynchronously and capture each read line in a callback function
     // (will invoke callback function with a string after stripping it form newline)
-    FdAsyncLineReader fdr{ios,fdRead1,3,[](string const&line){cerr<<line<<endl;}};
+    function<void(string const&)>linecb=[](string const&line){cerr<<line<<endl;};
+    function<void(boost::system::error_code const&err)>errcb=[](boost::system::error_code const&err){cerr<<err.message()<<endl;};
+    FdAsyncLineReader fdr{ios,fdRead,3,linecb,errcb};
 
     // setup deadline timer to close write fd to child after a few seconds
     boost::asio::deadline_timer ticker(ios,boost::posix_time::milliseconds(1000));
     std::function<void(const boost::system::error_code&)>fticker=[&](const boost::system::system_error&ec){
       cerr<<"ticker: closing pipe to child fd ..."<<endl;
-      eclose(fdWrite1,false);
+      eclose(fdWrite,false);
     };
     ticker.async_wait(fticker);
 
     // write to child
     constexpr char msg[]="Hello world 1\nAgain and again\nTesting translation again ...\n";
-    write(fdWrite1,msg,sizeof(msg));
+    write(fdWrite,msg,sizeof(msg));
 
     // run asio
     cerr<<"running asio ..."<<endl;

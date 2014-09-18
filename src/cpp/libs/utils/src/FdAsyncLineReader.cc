@@ -11,8 +11,9 @@ namespace asio=boost::asio;
 namespace utils{
 
 // ctor
-FdAsyncLineReader::FdAsyncLineReader(asio::io_service&ios,int fd,size_t bufsize,function<void(string const&)>linecb):
-    ios_(ios),fd_(fd),ais_(ios_,fd_),bufsize_(bufsize),buf_(bufsize_),linecb_(linecb){
+FdAsyncLineReader::FdAsyncLineReader(asio::io_service&ios,int fd,size_t bufsize,
+  function<void(string const&)>linecb,std::function<void(boost::system::error_code const&)>errcb):
+    ios_(ios),fd_(fd),ais_(ios_,fd_),bufsize_(bufsize),buf_(bufsize_),linecb_(linecb),errcb_(errcb){
   ais_.async_read_some(boost::asio::buffer(buf_,bufsize_),std::bind(&FdAsyncLineReader::read_handler,this,_1,_2));
 }
 // dtor
@@ -21,12 +22,9 @@ FdAsyncLineReader::~FdAsyncLineReader(){
 }
 // async read handler
 void FdAsyncLineReader::read_handler(boost::system::error_code const&err,size_t nbytes){
-  if(err==boost::asio::error::eof){
-    close();
-  }else
   if(err!=0){
     close();
-    THROW_RUNTIME("FdAsyncLineReader::read_handler: error code: "<<err.value()<<", error: "<<err.message();)
+    errcb_(boost::system::error_code(err));
   }else
   if(nbytes!=0){
     process_data(nbytes);
@@ -34,7 +32,7 @@ void FdAsyncLineReader::read_handler(boost::system::error_code const&err,size_t 
   }else{
     // unknown error
     close();
-    THROW_RUNTIME("FdAsyncLineReader::read_handler: unknown error, read 0 bytes");
+    THROW_RUNTIME("FdAsyncLineReader::read_handler: unknown error, read 0 bytes, should never happen");
   }
 }
 // process read data

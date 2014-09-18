@@ -11,7 +11,9 @@ namespace utils{
 class FdAsyncLineReader{
 public:
   // ctor,assign,dtor
-  FdAsyncLineReader(boost::asio::io_service&ios,int fd,std::size_t bufsize,std::function<void(std::string const&)>linecb);
+  FdAsyncLineReader(boost::asio::io_service&ios,int fd,std::size_t bufsize,
+                    std::function<void(std::string const&)>linecb,
+                    std::function<void(boost::system::error_code const&)>errcb);
   FdAsyncLineReader(FdAsyncLineReader const&)=delete;
   FdAsyncLineReader(FdAsyncLineReader&&)=default;
   FdAsyncLineReader&operator=(FdAsyncLineReader const&)=delete;
@@ -30,6 +32,7 @@ private:
   std::size_t bufsize_;
   std::vector<char>buf_;
   std::function<void(std::string const&)>linecb_;
+  std::function<void(boost::system::error_code const&)>errcb_;
   std::string line_;
   bool closed_=false;
 };
