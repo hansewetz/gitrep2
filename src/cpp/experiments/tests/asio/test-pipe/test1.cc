@@ -1,7 +1,8 @@
 /*
-problem is that 'async_read(...)' reads until buffer is full.
-right now, buffer size is set to 1.
-should instead use 'async_read_until(...) or something else
+	this program sets up two pipes, sets up reading from child using asio and spawns a child program (/bin/cat)
+	the program demonstrates:
+		(1) spawning achild together with duping fds so parent and child can talk to each other
+		(2) reading from pipe fd using boost::asio
 */
 #include <cstring>
 #include <string>
@@ -32,13 +33,16 @@ namespace asio=boost::asio;
     std::string s{strm.str()};\
     throw std::runtime_error(s);\
 }
-// callback handler for read
-void read_handler(boost::system::error_code const&err,size_t nbytes,asio::posix::stream_descriptor*ais,asio::streambuf*pbuf){
+// buffer stuff on reading end of parent
+constexpr size_t bufsize{3};
+array<char,bufsize>buf;
+auto bufs{boost::asio::buffer(buf,bufsize)};
+
+// callback handler for read on parent side
+void read_handler(boost::system::error_code const&err,size_t nbytes,asio::posix::stream_descriptor*ais){
   if(nbytes!=0){
-    istreambuf_iterator<char>end;
-    istreambuf_iterator<char>it{pbuf};
-    for(;it!=end;++it)cerr<<*it;
-    asio::async_read(*ais,*pbuf,std::bind(read_handler,_1,_2,ais,pbuf));
+    for(int i=0;i<nbytes;++i)cerr<<buf[i];
+    ais->async_read_some(bufs,std::bind(read_handler,_1,_2,ais));
   }else{
     ais->cancel();
     ais->close();
@@ -138,28 +142,24 @@ int main(){
     // io_service object
     asio::io_service ios;
 
-    // spawn child
+    // spawn /bin/cat as child program
     int fdRead1,fdWrite1;
     string execFile{"/bin/cat"};
     vector<string>execArgs{"cat"};
     int cpid1=spawnPipeChild(execFile,execArgs,fdRead1,fdWrite1,true);
 
     // write to child
-    asio::posix::stream_descriptor aos1(ios,fdWrite1);
-    asio::streambuf tmpbuf1{1024};
-    ostream os1{&tmpbuf1};
-    os1<<"Hello world 1"<<endl<<flush;
-    asio::write(aos1,tmpbuf1);
+    constexpr char msg[]="Hello world 1\n";
+    write(fdWrite1,msg,sizeof(msg));
 
-    // read from child asynchronously
-    asio::streambuf buf1{1}; // NOTE! Should not have to be of size '1'
+    // setup reading from child asynchronously
     asio::posix::stream_descriptor ais1(ios,fdRead1);
-    asio::async_read(ais1,buf1,std::bind(read_handler,_1,_2,&ais1,&buf1));
+    ais1.async_read_some(bufs,std::bind(read_handler,_1,_2,&ais1));
 
     // setup deadline timer to close write fd to child after a few seconds
     boost::asio::deadline_timer ticker(ios,boost::posix_time::milliseconds(1000));
     std::function<void(const boost::system::error_code&)>fticker=[&](const boost::system::system_error&ec){
-      cerr<<"ticker: closing write to child fd ..."<<endl;
+      cerr<<"ticker: closing pipe to child fd ..."<<endl;
       eclose(fdWrite1,false);
     };
     ticker.async_wait(fticker);
