@@ -33,19 +33,28 @@ namespace asio=boost::asio;
     std::string s{strm.str()};\
     throw std::runtime_error(s);\
 }
-// buffer stuff on reading end of parent
-constexpr size_t bufsize{3};
-
-// callback handler for read on parent side
-void read_handler(boost::system::error_code const&err,size_t nbytes,asio::posix::stream_descriptor*ais,array<char,bufsize>*buf){
-  if(nbytes!=0){
-    for(int i=0;i<nbytes;++i)cerr<<(*buf)[i];
-    ais->async_read_some(boost::asio::buffer(*buf,bufsize),std::bind(read_handler,_1,_2,ais,buf));
-  }else{
-    ais->cancel();
-    ais->close();
+// class representing parent reading side
+class FdReasyncRead{
+public:
+  FdReasyncRead(asio::posix::stream_descriptor*ais):ais_(ais){
+    ais->async_read_some(boost::asio::buffer(buf_,bufsize_),std::bind(&FdReasyncRead::read_handler,this,_1,_2));
   }
-}
+  ~FdReasyncRead(){
+    ais_->cancel();
+    ais_->close();
+  }
+private:
+  void read_handler(boost::system::error_code const&err,size_t nbytes){
+    if(nbytes!=0){
+      for(int i=0;i<nbytes;++i)cerr<<buf_[i];
+      ais_->async_read_some(boost::asio::buffer(buf_,bufsize_),std::bind(&FdReasyncRead::read_handler,this,_1,_2));
+    }
+  }
+  static constexpr size_t bufsize_{3};
+  array<char,bufsize_>buf_;
+  asio::posix::stream_descriptor*ais_;
+};
+
 // close a file descriptor
 int eclose(int fd,bool throwExcept=true){
   while(close(fd)<0&&errno==EINTR);
@@ -150,12 +159,9 @@ int main(){
     constexpr char msg[]="Hello world 1\n";
     write(fdWrite1,msg,sizeof(msg));
 
-    // buffer stuff on reading end of parent
-    array<char,bufsize>buf;
-
     // setup reading from child asynchronously
     asio::posix::stream_descriptor ais1(ios,fdRead1);
-    ais1.async_read_some(boost::asio::buffer(buf,bufsize),std::bind(read_handler,_1,_2,&ais1,&buf));
+    FdReasyncRead fdr{&ais1};
 
     // setup deadline timer to close write fd to child after a few seconds
     boost::asio::deadline_timer ticker(ios,boost::posix_time::milliseconds(1000));
