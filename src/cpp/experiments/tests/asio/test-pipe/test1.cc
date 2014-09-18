@@ -3,6 +3,7 @@
 	the program demonstrates:
 		(1) spawning achild together with duping fds so parent and child can talk to each other
 		(2) reading from pipe fd using boost::asio
+		(3) invoke a callback function for each read line
 */
 #include <cstring>
 #include <string>
@@ -33,26 +34,53 @@ namespace asio=boost::asio;
     std::string s{strm.str()};\
     throw std::runtime_error(s);\
 }
-// class representing parent reading side
-template<size_t BUFSIZE>
-class FdReasyncRead{
+// read async from fd and invoke a callback function for each read line
+class FdAsyncLineReader{
 public:
-  FdReasyncRead(asio::posix::stream_descriptor*ais):ais_(ais){
-    ais->async_read_some(boost::asio::buffer(buf_,BUFSIZE),std::bind(&FdReasyncRead::read_handler,this,_1,_2));
+  // ctor,assign,dtor
+  FdAsyncLineReader(size_t bufsize,asio::posix::stream_descriptor*ais,function<void(string const&)>linecb):buf_(bufsize),bufsize_(bufsize),ais_(ais),linecb_(linecb){
+    ais->async_read_some(boost::asio::buffer(buf_,bufsize_),std::bind(&FdAsyncLineReader::read_handler,this,_1,_2));
   }
-  ~FdReasyncRead(){
+  FdAsyncLineReader(FdAsyncLineReader const&)=delete;
+  FdAsyncLineReader(FdAsyncLineReader&&)=default;
+  FdAsyncLineReader&operator=(FdAsyncLineReader const&)=delete;
+  FdAsyncLineReader&operator=(FdAsyncLineReader&&)=default;
+  ~FdAsyncLineReader(){
     ais_->cancel();
     ais_->close();
   }
+  // getters
+  size_t bufsize()const{return bufsize_;}
+  vector<char> const&buf()const{return buf_;}
 private:
+  // async read handler
   void read_handler(boost::system::error_code const&err,size_t nbytes){
     if(nbytes!=0){
-      for(int i=0;i<nbytes;++i)cerr<<buf_[i];
-      ais_->async_read_some(boost::asio::buffer(buf_,BUFSIZE),std::bind(&FdReasyncRead::read_handler,this,_1,_2));
+      process_data(nbytes);
+      ais_->async_read_some(boost::asio::buffer(buf_,bufsize_),std::bind(&FdAsyncLineReader::read_handler,this,_1,_2));
+    }else{
+      // error
+      // NOTE! Not yet done
     }
   }
-  array<char,BUFSIZE>buf_;
+  // process read data
+  // (break it into lines and dump each line as we find them)
+  void process_data(size_t nbytes){
+    for(int i=0;i<nbytes;++i){
+      char c{buf_[i]};
+      if(c=='\n'){
+        linecb_(line_);
+        line_.clear();
+      }else{
+        line_.push_back(c);
+      }
+    }
+  }
+  vector<char>buf_;
+  size_t bufsize_;
   asio::posix::stream_descriptor*ais_;
+  function<void(string const&)>linecb_;
+  string line_;
 };
 
 // close a file descriptor
@@ -156,12 +184,12 @@ int main(){
     int cpid1=spawnPipeChild(execFile,execArgs,fdRead1,fdWrite1,true);
 
     // write to child
-    constexpr char msg[]="Hello world 1\n";
+    constexpr char msg[]="Hello world 1\nAgain and again\n";
     write(fdWrite1,msg,sizeof(msg));
 
-    // setup reading from child asynchronously
+    // setup reading from child asynchronously and capture each read line in a callback function
     asio::posix::stream_descriptor ais1(ios,fdRead1);
-    FdReasyncRead<3>fdr{&ais1};
+    FdAsyncLineReader fdr{3,&ais1,[](string const&line){cerr<<line<<endl;}};
 
     // setup deadline timer to close write fd to child after a few seconds
     boost::asio::deadline_timer ticker(ios,boost::posix_time::milliseconds(1000));
