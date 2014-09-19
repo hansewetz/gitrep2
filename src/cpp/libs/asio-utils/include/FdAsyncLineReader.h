@@ -4,7 +4,7 @@
 #include <vector>
 #include <functional>
 #include <boost/asio.hpp>
-namespace utils{
+namespace asioutils{
 
 // read asynchrounosly from fd and invoke a callback function for each read line
 // (the callback function is called with a string which have had the newline ('\n') stripped)

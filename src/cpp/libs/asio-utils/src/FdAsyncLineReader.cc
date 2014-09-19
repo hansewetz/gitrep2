@@ -1,4 +1,4 @@
-#include "utils/FdAsyncLineReader.h"
+#include "asio-utils/FdAsyncLineReader.h"
 #include "utils/utility.h"
 #include <string>
 #include <vector>
@@ -8,7 +8,7 @@
 using namespace std;
 using namespace std::placeholders;
 namespace asio=boost::asio;
-namespace utils{
+namespace asioutils{
 
 // ctor
 FdAsyncLineReader::FdAsyncLineReader(asio::io_service&ios,int fd,size_t bufsize,

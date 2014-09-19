@@ -1,7 +1,7 @@
 # To be built
 LOCAL_TARGET    =
-LOCAL_SOTARGET  = $(PROJECT_ROOT)/lib/libutils.so
-LOCAL_OBJS      = fileUtils.o utility.o logUtils.o sysUtils.o 
+LOCAL_SOTARGET  = $(PROJECT_ROOT)/lib/libasioutils.so
+LOCAL_OBJS      = FdAsyncLineReader.o
 
 # Control.
 LOCAL_LIBS      = 
