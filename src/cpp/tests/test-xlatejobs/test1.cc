@@ -21,31 +21,32 @@ using namespace xlate;
 
 // handler for jobs that have been translated
 // (output queue from job repository)
-void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationJob>job, std::shared_ptr<JobQueueListener>qtransjobreceiver){
+void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationJob>job,std::shared_ptr<JobQueueListener>qtransjobreceiver){
   BOOST_LOG_TRIVIAL(info)<<"translated job: "<<*job;
   qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver));
 }
-//  -------------- main test program
+//  main test program
 int main(){
   // setup asio stuff
-  boost::asio::io_service io_service;
+  boost::asio::io_service ios;
 
   // set log level (do not log debug messages)
   utils::initBoostFileLogging(false);
   try{
-    // create and arm translation component
-    TranslationCt tct{io_service,1,3};
+    // (1) ------------ create a translation component (one language pair)
+    TranslationCt tct{ios,1,3};
     tct.run();
 
+    // (2) ------------ create receiver of translated jobs
+    std::shared_ptr<JobQueueListener>qtransjobreceiver{make_shared<JobQueueListener>(ios,tct.getTranslatedJobQueue())};
+    qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver));
+
+    // (3) ------------ generate and send input for translation
     // create a request factory
     TranslationRequestFactory reqFact;
 
     // create sender to translation repository
-    std::shared_ptr<JobQueueSender>qnewjobsender{make_shared<JobQueueSender>(io_service,tct.getNewJobQueue())};
-
-    // create receive of translated jobs and arm it
-    std::shared_ptr<JobQueueListener>qtransjobreceiver{make_shared<JobQueueListener>(io_service,tct.getTranslatedJobQueue())};
-    qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver));
+    std::shared_ptr<JobQueueSender>qnewjobsender{make_shared<JobQueueSender>(ios,tct.getNewJobQueue())};
 
     // send jobs to translation component
     for(int i=0;i<5;++i){
@@ -57,8 +58,8 @@ int main(){
       std::shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};
       qnewjobsender->async_enq(job,[](boost::system::error_code const&ec){});
     }
-    // run asynchronous machinery
-    io_service.run();
+    // (4) ------------ run asynchronous machinery
+    ios.run();
   }
   catch(exception const&e){
     BOOST_LOG_TRIVIAL(debug)<<"cought exception: "<<e.what();
