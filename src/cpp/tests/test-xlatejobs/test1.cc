@@ -30,14 +30,17 @@ int main(){
   // setup asio stuff
   boost::asio::io_service ios;
 
-  // set log level (do not log debug messages)
+  // set log level
+  // (true: log debug info, false: do not log debug info)
   utils::initBoostFileLogging(false);
   try{
-    // (1) ------------ create a translation component (one language pair)
+    // (1) ------------ create a translation component
+    // (one translation component <--> one language pair)
     TranslationCt tct{ios,1,3};
     tct.run();
 
     // (2) ------------ create receiver of translated jobs
+    // (we'll use the receiver to print out jobs which have been translated)
     std::shared_ptr<JobQueueListener>qtransjobreceiver{make_shared<JobQueueListener>(ios,tct.getTranslatedJobQueue())};
     qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver));
 
@@ -59,6 +62,8 @@ int main(){
       qnewjobsender->async_enq(job,[](boost::system::error_code const&ec){});
     }
     // (4) ------------ run asynchronous machinery
+    // (everything runs under asio with the exception of the actual engines which runs as separate processes)
+    BOOST_LOG_TRIVIAL(info)<<"starting asio ...";
     ios.run();
   }
   catch(exception const&e){
