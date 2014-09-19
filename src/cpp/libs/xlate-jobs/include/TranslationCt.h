@@ -6,7 +6,6 @@
 #include <cstddef>
 #include <memory>
 #include <vector>
-#include <thread>
 #include <ratio>
 namespace xlate{
 
@@ -39,7 +38,7 @@ private:
   // queue configuration parameters
   std::size_t qnewJobSize_=std::mega::num;                   // new jobs into repository - can be very large
   std::size_t qschedJobSize_;                                // queue size between job repository and scheduler
-  std::size_t qschedTaskSize_;                               // queue size from scheduler to engines (should be same sizre as #of engines)
+  std::size_t qschedTaskSize_;                               // queue size from scheduler to engines (should be same size as #of engines)
   std::size_t qtransTasksSize_=std::mega::num;               // translated queue size - can be very large
   std::size_t qtransJobSize_=std::mega::num;                 // translated job size - can be very large
 
@@ -57,7 +56,6 @@ private:
   std::shared_ptr<TranslationJobRepository>jobrep_;
   std::shared_ptr<TaskScheduler>scheduler_;
   std::vector<std::shared_ptr<EngineProxy>>engines_;
-  std::vector<std::thread>thr_engines_;
 };
 }
 #endif

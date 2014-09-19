@@ -10,7 +10,7 @@ class TranslationTask;
 // class scheduling tasks taken from a job repository
 class EngineProxy{
 public:
-  EngineProxy(std::shared_ptr<TaskQueue>qin,std::shared_ptr<TaskQueue>qout);
+  EngineProxy(boost::asio::io_service&ios,std::shared_ptr<TaskQueue>qin,std::shared_ptr<TaskQueue>qout);
   EngineProxy(EngineProxy const&)=delete;
   EngineProxy(EngineProxy&&)=default;
   EngineProxy&operator=(EngineProxy const&)=delete;
@@ -23,12 +23,17 @@ public:
   // getters
   EngineProxyId id()const;
 private:
-  std::shared_ptr<TaskQueue>qin_;
-  std::shared_ptr<TaskQueue>qout_;
-  EngineProxyId id_;
+  // helper functions
+  void waitForNewTask();
+  void newTaskHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task);
+  void tmoHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task);
 
-  // transate a task
-  void translate(std::shared_ptr<TranslationTask>)const;
+  // asio stuff
+  boost::asio::io_service&ios_;
+  std::shared_ptr<TaskQueueListener>qtaskListener_;
+  std::shared_ptr<TaskQueueSender>qtaskSender_;
+  EngineProxyId id_;
+  boost::asio::deadline_timer tmo_;
 };
 }
 #endif
