@@ -11,7 +11,7 @@ void isort(vector<int>&v){
   for(int i=1;i<n;++i){
     int t=v[i];
     int j=i;
-    for(;j0&&v[j-1]>t;--j)v[j]=v[j-1];
+    for(;j>0&&v[j-1]>t;--j)v[j]=v[j-1];
     v[j]=t;
   }
 }
