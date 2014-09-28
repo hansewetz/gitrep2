@@ -10,7 +10,7 @@ namespace pt= boost::posix_time;
 // deserialise stream into a string
 int reader(istream&is){
   // NOTE!
-  return "hello";
+  return 5;
 }
 // test main program
 int main(){
