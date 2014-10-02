@@ -12,12 +12,12 @@ NOTE!	Maybe we should remove the max size of the queue ...?
 #include <mutex>
 #include <chrono>
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/thread/thread_time.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
 #include <boost/interprocess/sync/named_condition.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -56,7 +56,7 @@ public:
   // put a message into queue
   // (returns true if message was enqueued, false if enqueing was disabled)
   bool enq(T t){
-    // loop until there is room in the queue or until someone stops dequeing
+    // loop until there is room in the queue or until enquing is disabled
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     while(enq_enabled_){
       // check if there is room to put another message into queue
@@ -74,7 +74,7 @@ public:
   // wait until we can put a message in queue
   // (returns false if enqueing was disabled, else true)
   bool wait_enq(){
-    // loop until there is room in the queue or until someone stops dequeing
+    // loop until there is room in the queue or until enquing is disabled
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     while(enq_enabled_){
       // check if there is room to put another message into queue
@@ -90,7 +90,7 @@ public:
   }
   // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(){
-    // loop until we have a message or until someone stops enqueing
+    // loop until we have a message or until dequeing is disabled
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     while(deq_enabled_){
       // get oldest file
@@ -138,7 +138,7 @@ public:
   // get #of items in queue
   std::size_t size()const{
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    return sizeNolock().size();
+    return sizeNolock();
   }
   // get max items in queue
   std::size_t maxsize()const{
@@ -151,9 +151,10 @@ public:
     boost::interprocess::named_condition::remove(getCondName(dir).c_str());
   }
 private:
-  // helper write function (lock must be held when calling this functions)
+  // helper write function (lock must be held when calling this function)
   void write(T const&t)const{
     // create a unique filename, open file for writing and serialise object to file (user defined function)
+    // (serialization function is a user supplied function - see ctor)
     std::string const id{boost::lexical_cast<std::string>(boost::uuids::random_generator()())};
     fs::path fullpath{dir_/id};
     std::ofstream os{fullpath.string(),std::ofstream::binary};
@@ -161,7 +162,7 @@ private:
     fw_(os,t);
     os.close();
   }
-  // helper read function (lock must be held when calling this functions)
+  // helper read function (lock must be held when calling this function)
   T read(fs::path const&fullpath)const{
     // open input stream, deserialize stream into an object and remove file
     // (deserialization function is a user supplied function - see ctor)
@@ -172,18 +173,25 @@ private:
     std::remove(fullpath.string().c_str());
     return ret;
   }
-  // check if queue is full - must hold a lock when calling
+  // check if queue is full
+  // (lock must be held when calling this function)
   bool fullNolock()const{
     return sizeNolock()>=maxsize_;
   }
-  // check if queue is empty - must hold a lock when calling
+  // check if queue is empty 
+  // (lock must be held when calling this function)
   bool emptyNolock()const{
     std::pair<bool,fs::path>oldestFile{nextFile()};
     if(!oldestFile.first)return true;
     return false;
   }
+  // get size of queue
+  // (lock must be held when calling this function)
+  size_t sizeNolock()const{
+    return allFiles().size();
+  }
   // get oldest file + manage cache_ if needed
-  // (must be called when having the lock)
+  // (lock must be held when calling this function)
   std::pair<bool,fs::path>nextFile()const{
     // only fill cache if cache is empty
     cleanCache();
@@ -193,13 +201,8 @@ private:
     cache_.pop_front();
     return ret;
   }
-  // get size of queue
-  size_t sizeNolock()const{
-    return allFiles().size();
-  }
-  // (must be called when having the lock)
   // get all pending messages and fill cache at the same time
-  // (must be called when having the lock)
+  // (lock must be held when calling this function)
   std::list<fs::path>allFiles()const{
     cleanCache();
     fillCache(true);
@@ -215,13 +218,12 @@ private:
       for(auto const&f:sortedFiles)cache_.push_back(f.second);
     }
   }
-  // fill cache of files
+  // remove any file in cache which do not exist in dir_
   // (must be called when having the lock)
   void cleanCache()const{
     std::list<fs::path>tmpCache;
-    for(auto const&p:cache_){
+    for(auto const&p:cache_)
       if(fs::exists(p))tmpCache.push_back(p);
-    }
     swap(tmpCache,cache_);
   }
   // get all filenames in time sorted order in a dircetory

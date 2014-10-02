@@ -22,28 +22,34 @@ int main(int argc,char*argv[]){
   if(!strcmp(argv[1],"-d"))producer=false;
   else usage();
 
-  // directory for queue
-  fs::path qdir{"./q1"};
+  try{
+    // directory for queue
+    fs::path qdir{"./q2"};
 
-  // setup a queue
-  function<int(istream&)>reader=[](istream&is){int ret;is>>ret;return ret;};
-  function<void(ostream&,int)>writer=[](ostream&os,int i){os<<i;};
-  asio::polldir_queue<int,decltype(reader),decltype(writer)>pq{10,5000,qdir,reader,writer,true};
+    // setup a queue
+    function<int(istream&)>reader=[](istream&is){int ret;is>>ret;return ret;};
+    function<void(ostream&,int)>writer=[](ostream&os,int i){os<<i;};
+    asio::polldir_queue<int,decltype(reader),decltype(writer)>pq{10,5000,qdir,reader,writer,true};
 
-  // remove locks if they exist
-//  pq.removeLockVariables(qdir);
+    // remove locks if they exist
+    //pq.removeLockVariables(qdir);
 
-  // check if we are consumer or producer
-  if(producer){
-    for(int i=0;i<100;++i){
-      pq.enq(i);
-      std::chrono::milliseconds tmo(1000);
-      std::this_thread::sleep_for(tmo);
+    // check if we are consumer or producer
+    if(producer){
+      for(int i=0;i<100;++i){
+        pq.enq(i);
+        std::chrono::milliseconds tmo(1000);
+        std::this_thread::sleep_for(tmo);
+      }
+    }else{
+      while(true){
+        pair<bool,int>p{pq.deq()};
+        cout<<"deq: "<<boolalpha<<"["<<p.first<<","<<p.second<<"]"<<endl;
+      }
     }
-  }else{
-    while(true){
-      pair<bool,int>p{pq.deq()};
-      cout<<"deq: "<<boolalpha<<"["<<p.first<<","<<p.second<<"]"<<endl;
-    }
+  }
+  catch(exception const&e){
+    cerr<<"caught exception: "<<e.what()<<endl;
+    exit(1);
   }
 }
