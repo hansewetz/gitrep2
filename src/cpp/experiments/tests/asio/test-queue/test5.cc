@@ -9,16 +9,6 @@ namespace asio= boost::asio;
 namespace fs=boost::filesystem;
 namespace pt= boost::posix_time;
 
-// deserialise stream into a string
-int reader(istream&is){
-  int ret;
-  is>>ret;
-  return ret;
-}
-// serialise stream into a string
-int writer(ostream&os,int i){
-  os<<i;
-}
 // print usage info and exit
 void usage(){
   cerr<<"usage: test5 [-e|-d]"<<endl;
@@ -36,9 +26,9 @@ int main(int argc,char*argv[]){
   fs::path qdir{"./q1"};
 
   // setup a queue
-  function<int(istream&)>read{reader};
-  function<void(ostream&,int)>write{writer};
-  asio::polldir_queue<int,decltype(read),decltype(write)>pq{10,5000,qdir,read,write,true};
+  function<int(istream&)>reader=[](istream&is){int ret;is>>ret;return ret;};
+  function<void(ostream&,int)>writer=[](ostream&os,int i){os<<i;};
+  asio::polldir_queue<int,decltype(reader),decltype(writer)>pq{10,5000,qdir,reader,writer,true};
 
   // remove locks if they exist
 //  pq.removeLockVariables(qdir);

@@ -29,9 +29,9 @@ namespace fs=boost::filesystem;
 namespace ipc=boost::interprocess;
 namespace pt= boost::posix_time;
 
-// a simple threadsafe queue using directories as queue and files for storing messages
+// a simple threadsafe/interprocess-safe queue using directory as queue and files as storage media for queue items
 // (mutex/condition variable names are derived from the queue name)
-// (enq/deq have locks around them so that we cannot read 'half' a message)
+// (enq/deq have locks around them so that we cannot read a partial message)
 template<typename T,typename FR,typename FW>
 class polldir_queue{
 public:
@@ -60,14 +60,14 @@ public:
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     while(enq_enabled_){
       // check if there is room to put another message into queue
-      if(sizeNolock()<maxsize_){
+      if(!fullNolock()){
         write(t);
         ipccond_.notify_all();
         return true;
       }
       // sleep with poll intervall or until someone alerts us
       pt::ptime const abstm{pt::microsec_clock::local_time()+pt::milliseconds(pollms_)};
-      ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_|| sizeNolock()<maxsize_;});
+      ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_||!fullNolock();});
     }
     return false;
   }
@@ -78,7 +78,7 @@ public:
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     while(enq_enabled_){
       // check if there is room to put another message into queue
-      if(sizeNolock()<maxsize){
+      if(!fullNolock()){
         ipccond_.notify_all();
         return true;
       }
@@ -133,7 +133,7 @@ public:
   // check if queue is full
   bool full()const{
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    return sizeNolock().size()>=maxsize_;
+    return fullNolock();
   }
   // get #of items in queue
   std::size_t size()const{
@@ -171,6 +171,10 @@ private:
     is.close();
     std::remove(fullpath.string().c_str());
     return ret;
+  }
+  // check if queue is full - must hold a lock when calling
+  bool fullNolock()const{
+    return sizeNolock()>=maxsize_;
   }
   // check if queue is empty - must hold a lock when calling
   bool emptyNolock()const{
