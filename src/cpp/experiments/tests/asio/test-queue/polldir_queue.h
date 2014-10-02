@@ -67,7 +67,7 @@ public:
       }
       // sleep with poll intervall or until someone alerts us
       pt::ptime const abstm{pt::microsec_clock::local_time()+pt::milliseconds(pollms_)};
-      ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_|| sizeNolock().size()<maxsize_;});
+      ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_|| sizeNolock()<maxsize_;});
     }
     return false;
   }
