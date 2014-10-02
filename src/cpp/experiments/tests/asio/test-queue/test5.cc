@@ -18,7 +18,20 @@ int writer(ostream&os,int i){
 }
 // test main program
 int main(){
+  fs::path qdir{"./q1"};
+
+  // setup a queue
   function<int(istream&)>read{reader};
   function<void(ostream&,int)>write{writer};
-  asio::polldir_queue<int,decltype(read),decltype(write)>pq{10,1000,fs::path{".",},read,write,true};
+  asio::polldir_queue<int,decltype(read),decltype(write)>pq{10,1000,qdir,read,write,true};
+
+  // remove locks if they exist
+  pq.removeLockVariables(qdir);
+
+  // test enq/deq 
+//  cout<<"enq: "<<boolalpha<<pq.enq(17)<<endl;
+while(true){
+  pair<bool,int>p{pq.deq()};
+  cout<<"deq: "<<boolalpha<<"["<<p.first<<","<<p.second<<"]"<<endl;
+}
 }

@@ -12,6 +12,9 @@ NOTE!	Maybe we should remove the max size of the queue ...?
 #include <mutex>
 #include <chrono>
 #include <boost/filesystem.hpp>
+#include <boost/thread/thread_time.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
 #include <boost/interprocess/sync/named_condition.hpp>
 #include <boost/lexical_cast.hpp>
@@ -54,17 +57,17 @@ public:
   // (returns true if message was enqueued, false if enqueing was disabled)
   bool enq(T t){
     // loop until there is room in the queue or until someone stops dequeing
-    std::unique_lock<std::mutex>lock(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     while(enq_enabled_){
       // check if there is room to put another message into queue
-      if(sizeNolock()<maxsize){
+      if(sizeNolock()<maxsize_){
         write(t);
         ipccond_.notify_all();
         return true;
       }
       // sleep with poll intervall or until someone alerts us
       pt::ptime const abstm{pt::microsec_clock::local_time()+pt::milliseconds(pollms_)};
-      ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_;});
+      ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_|| sizeNolock().size()<maxsize_;});
     }
     return false;
   }
@@ -72,7 +75,7 @@ public:
   // (returns false if enqueing was disabled, else true)
   bool wait_enq(){
     // loop until there is room in the queue or until someone stops dequeing
-    std::unique_lock<std::mutex>lock(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     while(enq_enabled_){
       // check if there is room to put another message into queue
       if(sizeNolock()<maxsize){
@@ -81,14 +84,14 @@ public:
       }
       // sleep with poll intervall or until someone alerts us
       pt::ptime const abstm{pt::microsec_clock::local_time()+pt::milliseconds(pollms_)};
-      ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_;});
+      ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_||emptyNolock();});
     }
     return false;
   }
   // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(){
     // loop until we have a message or until someone stops enqueing
-    std::unique_lock<std::mutex>lock(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     while(deq_enabled_){
       // get oldest file
       std::pair<bool,fs::path>oldestFile{nextFile()};
@@ -99,11 +102,11 @@ public:
         return std::make_pair(true,ret);
       }
       // sleep with poll intervall or until someone alerts us
-      pt::ptime const abstm{pt::microsec_clock::local_time()+pt::milliseconds(pollms_)};
+      boost::system_time const abstm{boost::get_system_time()+pt::milliseconds(1000)};
       ipccond_.timed_wait(lock,abstm,[&](){return !deq_enabled_;});
     }
     // return null ptr if deq is disabled
-    return make_pair(false,T{});
+    return std::make_pair(false,T{});
   }
   // cancel deq operations (will also release blocking threads)
   void disable_deq(bool disable){
@@ -119,15 +122,13 @@ public:
   }
   // set max size of queue
   void set_maxsize(std::size_t maxsize){
-    std::lock_guard<std::mutex>(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     return maxsize_;
   }
   // check if queue is empty
   bool empty()const{
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    std::pair<bool,fs::path>oldestFile{nextFile()};
-    if(!oldestFile.first)return true;
-    return false;
+    return emptyNolock();
   }
   // check if queue is full
   bool full()const{
@@ -141,7 +142,7 @@ public:
   }
   // get max items in queue
   std::size_t maxsize()const{
-    std::lock_guard<std::mutex>(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     return maxsize_;
   }
   // remove lock variables for queue
@@ -155,22 +156,27 @@ private:
     // create a unique filename, open file for writing and serialise object to file (user defined function)
     std::string const id{boost::lexical_cast<std::string>(boost::uuids::random_generator()())};
     fs::path fullpath{dir_/id};
-    std::ofstream os{std::ofstream(fullpath.string(),std::ofstream::binary)};
+    std::ofstream os{fullpath.string(),std::ofstream::binary};
     if(!os)throw std::runtime_error(std::string("polldir_queue::write: could not open file: ")+fullpath.string());
     fw_(os,t);
     os.close();
   }
   // helper read function (lock must be held when calling this functions)
-  T read(fs::path const&filename)const{
+  T read(fs::path const&fullpath)const{
     // open input stream, deserialize stream into an object and remove file
     // (deserialization function is a user supplied function - see ctor)
-    fs::path fullpath{dir_/filename};
-    std::ifstream is{std::ifstream(fullpath.string(),std::ifstream::binary)};
+    std::ifstream is{fullpath.string(),std::ifstream::binary};
     if(!is)throw std::runtime_error(std::string("polldir_queue::read: could not open file: ")+fullpath.string());
     T ret{fr_(is)};
     is.close();
     std::remove(fullpath.string().c_str());
     return ret;
+  }
+  // check if queue is empty - must hold a lock when calling
+  bool emptyNolock()const{
+    std::pair<bool,fs::path>oldestFile{nextFile()};
+    if(!oldestFile.first)return true;
+    return false;
   }
   // get oldest file + manage cache_ if needed
   // (must be called when having the lock)
@@ -185,7 +191,7 @@ private:
   }
   // get size of queue
   size_t sizeNolock()const{
-    return allFiles.size();
+    return allFiles().size();
   }
   // (must be called when having the lock)
   // get all pending messages and fill cache at the same time
@@ -200,7 +206,7 @@ private:
   void fillCache(bool refill)const{
     // trash cache and re-read it if 'refill' is set or if cache is empty
     if(refill||cache_.empty()){
-      std::multimap<time_t,fs::path>sortedFiles{getTsOrderedFiles()};
+      std::multimap<time_t,fs::path>sortedFiles{getTsOrderedFiles(dir_)};
       cache_.clear();
       for(auto const&f:sortedFiles)cache_.push_back(f.second);
     }
