@@ -1,30 +1,39 @@
+/*
+  test program for polldir_queue.
+  program kicks off a sender thread and a receiver thread and terminates when a specified #of messages has been received
+*/
 #include "polldir_queue.h"
 #include <string>
-#include <chrono>
 #include <thread>
 #include <functional>
 
 using namespace std;
 namespace asio= boost::asio;
 namespace fs=boost::filesystem;
-namespace pt= boost::posix_time;
 
-// print usage info and exit
-void usage(){
-  cerr<<"usage: test5 [-e|-d]"<<endl;
-  exit(1);
+// sender
+template<typename Q>
+void sender(Q&pq,size_t maxmsg){
+  for(int i=0;i<maxmsg;++i){
+    pq.enq(i);
+    std::chrono::milliseconds tmo(1000);
+    std::this_thread::sleep_for(tmo);
+  }
+}
+// receiver
+template<typename Q>
+void receiver(Q&pq,size_t maxmsg){
+  while(maxmsg!=0){
+    pair<bool,int>p{pq.deq()};
+    cout<<"deq: "<<boolalpha<<"["<<p.first<<","<<p.second<<"]"<<endl;
+    --maxmsg;
+  }
 }
 // test main program
 int main(int argc,char*argv[]){
-  if(argc!=2)usage();
-  bool producer;
-  if(!strcmp(argv[1],"-e"))producer=true; else
-  if(!strcmp(argv[1],"-d"))producer=false;
-  else usage();
-
   try{
     // directory for queue
-    fs::path qdir{"./q2"};
+    fs::path qdir{"./q1"};
 
     // setup a queue
     function<int(istream&)>reader=[](istream&is){int ret;is>>ret;return ret;};
@@ -32,21 +41,16 @@ int main(int argc,char*argv[]){
     asio::polldir_queue<int,decltype(reader),decltype(writer)>pq{10,5000,qdir,reader,writer,true};
 
     // remove locks if they exist
-    //pq.removeLockVariables(qdir);
+    pq.removeLockVariables(qdir);
 
-    // check if we are consumer or producer
-    if(producer){
-      for(int i=0;i<100;++i){
-        pq.enq(i);
-        std::chrono::milliseconds tmo(1000);
-        std::this_thread::sleep_for(tmo);
-      }
-    }else{
-      while(true){
-        pair<bool,int>p{pq.deq()};
-        cout<<"deq: "<<boolalpha<<"["<<p.first<<","<<p.second<<"]"<<endl;
-      }
-    }
+    // kick off threads for sender/receiver
+    size_t maxmsg{10};
+    std::thread tsend{[&](){sender(pq,maxmsg);}};
+    std::thread trecv{[&](){receiver(pq,maxmsg);}};
+
+    // join threads
+    trecv.join();
+    tsend.join();
   }
   catch(exception const&e){
     cerr<<"caught exception: "<<e.what()<<endl;
