@@ -111,13 +111,13 @@ public:
   // cancel deq operations (will also release blocking threads)
   void disable_deq(bool disable){
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    enq_enabled_=!disable;
+    deq_enabled_=!disable;
     ipccond_.notify_all();
   }
   // cancel enq operations (will also release blocking threads)
   void disable_enq(bool disable){
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    deq_enabled_=!disable;
+    enq_enabled_=!disable;
     ipccond_.notify_all();
   }
   // set max size of queue
