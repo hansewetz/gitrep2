@@ -44,6 +44,7 @@ public:
   using serialiser=SERIAL;
 
   // ctors,assign,dtor
+  // (if maxsize == 0 checking for max numbert of queue elements is ignored)
   polldir_queue(std::size_t maxsize,size_t pollms,fs::path const&dir,DESER deser,SERIAL serial,bool removelocks):
       maxsize_(maxsize),pollms_(pollms),dir_(dir),deser_(deser),serial_(serial),removelocks_(removelocks),
       ipcmtx_(ipc::open_or_create,getMutexName(dir).c_str()),ipccond_(ipc::open_or_create,getCondName(dir).c_str()){
@@ -62,35 +63,43 @@ public:
   bool enq(T t){
     // loop until there is room in the queue or until enquing is disabled
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    while(enq_enabled_){
-      // check if there is room to put another message into queue
-      if(!fullNolock()){
-        write(t);
-        ipccond_.notify_all();
-        return true;
-      }
+    while(true){
       // sleep with poll intervall or until someone alerts us
       pt::ptime const abstm{pt::microsec_clock::local_time()+pt::milliseconds(pollms_)};
-      ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_||!fullNolock();});
+      bool tmo=!ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_||!fullNolock();});
+
+      // if enq is disabled we'll return
+      if(!enq_enabled_)return false;
+
+      // if we timed out must check if queue is full
+      if(tmo&&fullNolock())continue;
+
+      // we know we can now write message
+      write(t);
+      ipccond_.notify_all();
+      return true;
     }
-    return false;
   }
   // wait until we can put a message in queue
   // (returns false if enqueing was disabled, else true)
   bool wait_enq(){
     // loop until there is room in the queue or until enquing is disabled
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    while(enq_enabled_){
-      // check if there is room to put another message into queue
-      if(!fullNolock()){
-        ipccond_.notify_all();
-        return true;
-      }
+    while(true){
       // sleep with poll intervall or until someone alerts us
       pt::ptime const abstm{pt::microsec_clock::local_time()+pt::milliseconds(pollms_)};
-      ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_||emptyNolock();});
+      bool tmo=!ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_||!fullNolock();});
+
+      // if enq is disabled we'll return
+      if(!enq_enabled_)return false;
+
+      // if we timed out must check if queue is full
+      if(tmo&&fullNolock())continue;
+
+      // we know we can now write message
+      ipccond_.notify_all();
+      return true;
     }
-    return false;
   }
   // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(){
@@ -180,6 +189,8 @@ private:
   // check if queue is full
   // (lock must be held when calling this function)
   bool fullNolock()const{
+    // if maxsize_ == 0 we ignore checking the size of the queue
+    if(maxsize_==0)return false;
     return sizeNolock()>=maxsize_;
   }
   // check if queue is empty 
@@ -208,7 +219,6 @@ private:
   // get all pending messages and fill cache at the same time
   // (lock must be held when calling this function)
   std::list<fs::path>allFiles()const{
-    cleanCache();
     fillCache(true);
     return cache_;
   }
