@@ -32,7 +32,7 @@ namespace pt= boost::posix_time;
 // a simple threadsafe/interprocess-safe queue using directory as queue and files as storage media for queue items
 // (mutex/condition variable names are derived from the queue name)
 // (enq/deq have locks around them so that we cannot read a partial message)
-template<typename T,typename FR,typename FW>
+template<typename T,typename DESER,typename SERIAL>
 class polldir_queue{
 public:
   // typedef for value stored in queue
@@ -40,12 +40,12 @@ public:
   using value_type=T;
 
   // typedef for serialiser/de-serialiser
-  using deserialiser=FR;
-  using serialiser=FW;
+  using deserialiser=DESER;
+  using serialiser=SERIAL;
 
   // ctors,assign,dtor
-  polldir_queue(std::size_t maxsize,size_t pollms,fs::path const&dir,FR fr,FW fw,bool removelocks):
-      maxsize_(maxsize),pollms_(pollms),dir_(dir),fr_(fr),fw_(fw),removelocks_(removelocks),
+  polldir_queue(std::size_t maxsize,size_t pollms,fs::path const&dir,DESER deser,SERIAL serial,bool removelocks):
+      maxsize_(maxsize),pollms_(pollms),dir_(dir),deser_(deser),serial_(serial),removelocks_(removelocks),
       ipcmtx_(ipc::open_or_create,getMutexName(dir).c_str()),ipccond_(ipc::open_or_create,getCondName(dir).c_str()){
     // make sure path is a directory
     if(!fs::is_directory(dir_))throw std::logic_error(std::string("polldir_queue::polldir_queue: dir_: ")+dir.string()+" is not a directory");
@@ -163,7 +163,7 @@ private:
     fs::path fullpath{dir_/id};
     std::ofstream os{fullpath.string(),std::ofstream::binary};
     if(!os)throw std::runtime_error(std::string("polldir_queue::write: could not open file: ")+fullpath.string());
-    fw_(os,t);
+    serial_(os,t);
     os.close();
   }
   // helper read function (lock must be held when calling this function)
@@ -172,7 +172,7 @@ private:
     // (deserialization function is a user supplied function - see ctor)
     std::ifstream is{fullpath.string(),std::ifstream::binary};
     if(!is)throw std::runtime_error(std::string("polldir_queue::read: could not open file: ")+fullpath.string());
-    T ret{fr_(is)};
+    T ret{deser_(is)};
     is.close();
     std::remove(fullpath.string().c_str());
     return ret;
@@ -264,8 +264,8 @@ private:
   bool removelocks_;
 
   // serialization/deserialization functions
-  FR fr_;
-  FW fw_;
+  DESER deser_;
+  SERIAL serial_;
 
   // state of queue
   bool deq_enabled_=true;
