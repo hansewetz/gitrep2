@@ -39,7 +39,7 @@ private:
   std::shared_ptr<Queue>q_;
 };
 // typedef for using standard service object
-template<typename T>using simple_queue_sender=basic_queue_sender<basic_queue_sender_service<>,simple_queue<T>>;
+template<typename Queue>using simple_queue_sender=basic_queue_sender<basic_queue_sender_service<>,simple_queue<typename Queue::value_type>>;
 template<typename Queue>using polldir_queue_sender=basic_queue_sender<basic_queue_sender_service<>,polldir_queue<typename Queue::value_type,typename Queue::deserialiser,typename Queue::serialiser>>;
 
 // --- service class -----------------------------

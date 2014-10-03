@@ -16,9 +16,10 @@ atomic<size_t>nlinesRemaining{0};
 atomic<bool>done{false};
 
 // queue stuff
-shared_ptr<boost::asio::simple_queue<string>>q{new boost::asio::simple_queue<string>(3)};
-boost::asio::simple_queue_listener<string>qlistener(::ios,q);
-boost::asio::simple_queue_sender<string>qsender(::ios,q);
+using queue_t=boost::asio::simple_queue<string>;
+shared_ptr<queue_t>q{new queue_t(3)};
+boost::asio::simple_queue_listener<queue_t>qlistener(::ios,q);
+boost::asio::simple_queue_sender<queue_t>qsender(::ios,q);
 
 // posix stream
 boost::asio::posix::stream_descriptor fd_read(::ios,0);

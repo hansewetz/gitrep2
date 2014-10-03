@@ -17,10 +17,11 @@ using namespace std::placeholders;
 
 // queue sending/receiving max #of messages
 // asio queue stuff
-shared_ptr<boost::asio::simple_queue<int>>q{new boost::asio::simple_queue<int>(3)};
+using queue_t=boost::asio::simple_queue<int>;
+shared_ptr<queue_t>q{new queue_t(3)};
 boost::asio::io_service ios;
-boost::asio::simple_queue_listener<int>qlistener(::ios,q);
-boost::asio::simple_queue_sender<int>qsender(::ios,q);
+boost::asio::simple_queue_listener<queue_t>qlistener(::ios,q);
+boost::asio::simple_queue_sender<queue_t>qsender(::ios,q);
 
 // max #of messages to send/receive
 constexpr size_t maxmsg{10};

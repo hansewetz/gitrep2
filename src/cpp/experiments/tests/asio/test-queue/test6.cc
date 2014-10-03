@@ -25,7 +25,7 @@ function<int(istream&)>deserialiser=[](istream&is){int ret;is>>ret;return ret;};
 function<void(ostream&,int)>serialiser=[](ostream&os,int i){os<<i;};
 fs::path qdir{"./q1"};
 using intq_t=asio::polldir_queue<int,decltype(deserialiser),decltype(serialiser)>;
-std::shared_ptr<intq_t>q{new intq_t(5,5000,qdir,deserialiser,serialiser,true)};
+std::shared_ptr<intq_t>q{new intq_t(10,5000,qdir,deserialiser,serialiser,true)};
 
 // setup asio object
 asio::io_service ios;
@@ -48,6 +48,7 @@ void thr_send_sync_messages(){
     int item{boost::lexical_cast<int>(i)};
     BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
     qsender.sync_enq(item);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1100));
   }
 }
 // test program

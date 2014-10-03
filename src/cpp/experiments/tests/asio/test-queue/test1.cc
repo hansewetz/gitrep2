@@ -25,10 +25,11 @@ using namespace std::placeholders;
 
 // ----------------- queue sending/receiving max #of messages
 // asio queue stuff
-shared_ptr<boost::asio::simple_queue<int>>q{new boost::asio::simple_queue<int>(3)};
+using queue_t=boost::asio::simple_queue<int>;
+shared_ptr<queue_t>q{new queue_t(3)};
 boost::asio::io_service ios;
-boost::asio::simple_queue_listener<int>qlistener(::ios,q);
-boost::asio::simple_queue_sender<int>qsender(::ios,q);
+boost::asio::simple_queue_listener<queue_t>qlistener(::ios,q);
+boost::asio::simple_queue_sender<queue_t>qsender(::ios,q);
 
 // max #of messages to send/receive
 constexpr size_t maxmsg{10};
@@ -56,9 +57,9 @@ void qsender_handler(boost::system::error_code const&ec,int item,int nsent){
 
 // ----------------- queue (q1) sending/receiving until a timer pops
 //  asio queue stuff
-shared_ptr<boost::asio::simple_queue<int>>q1{new boost::asio::simple_queue<int>(1000)};
-boost::asio::simple_queue_listener<int>qlistener1(::ios,q1);
-boost::asio::simple_queue_sender<int>qsender1(::ios,q1);
+shared_ptr<queue_t>q1{new queue_t(1000)};
+boost::asio::simple_queue_listener<queue_t>qlistener1(::ios,q1);
+boost::asio::simple_queue_sender<queue_t>qsender1(::ios,q1);
 
 // handler for queue listener
 template<typename T>

@@ -27,9 +27,10 @@ boost::asio::io_service ios;
 
 // asio stuff
 int maxmsg{3};
-shared_ptr<boost::asio::simple_queue<string>>q{new boost::asio::simple_queue<string>(maxmsg)};
-boost::asio::simple_queue_listener<string>qlistener(::ios,q);
-boost::asio::simple_queue_sender<string>qsender(::ios,q);
+using queue_t=boost::asio::simple_queue<string>;
+shared_ptr<queue_t>q{new queue_t(maxmsg)};
+boost::asio::simple_queue_listener<queue_t>qlistener(::ios,q);
+boost::asio::simple_queue_sender<queue_t>qsender(::ios,q);
 boost::asio::deadline_timer timer(::ios,boost::posix_time::milliseconds(1));
 
 // count #of outstanding messages
