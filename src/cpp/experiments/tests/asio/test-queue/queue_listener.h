@@ -1,6 +1,7 @@
 #ifndef __QUEUE_LISTENER_H__
 #define __QUEUE_LISTENER_H__
 #include "simple_queue.h"
+#include "polldir_queue.h"
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
 #include <cstddef>
@@ -29,8 +30,8 @@ private:
   std::shared_ptr<Queue>q_;
 };
 // typedef for using standard service object
-template<typename T>
-using simple_queue_listener=basic_queue_listener<basic_queue_listener_service<>,simple_queue<T>>;
+template<typename T>using simple_queue_listener=basic_queue_listener<basic_queue_listener_service<>,simple_queue<T>>;
+template<typename Queue>using polldir_queue_listener=basic_queue_listener<basic_queue_listener_service<>,polldir_queue<typename Queue::value_type,typename Queue::deserialiser,typename Queue::serialiser>>;
 
 // --- service class -----------------------------
 // (for one io_service, only one object created)

@@ -39,6 +39,10 @@ public:
   // (need this so we can create an item with default ctor)
   using value_type=T;
 
+  // typedef for serialiser/de-serialiser
+  using deserialiser=FR;
+  using serialiser=FW;
+
   // ctors,assign,dtor
   polldir_queue(std::size_t maxsize,size_t pollms,fs::path const&dir,FR fr,FW fw,bool removelocks):
       maxsize_(maxsize),pollms_(pollms),dir_(dir),fr_(fr),fw_(fw),removelocks_(removelocks),
