@@ -9,8 +9,6 @@ NOTE!	Maybe we should remove the max size of the queue ...?
 #include <list>
 #include <map>
 #include <fstream>
-#include <mutex>
-#include <chrono>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/thread/thread_time.hpp>
@@ -31,7 +29,7 @@ namespace pt= boost::posix_time;
 
 // a simple threadsafe/interprocess-safe queue using directory as queue and files as storage media for queue items
 // (mutex/condition variable names are derived from the queue name)
-// (enq/deq have locks around them so that we cannot read a partial message)
+// (enq/deq have locks around them so that we cannot read partial messages)
 template<typename T,typename DESER,typename SERIAL>
 class polldir_queue{
 public:
@@ -115,7 +113,7 @@ public:
         return std::make_pair(true,ret);
       }
       // sleep with poll intervall or until someone alerts us
-      boost::system_time const abstm{boost::get_system_time()+pt::milliseconds(1000)};
+      boost::system_time const abstm{boost::get_system_time()+pt::milliseconds(pollms_)};
       ipccond_.timed_wait(lock,abstm,[&](){return !deq_enabled_;});
     }
     // return null ptr if deq is disabled
