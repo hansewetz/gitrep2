@@ -1,5 +1,4 @@
-#include "queue_listener.h"
-#include "queue_sender.h"
+#include "asio_queue.h"
 #include <boost/asio.hpp>
 #include <boost/asio/posix/basic_descriptor.hpp>
 #include <boost/log/trivial.hpp>

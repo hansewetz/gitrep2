@@ -3,8 +3,7 @@ this program has one queue with a thread doing sync_enq and an asio in main thre
 
 */
 
-#include "queue_listener.h"
-#include "queue_sender.h"
+#include "asio_queue.h"
 #include <boost/asio.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
