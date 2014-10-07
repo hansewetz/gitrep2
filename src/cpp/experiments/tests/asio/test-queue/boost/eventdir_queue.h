@@ -1,3 +1,9 @@
+/*
+  queue runs a thread which runs asio::dir_monitor
+  when the directory has a file created or removed it updates the cache in the queue
+  both ipc mutices/condition-variables will be needed (when asio callback updates the cache the main queue thread needs to be notified
+  not clear of if we should use internal mutex/cond-variables for internal notification in this queue
+*/
 #ifndef __EVENTDIR_QUEUE_H__
 #define __EVENTDIR_QUEUE_H__
 #include "detail/dirqueue_support.h"

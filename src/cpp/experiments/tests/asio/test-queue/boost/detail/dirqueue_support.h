@@ -67,7 +67,7 @@ void write(T const&t,fs::path const&dir,SERIAL serial){
   std::string const id{boost::lexical_cast<std::string>(boost::uuids::random_generator()())};
   fs::path fullpath{dir/id};
   std::ofstream os{fullpath.string(),std::ofstream::binary};
-  if(!os)throw std::runtime_error(std::string("polldir_queue::write: could not open file: ")+fullpath.string());
+  if(!os)throw std::runtime_error(std::string("asio::detail::dirqueue_support::::write: could not open file: ")+fullpath.string());
   serial(os,t);
   os.close();
 }
@@ -77,7 +77,7 @@ T read(fs::path const&fullpath,DESER deser){
   // open input stream, deserialize stream into an object and remove file
   // (deserialization function is a user supplied function - see ctor)
   std::ifstream is{fullpath.string(),std::ifstream::binary};
-  if(!is)throw std::runtime_error(std::string("polldir_queue::read: could not open file: ")+fullpath.string());
+  if(!is)throw std::runtime_error(std::string("asio::detail::dirqueue_support::read: could not open file: ")+fullpath.string());
   T ret{deser(is)};
   is.close();
   std::remove(fullpath.string().c_str());
