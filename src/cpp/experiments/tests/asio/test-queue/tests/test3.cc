@@ -12,7 +12,7 @@ The code is somehat complicated:
 	- when the last message (we count) in the deq() callback has been received, we issue a disable_enq on the queue
 */
 
-#include "asio_queue.h"
+#include <boost/asio_queue.h>
 #include <boost/asio.hpp>
 #include <boost/asio/posix/basic_descriptor.hpp>
 #include <boost/log/trivial.hpp>

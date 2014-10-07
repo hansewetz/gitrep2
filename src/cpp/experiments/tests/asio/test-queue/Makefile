@@ -1,15 +1,4 @@
-all:
-	$(MAKE) -f Makefile.test1
-	$(MAKE) -f Makefile.test2
-	$(MAKE) -f Makefile.test3
-	$(MAKE) -f Makefile.test4
-	$(MAKE) -f Makefile.test5
-	$(MAKE) -f Makefile.test6
+SUBDIRS = tests
 
-clean:
-	$(MAKE) -f Makefile.test1 clean
-	$(MAKE) -f Makefile.test2 clean
-	$(MAKE) -f Makefile.test3 clean
-	$(MAKE) -f Makefile.test4 clean
-	$(MAKE) -f Makefile.test5 clean
-	$(MAKE) -f Makefile.test6 clean
+include $(PROJECT_ROOT)/env/makerules/subdirs.rules
+

@@ -1,12 +1,12 @@
 # To be built
-LOCAL_TARGET    =  test2
+LOCAL_TARGET    =  test1
 LOCAL_SOTARGET  =
-LOCAL_OBJS      = test2.o
+LOCAL_OBJS      = test1.o
 
 # Control.
 LOCAL_LIBS      = -lboost_log -lboost_system
 LOCAL_LIBPATH   = -L$(PROJECT_ROOT)/lib/lib -L$(BOOST_LIB)
-LOCAL_INCPATH   = -I${BOOST_INC}
+LOCAL_INCPATH   = -I${BOOST_INC} -I..
 LOCAL_DEFINES   = -DBOOST_ALL_DYN_LINK -DASIO_STANDALONE
 LOCAL_CXXFLAGS  =
 LOCAL_CPPFLAGS  = 

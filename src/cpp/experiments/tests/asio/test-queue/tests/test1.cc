@@ -11,7 +11,7 @@ a timer runs which when popped disables enq and deq on the second queue
 there is also a fast timer which pops every 100 ms and is disabled when th enq and deq on the second queue is disabled
 */
 
-#include "asio_queue.h"
+#include <boost/asio_queue.h>
 #include <boost/asio.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>

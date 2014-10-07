@@ -1,14 +1,12 @@
 /*
 this program has one queue with a thread doing sync_enq and an asio in main thread doing async_deq
-this is the same program as test4.cc but using a polldir_queue instead of a simple_queue
 
 */
 
-#include "asio_queue.h"
+#include <boost/asio_queue.h>
 #include <boost/asio.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/filesystem.hpp>
 #include <string>
 #include <memory>
 #include <thread>
@@ -16,20 +14,13 @@ this is the same program as test4.cc but using a polldir_queue instead of a simp
 using namespace std;
 using namespace std::placeholders;
 
-namespace asio= boost::asio;
-namespace fs=boost::filesystem;
-
-// create queue
-function<int(istream&)>deserialiser=[](istream&is){int ret;is>>ret;return ret;};
-function<void(ostream&,int)>serialiser=[](ostream&os,int i){os<<i;};
-fs::path qdir{"./q1"};
-using intq_t=asio::polldir_queue<int,decltype(deserialiser),decltype(serialiser)>;
-std::shared_ptr<intq_t>q{new intq_t(10,5000,qdir,deserialiser,serialiser,true)};
-
-// setup asio object
-asio::io_service ios;
-asio::polldir_queue_listener<intq_t>qlistener(::ios,q);
-asio::polldir_queue_sender<intq_t>qsender(::ios,q);
+// queue sending/receiving max #of messages
+// asio queue stuff
+using queue_t=boost::asio::simple_queue<int>;
+shared_ptr<queue_t>q{new queue_t(3)};
+boost::asio::io_service ios;
+boost::asio::simple_queue_listener<queue_t>qlistener(::ios,q);
+boost::asio::simple_queue_sender<queue_t>qsender(::ios,q);
 
 // max #of messages to send/receive
 constexpr size_t maxmsg{10};
@@ -47,7 +38,6 @@ void thr_send_sync_messages(){
     int item{boost::lexical_cast<int>(i)};
     BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
     qsender.sync_enq(item);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1100));
   }
 }
 // test program

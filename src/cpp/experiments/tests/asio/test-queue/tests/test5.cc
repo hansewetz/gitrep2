@@ -2,7 +2,7 @@
   test program for polldir_queue.
   program kicks off a sender thread and a receiver thread and terminates when a specified #of messages has been received
 */
-#include "asio_queue.h"
+#include <boost/asio_queue.h>
 #include <string>
 #include <thread>
 #include <functional>
