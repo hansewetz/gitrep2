@@ -4,21 +4,16 @@ NOTE!	Maybe we should remove the max size of the queue ...?
 */
 #ifndef __POLLDIR_QUEUE_H__
 #define __POLLDIR_QUEUE_H__
+#include "detail/dirqueue_support.h"
 #include <string>
 #include <utility>
 #include <list>
-#include <map>
-#include <fstream>
 #include <boost/filesystem.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/thread/thread_time.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
 #include <boost/interprocess/sync/named_condition.hpp>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
 
 namespace boost{
 namespace asio{
@@ -45,7 +40,7 @@ public:
   // (if maxsize == 0 checking for max numbert of queue elements is ignored)
   polldir_queue(std::size_t maxsize,size_t pollms,fs::path const&dir,DESER deser,SERIAL serial,bool removelocks):
       maxsize_(maxsize),pollms_(pollms),dir_(dir),deser_(deser),serial_(serial),removelocks_(removelocks),
-      ipcmtx_(ipc::open_or_create,getMutexName(dir).c_str()),ipccond_(ipc::open_or_create,getCondName(dir).c_str()){
+      ipcmtx_(ipc::open_or_create,detail::dirqueue_support::getMutexName(dir).c_str()),ipccond_(ipc::open_or_create,detail::dirqueue_support::getCondName(dir).c_str()){
     // make sure path is a directory
     if(!fs::is_directory(dir_))throw std::logic_error(std::string("polldir_queue::polldir_queue: dir_: ")+dir.string()+" is not a directory");
   }
@@ -73,7 +68,7 @@ public:
       if(tmo&&fullNolock())continue;
 
       // we know we can now write message
-      write(t);
+      detail::dirqueue_support::write(t,dir_,serial_);
       ipccond_.notify_all();
       return true;
     }
@@ -108,7 +103,7 @@ public:
       std::pair<bool,fs::path>oldestFile{nextFile()};
       if(oldestFile.first){
         // convert file into message, remove file and return message
-        T ret{read(oldestFile.second)};
+        T ret{detail::dirqueue_support::read<T>(oldestFile.second,deser_)};
         ipccond_.notify_all();
         return std::make_pair(true,ret);
       }
@@ -158,32 +153,9 @@ public:
   }
   // remove lock variables for queue
   static void removeLockVariables(fs::path const&dir){
-    boost::interprocess::named_mutex::remove(getMutexName(dir).c_str());
-    boost::interprocess::named_condition::remove(getCondName(dir).c_str());
+    detail::dirqueue_support::removeLockVariables(dir);
   }
 private:
-  // helper write function (lock must be held when calling this function)
-  void write(T const&t)const{
-    // create a unique filename, open file for writing and serialise object to file (user defined function)
-    // (serialization function is a user supplied function - see ctor)
-    std::string const id{boost::lexical_cast<std::string>(boost::uuids::random_generator()())};
-    fs::path fullpath{dir_/id};
-    std::ofstream os{fullpath.string(),std::ofstream::binary};
-    if(!os)throw std::runtime_error(std::string("polldir_queue::write: could not open file: ")+fullpath.string());
-    serial_(os,t);
-    os.close();
-  }
-  // helper read function (lock must be held when calling this function)
-  T read(fs::path const&fullpath)const{
-    // open input stream, deserialize stream into an object and remove file
-    // (deserialization function is a user supplied function - see ctor)
-    std::ifstream is{fullpath.string(),std::ifstream::binary};
-    if(!is)throw std::runtime_error(std::string("polldir_queue::read: could not open file: ")+fullpath.string());
-    T ret{deser_(is)};
-    is.close();
-    std::remove(fullpath.string().c_str());
-    return ret;
-  }
   // check if queue is full
   // (lock must be held when calling this function)
   bool fullNolock()const{
@@ -225,9 +197,8 @@ private:
   void fillCache(bool refill)const{
     // trash cache and re-read it if 'refill' is set or if cache is empty
     if(refill||cache_.empty()){
-      std::multimap<time_t,fs::path>sortedFiles{getTsOrderedFiles(dir_)};
-      cache_.clear();
-      for(auto const&f:sortedFiles)cache_.push_back(f.second);
+      std::list<fs::path>sortedFiles{detail::dirqueue_support::getTsOrderedFiles(dir_)};
+      cache_.swap(sortedFiles);
     }
   }
   // remove any file in cache which do not exist in dir_
@@ -237,33 +208,6 @@ private:
     for(auto const&p:cache_)
       if(fs::exists(p))tmpCache.push_back(p);
     swap(tmpCache,cache_);
-  }
-  // get all filenames in time sorted order in a dircetory
-  static std::multimap<time_t,fs::path>getTsOrderedFiles(fs::path const&dir){
-    // need a map with key=time, value=filename
-    typedef std::multimap<time_t,fs::path>time_file_map_t;
-    time_file_map_t time_file_map;
-
-    // insert all files together with time as key into map
-    fs::directory_iterator dir_end_iter;
-    for(fs::directory_iterator it(dir);it!=dir_end_iter;++it){
-      if(!is_regular_file(*it))continue;
-      time_t time_stamp(last_write_time(*it));
-      time_file_map.insert(time_file_map_t::value_type(time_stamp,*it));
-    }
-    return time_file_map;
-  }
-  // create a name for mutex for this dircetory queue queue
-  static std::string getMutexName(fs::path const&dir){
-    std::string sdir{dir.string()};
-    std::replace_if(sdir.begin(),sdir.end(),[](char c){return c=='/'||c=='.';},'_');
-    return sdir;
-  }
-  // create a name for condition variable for this directory queue
-  static std::string getCondName(fs::path const&dir){
-    std::string sdir{dir.string()};
-    std::replace_if(sdir.begin(),sdir.end(),[](char c){return c=='/'||c=='.';},'_');
-    return sdir;
   }
   // user specified characteristics of queue
   std::size_t maxsize_;

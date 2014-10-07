@@ -1,18 +1,16 @@
 #ifndef __EVENTDIR_QUEUE_H__
 #define __EVENTDIR_QUEUE_H__
+#include "detail/dirqueue_support.h"
 #include <string>
 #include <utility>
 #include <list>
-#include <map>
-#include <fstream>
 #include <boost/filesystem.hpp>
-#include <boost/lexical_cast.hpp>
+#include <boost/thread/thread_time.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
 #include <boost/interprocess/sync/named_condition.hpp>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
+
 namespace boost{
 namespace asio{
 
@@ -34,7 +32,7 @@ public:
   // ctors,assign,dtor
   eventdir_queue(std::size_t maxsize,fs::path const&dir,DESER deser,SERIAL serial,bool removelocks):
       maxsize_(maxsize),dir_(dir),deser_(deser),serial_(serial),removelocks_(removelocks),
-      ipcmtx_(ipc::open_or_create,getMutexName(dir).c_str()),ipccond_(ipc::open_or_create,getCondName(dir).c_str()){
+      ipcmtx_(ipc::open_or_create,detail::dirqueue_support::getMutexName(dir).c_str()),ipccond_(ipc::open_or_create,detail::dirqueue_support::getCondName(dir).c_str()){
     // make sure path is a directory
     if(!fs::is_directory(dir_))throw std::logic_error(std::string("eventdir_queue::eventdir_queue: dir_: ")+dir.string()+" is not a directory");
 
@@ -101,22 +99,9 @@ public:
   }
   // remove lock variables for queue
   static void removeLockVariables(fs::path const&dir){
-    boost::interprocess::named_mutex::remove(getMutexName(dir).c_str());
-    boost::interprocess::named_condition::remove(getCondName(dir).c_str());
+    detail::dirqueue_support::removeLockVariables(dir);
   }
 private:
-  // create a name for mutex for this dircetory queue queue
-  static std::string getMutexName(fs::path const&dir){
-    std::string sdir{dir.string()};
-    std::replace_if(sdir.begin(),sdir.end(),[](char c){return c=='/'||c=='.';},'_');
-    return sdir;
-  }
-  // create a name for condition variable for this directory queue
-  static std::string getCondName(fs::path const&dir){
-    std::string sdir{dir.string()};
-    std::replace_if(sdir.begin(),sdir.end(),[](char c){return c=='/'||c=='.';},'_');
-    return sdir;
-  }
   // user specified characteristics of queue
   std::size_t maxsize_;
   fs::path dir_;
