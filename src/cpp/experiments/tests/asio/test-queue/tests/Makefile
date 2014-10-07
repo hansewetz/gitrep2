@@ -1,4 +1,4 @@
-SUBDIRS = test1 test2 test3 test4 test5 test6
+SUBDIRS = test-1 test-2 test-3 test-4 test-5 test-6
 
 include $(PROJECT_ROOT)/env/makerules/subdirs.rules
 
