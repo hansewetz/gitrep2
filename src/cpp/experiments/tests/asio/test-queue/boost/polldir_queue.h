@@ -1,6 +1,7 @@
 /*
-NOTE!	Maybe we should remove the max size of the queue ...?
-	We should change polling to inotify - sort out how contention would be handled
+NOTE!	
+	we should remove max size in polldir_queue and have wait_enq() always return true
+	for this type of queue it's too cimplicated otherwise
 */
 #ifndef __POLLDIR_QUEUE_H__
 #define __POLLDIR_QUEUE_H__
