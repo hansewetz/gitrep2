@@ -1,5 +1,6 @@
 #include "asio-utils/FdAsyncLineReader.h"
 #include "utils/sysUtils.h"
+#include <iostream>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <boost/asio.hpp>

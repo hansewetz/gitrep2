@@ -6,6 +6,7 @@
 #include <string>
 #include <thread>
 #include <functional>
+#include <iostream>
 
 using namespace std;
 namespace asio= boost::asio;
