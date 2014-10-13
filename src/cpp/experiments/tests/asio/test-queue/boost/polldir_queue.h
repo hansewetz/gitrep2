@@ -1,8 +1,3 @@
-/*
-NOTE!	
-	we should remove max size in polldir_queue and have wait_enq() always return true
-	for this type of queue it's too cimplicated otherwise
-*/
 #ifndef __POLLDIR_QUEUE_H__
 #define __POLLDIR_QUEUE_H__
 #include "detail/dirqueue_support.h"
@@ -58,7 +53,7 @@ public:
     // loop until there is room in the queue or until enquing is disabled
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     while(true){
-      // sleep with poll intervall or until someone alerts us
+      // wait for either poll intervall or the state of queue is such that we can enque an element
       pt::ptime const abstm{pt::microsec_clock::local_time()+pt::milliseconds(pollms_)};
       bool tmo=!ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_||!fullNolock();});
 
@@ -66,7 +61,7 @@ public:
       if(!enq_enabled_)return false;
 
       // if we timed out must check if queue is full
-      if(tmo&&fullNolock())continue;
+      if(tmo)continue;
 
       // we know we can now write message
       detail::dirqueue_support::write(t,dir_,serial_);
@@ -80,15 +75,15 @@ public:
     // loop until there is room in the queue or until enquing is disabled
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     while(true){
-      // sleep with poll intervall or until someone alerts us
+      // wait for either poll intervall or the state of queue is such that we can return something
       pt::ptime const abstm{pt::microsec_clock::local_time()+pt::milliseconds(pollms_)};
       bool tmo=!ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_||!fullNolock();});
 
       // if enq is disabled we'll return
       if(!enq_enabled_)return false;
 
-      // if we timed out must check if queue is full
-      if(tmo&&fullNolock())continue;
+      // if we timed out continue and wait
+      if(tmo)continue;
 
       // we know we can now write message
       ipccond_.notify_all();
@@ -99,21 +94,24 @@ public:
   std::pair<bool,T>deq(){
     // loop until we have a message or until dequeing is disabled
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    while(deq_enabled_){
-      // get oldest file
-      std::pair<bool,fs::path>oldestFile{nextFile()};
-      if(oldestFile.first){
-        // convert file into message, remove file and return message
-        T ret{detail::dirqueue_support::read<T>(oldestFile.second,deser_)};
-        ipccond_.notify_all();
-        return std::make_pair(true,ret);
-      }
-      // sleep with poll intervall or until someone alerts us
+    while(true){
+      // wait for either poll intervall or the state of queue is such that we can return something
       boost::system_time const abstm{boost::get_system_time()+pt::milliseconds(pollms_)};
-      ipccond_.timed_wait(lock,abstm,[&](){return !deq_enabled_;});
+      bool tmo=!ipccond_.timed_wait(lock,abstm,[&](){return !deq_enabled_||!emptyNolock();});
+
+      // check if dequeue was disabled
+      if(!deq_enabled_)return std::make_pair(false,T{});
+
+      // if we timed out continue and wait
+      if(tmo)continue;
+
+      // we know the cache is not empty now so no need to check
+      fs::path file{cache_.front()};
+      cache_.pop_front();
+      T ret{detail::dirqueue_support::read<T>(file,deser_)};
+      ipccond_.notify_all();
+      return std::make_pair(true,ret);
     }
-    // return null ptr if deq is disabled
-    return std::make_pair(false,T{});
   }
   // cancel deq operations (will also release blocking threads)
   void disable_deq(bool disable){
@@ -167,48 +165,47 @@ private:
   // check if queue is empty 
   // (lock must be held when calling this function)
   bool emptyNolock()const{
-    std::pair<bool,fs::path>oldestFile{nextFile()};
-    if(!oldestFile.first)return true;
-    return false;
-  }
-  // get size of queue
-  // (lock must be held when calling this function)
-  size_t sizeNolock()const{
-    return allFiles().size();
-  }
-  // get oldest file + manage cache_ if needed
-  // (lock must be held when calling this function)
-  std::pair<bool,fs::path>nextFile()const{
-    // only fill cache if cache is empty
-    cleanCache();
-    fillCache(false);
-    if(cache_.empty())return std::make_pair(false,fs::path());
-    std::pair<bool,fs::path>ret{std::make_pair(true,cache_.front())};
-    cache_.pop_front();
-    return ret;
-  }
-  // get all pending messages and fill cache at the same time
-  // (lock must be held when calling this function)
-  std::list<fs::path>allFiles()const{
-    fillCache(true);
-    return cache_;
+    // cleanup cache and check if we have queue elements
+    cleanCacheNolock();
+    if(cache_.size()>0)return false;
+
+    // cache is empty, fill it up and check if we are still empty
+    fillCacheNolock(true);
+    return cache_.size()==0;
   }
   // fill cache
   // (must be called when having the lock)
-  void fillCache(bool refill)const{
-    // trash cache and re-read it if 'refill' is set or if cache is empty
-    if(refill||cache_.empty()){
+  void fillCacheNolock(bool forceRefill)const{
+    // trash cache and re-read if 'forceRefill' is set or if cache is empty
+    if(forceRefill||cache_.empty()){
       std::list<fs::path>sortedFiles{detail::dirqueue_support::getTsOrderedFiles(dir_)};
       cache_.swap(sortedFiles);
     }
   }
   // remove any file in cache which do not exist in dir_
   // (must be called when having the lock)
-  void cleanCache()const{
+  void cleanCacheNolock()const{
     std::list<fs::path>tmpCache;
     for(auto const&p:cache_)
       if(fs::exists(p))tmpCache.push_back(p);
     swap(tmpCache,cache_);
+  }
+  // get size of queue
+  // (lock must be held when calling this function)
+  size_t sizeNolock()const{
+    fillCacheNolock(true);
+    return cache_.size();
+  }
+  // get oldest file + manage cache_ if needed
+  // (lock must be held when calling this function)
+  std::pair<bool,fs::path>nextFileNolock()const{
+    // only fill cache if cache is empty
+    cleanCacheNolock();
+    fillCacheNolock(false);
+    if(cache_.empty())return std::make_pair(false,fs::path());
+    std::pair<bool,fs::path>ret{std::make_pair(true,cache_.front())};
+    cache_.pop_front();
+    return ret;
   }
   // user specified characteristics of queue
   std::size_t maxsize_;

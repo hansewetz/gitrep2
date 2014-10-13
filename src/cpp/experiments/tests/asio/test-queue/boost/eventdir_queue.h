@@ -1,5 +1,6 @@
 /*
   queue runs a thread which runs asio::dir_monitor
+  at startup the queue reads all queue items (files) in the queue directory
   when the directory has a file created or removed it updates the cache in the queue
   both ipc mutices/condition-variables will be needed (when asio callback updates the cache the main queue thread needs to be notified
   not clear of if we should use internal mutex/cond-variables for internal notification in this queue
@@ -42,10 +43,10 @@ public:
     // make sure path is a directory
     if(!fs::is_directory(dir_))throw std::logic_error(std::string("eventdir_queue::eventdir_queue: dir_: ")+dir.string()+" is not a directory");
 
-    // setup to receive events from inotify
+    // lock directory and read content
     // ...
 
-    // lock directory and read content
+    // setup to receive events from inotify
     // ...
   }
   eventdir_queue(eventdir_queue const&)=delete;

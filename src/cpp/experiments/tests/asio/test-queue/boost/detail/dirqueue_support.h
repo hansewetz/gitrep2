@@ -42,7 +42,7 @@ std::list<fs::path>getTsOrderedFiles(fs::path const&dir){
   for(auto const&f:time_file_map)ret.push_back(f.second);
   return ret;
 }
-// create a name for mutex for this dircetory queue queue
+// create a name for mutex for this directory queue queue
 std::string getMutexName(fs::path const&dir){
   std::string sdir{dir.string()};
   std::replace_if(sdir.begin(),sdir.end(),[](char c){return c=='/'||c=='.';},'_');
@@ -55,11 +55,13 @@ std::string getCondName(fs::path const&dir){
   return sdir;
 }
 // remove lock variables for queue
+// (name of lock variables are computed from the path to the queue directory)
 void removeLockVariables(fs::path const&dir){
   ipc::named_mutex::remove(getMutexName(dir).c_str());
   ipc::named_condition::remove(getCondName(dir).c_str());
 }
-// helper write function (lock must be held when calling this function)
+// helper function for serialising an object
+// (lock must be held when calling this function)
 template<typename T,typename SERIAL>
 void write(T const&t,fs::path const&dir,SERIAL serial){
   // create a unique filename, open file for writing and serialise object to file (user defined function)
@@ -71,7 +73,8 @@ void write(T const&t,fs::path const&dir,SERIAL serial){
   serial(os,t);
   os.close();
 }
-// helper read function (lock must be held when calling this function)
+// helper function for deserialising an object
+// (lock must be held when calling this function)
 template<typename T,typename DESER>
 T read(fs::path const&fullpath,DESER deser){
   // open input stream, deserialize stream into an object and remove file

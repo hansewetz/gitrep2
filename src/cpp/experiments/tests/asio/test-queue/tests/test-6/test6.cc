@@ -24,7 +24,7 @@ function<int(istream&)>deserialiser=[](istream&is){int ret;is>>ret;return ret;};
 function<void(ostream&,int)>serialiser=[](ostream&os,int i){os<<i;};
 fs::path qdir{"./q1"};
 using intq_t=asio::polldir_queue<int,decltype(deserialiser),decltype(serialiser)>;
-std::shared_ptr<intq_t>q{new intq_t(10,5000,qdir,deserialiser,serialiser,true)};
+std::shared_ptr<intq_t>q{new intq_t(10,500,qdir,deserialiser,serialiser,true)};
 
 // setup asio object
 asio::io_service ios;
@@ -43,6 +43,7 @@ void qlistener_handler(boost::system::error_code const&ec,T item){
 }
 // thread function sending maxmsg messages
 void thr_send_sync_messages(){
+  BOOST_LOG_TRIVIAL(debug)<<"thread sender started ...";
   for(int i=0;i<maxmsg;++i){
     int item{boost::lexical_cast<int>(i)};
     BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
@@ -53,13 +54,18 @@ void thr_send_sync_messages(){
 // test program
 int main(){
   try{
+    // remove locks for queue
+    q->removeLockVariables(qdir);
+
     // listen/send on messages on q1
+    BOOST_LOG_TRIVIAL(debug)<<"starting async_deq() ...";
     qlistener.async_deq(qlistener_handler<int>);
 
     // kick off sender thread
     thread thr(thr_send_sync_messages);
 
     // kick off io service
+    BOOST_LOG_TRIVIAL(debug)<<"starting asio ...";
     ::ios.run();
 
     // join thread
