@@ -39,6 +39,10 @@ public:
       ipcmtx_(ipc::open_or_create,detail::dirqueue_support::getMutexName(dir).c_str()),ipccond_(ipc::open_or_create,detail::dirqueue_support::getCondName(dir).c_str()){
     // make sure path is a directory
     if(!fs::is_directory(dir_))throw std::logic_error(std::string("polldir_queue::polldir_queue: dir_: ")+dir.string()+" is not a directory");
+
+    // populate cache
+    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
+    fillCacheNolock(true);
   }
   polldir_queue(polldir_queue const&)=delete;
   polldir_queue(polldir_queue&&)=default;
