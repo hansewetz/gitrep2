@@ -193,13 +193,14 @@ private:
   // get size of queue
   // (lock must be held when calling this function)
   size_t sizeNolock()const{
+    // must forcefill cache to know the queue size
     fillCacheNolock(true);
     return cache_.size();
   }
   // get oldest file + manage cache_ if needed
   // (lock must be held when calling this function)
   std::pair<bool,fs::path>nextFileNolock()const{
-    // only fill cache if cache is empty
+    // clean cache and only fill cache if it's empty
     cleanCacheNolock();
     fillCacheNolock(false);
     if(cache_.empty())return std::make_pair(false,fs::path());
