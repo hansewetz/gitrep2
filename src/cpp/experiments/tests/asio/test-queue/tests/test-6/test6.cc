@@ -19,19 +19,22 @@ using namespace std::placeholders;
 namespace asio= boost::asio;
 namespace fs=boost::filesystem;
 
+// value type in queues
+using qval_t=std::string;
+
 // create a sender and listener queues (could be the same queue)
-function<int(istream&)>deserialiser=[](istream&is){int ret;is>>ret;return ret;};
-function<void(ostream&,int)>serialiser=[](ostream&os,int i){os<<i;};
+function<qval_t(istream&)>deserialiser=[](istream&is){qval_t ret;is>>ret;return ret;};
+function<void(ostream&,qval_t const&)>serialiser=[](ostream&os,qval_t const&i){os<<i;};
 string qname{"q1"};
 fs::path qdir{"./q1"};
-using intq_t=asio::polldir_queue<int,decltype(deserialiser),decltype(serialiser)>;
-std::shared_ptr<intq_t>qrecv{new intq_t(qname,0,qdir,deserialiser,serialiser,true)};
-std::shared_ptr<intq_t>qsend{new intq_t(qname,0,qdir,deserialiser,serialiser,true)};
+using queue_t=asio::polldir_queue<qval_t,decltype(deserialiser),decltype(serialiser)>;
+std::shared_ptr<queue_t>qrecv{new queue_t(qname,0,qdir,deserialiser,serialiser,true)};
+std::shared_ptr<queue_t>qsend{new queue_t(qname,0,qdir,deserialiser,serialiser,true)};
 
 // setup asio object
 asio::io_service ios;
-asio::queue_listener<intq_t>qlistener(::ios,qrecv);
-asio::queue_sender<intq_t>qsender(::ios,qsend);
+asio::queue_listener<queue_t>qlistener(::ios,qrecv);
+asio::queue_sender<queue_t>qsender(::ios,qsend);
 
 // timer
 boost::asio::deadline_timer timer(::ios,boost::posix_time::milliseconds(5000));
@@ -56,10 +59,9 @@ void qlistener_handler(boost::system::error_code const&ec,T item){
 template<typename T>
 void thr_send_sync_messages(){
   for(int i=0;i<maxmsg;++i){
-    T item{boost::lexical_cast<T>(i)};
+    qval_t item{boost::lexical_cast<qval_t>(i)};
     BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
-    qsender.sync_enq(2*item);
-    qsender.sync_enq(2*item+1);
+    qsender.sync_enq(item);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 }
@@ -76,11 +78,11 @@ int main(){
 
     // listen/send on messages on q1
     BOOST_LOG_TRIVIAL(debug)<<"starting async_deq() ...";
-    qlistener.async_deq(qlistener_handler<int>);
+    qlistener.async_deq(qlistener_handler<qval_t>);
 
     // kick off sender thread
     BOOST_LOG_TRIVIAL(debug)<<"starting thread sender thread ...";
-    thread thr(thr_send_sync_messages<int>);
+    thread thr(thr_send_sync_messages<qval_t>);
 
     // set timer stopping dequeing on q
     BOOST_LOG_TRIVIAL(debug)<<"starting timer ...";
