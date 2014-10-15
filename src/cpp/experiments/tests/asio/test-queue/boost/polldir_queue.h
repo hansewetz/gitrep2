@@ -1,9 +1,9 @@
 /*
-	Q: do we need to poll or is it eneough to notify via condition variables?
 	Q: what advantage would it be to use inotify for event notification
 		- possibly using normal copying of files into a directory
 		- we would not need a cache
-NOTE! the named mutex/condition does not seem to work ... maybe we need to store them in shared memory ...?
+	D: add shared memory to keep track of #elements in queue
+	D: add a base class to queues (queue_base)
 
 */
 #ifndef __POLLDIR_QUEUE_H__
