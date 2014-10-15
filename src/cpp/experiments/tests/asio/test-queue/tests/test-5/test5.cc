@@ -33,16 +33,17 @@ void receiver(Q&q,size_t maxmsg){
 // test main program
 int main(int argc,char*argv[]){
   try{
-    // directory for queue
+    // name and directory for queue
+    string qname{"q1"};
     fs::path qdir{"./q1"};
 
     // setup queue
     function<int(istream&)>reader=[](istream&is){int ret;is>>ret;return ret;};
     function<void(ostream&,int)>writer=[](ostream&os,int i){os<<i;};
-    asio::polldir_queue<int,decltype(reader),decltype(writer)>q1{10,qdir,reader,writer,true};
+    asio::polldir_queue<int,decltype(reader),decltype(writer)>q1{qname,10,qdir,reader,writer,true};
 
     // remove locks if they exist
-    q1.removeLockVariables(qdir);
+    q1.removeLockVariables(q1.qname());
 
     // kick off threads for sender/receiver
     size_t maxmsg{10};

@@ -42,23 +42,11 @@ std::list<fs::path>getTsOrderedFiles(fs::path const&dir){
   for(auto const&f:time_file_map)ret.push_back(f.second);
   return ret;
 }
-// create a name for mutex for this directory queue queue
-std::string getMutexName(fs::path const&dir){
-  std::string sdir{dir.string()};
-  std::replace_if(sdir.begin(),sdir.end(),[](char c){return c=='/'||c=='.';},'_');
-  return sdir;
-}
-// create a name for condition variable for this directory queue
-std::string getCondName(fs::path const&dir){
-  std::string sdir{dir.string()};
-  std::replace_if(sdir.begin(),sdir.end(),[](char c){return c=='/'||c=='.';},'_');
-  return sdir;
-}
 // remove lock variables for queue
 // (name of lock variables are computed from the path to the queue directory)
-void removeLockVariables(fs::path const&dir){
-  ipc::named_mutex::remove(getMutexName(dir).c_str());
-  ipc::named_condition::remove(getCondName(dir).c_str());
+void removeLockVariables(std::string const&name){
+  ipc::named_mutex::remove(name.c_str());
+  ipc::named_condition::remove(name.c_str());
 }
 // helper function for serialising an object
 // (lock must be held when calling this function)

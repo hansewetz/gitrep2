@@ -3,7 +3,7 @@
 		- possibly using normal copying of files into a directory
 		- we would not need a cache
 	D: add shared memory to keep track of #elements in queue
-	D: add a base class to queues (queue_base)
+	D: (add a base class to queues (queue_base))
 	D: test queue through producer/consumer in separate processes
 	D: possibly add callback when an event happens at the queue level
 
@@ -42,9 +42,9 @@ public:
 
   // ctors,assign,dtor
   // (if maxsize == 0 checking for max numbert of queue elements is ignored)
-  polldir_queue(std::size_t maxsize,fs::path const&dir,DESER deser,SERIAL serial,bool removelocks):
-      maxsize_(maxsize),dir_(dir),deser_(deser),serial_(serial),removelocks_(removelocks),
-      ipcmtx_(ipc::open_or_create,detail::dirqueue_support::getMutexName(dir).c_str()),ipccond_(ipc::open_or_create,detail::dirqueue_support::getCondName(dir).c_str()){
+  polldir_queue(std::string const&qname,std::size_t maxsize,fs::path const&dir,DESER deser,SERIAL serial,bool removelocks):
+      qname_(qname),maxsize_(maxsize),dir_(dir),deser_(deser),serial_(serial),removelocks_(removelocks),
+      ipcmtx_(ipc::open_or_create,qname.c_str()),ipccond_(ipc::open_or_create,qname.c_str()){
     // make sure path is a directory
     if(!fs::is_directory(dir_))throw std::logic_error(std::string("polldir_queue::polldir_queue: dir_: ")+dir.string()+" is not a directory");
   }
@@ -53,7 +53,7 @@ public:
   polldir_queue&operator=(polldir_queue const&)=delete;
   polldir_queue&operator=(polldir_queue&&)=default;
   ~polldir_queue(){
-    if(removelocks_)removeLockVariables(dir_);
+    if(removelocks_)removeLockVariables(qname_);
   }
   // put a message into queue
   // (returns true if message was enqueued, false if enqueing was disabled)
@@ -137,9 +137,13 @@ public:
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     return maxsize_;
   }
+  // get name of queue
+  std::string qname()const{
+    return qname_;
+  }
   // remove lock variables for queue
-  static void removeLockVariables(fs::path const&dir){
-    detail::dirqueue_support::removeLockVariables(dir);
+  static void removeLockVariables(std::string const&qname){
+    detail::dirqueue_support::removeLockVariables(qname);
   }
 private:
   // check if queue is full
@@ -196,6 +200,7 @@ private:
     return ret;
   }
   // user specified characteristics of queue
+  std::string qname_;
   std::size_t maxsize_;
   fs::path dir_;
   bool removelocks_;

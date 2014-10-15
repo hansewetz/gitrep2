@@ -19,13 +19,14 @@ using namespace std::placeholders;
 namespace asio= boost::asio;
 namespace fs=boost::filesystem;
 
-// create queue
+// create a sender queyue and a listener queue (could be the same queue)
 function<int(istream&)>deserialiser=[](istream&is){int ret;is>>ret;return ret;};
 function<void(ostream&,int)>serialiser=[](ostream&os,int i){os<<i;};
+string qname{"q1"};
 fs::path qdir{"./q1"};
 using intq_t=asio::polldir_queue<int,decltype(deserialiser),decltype(serialiser)>;
-std::shared_ptr<intq_t>qrecv{new intq_t(0,qdir,deserialiser,serialiser,true)};
-std::shared_ptr<intq_t>qsend{new intq_t(0,qdir,deserialiser,serialiser,true)};
+std::shared_ptr<intq_t>qrecv{new intq_t(qname,0,qdir,deserialiser,serialiser,true)};
+std::shared_ptr<intq_t>qsend{new intq_t(qname,0,qdir,deserialiser,serialiser,true)};
 
 // setup asio object
 asio::io_service ios;
@@ -71,7 +72,7 @@ void stopTimer(boost::system::error_code const&ec){
 int main(){
   try{
     // remove locks for queue
-    qrecv->removeLockVariables(qdir);
+    qrecv->removeLockVariables(qrecv->qname());
 
     // listen/send on messages on q1
     BOOST_LOG_TRIVIAL(debug)<<"starting async_deq() ...";
