@@ -4,6 +4,8 @@
 		- we would not need a cache
 	D: add shared memory to keep track of #elements in queue
 	D: add a base class to queues (queue_base)
+	D: test queue through producer/consumer in separate processes
+	D: possibly add callback when an event happens at the queue level
 
 */
 #ifndef __POLLDIR_QUEUE_H__
