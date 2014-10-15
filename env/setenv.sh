@@ -31,9 +31,10 @@ export PROJECT_ROOT=${ENV_ROOT}/..
 export STDFLAG='-std=c++11'		# C++11
 
 # must include boost stuff
-export BOOST_INC=${INSTALL_HOME}/include
-export BOOST_LIB=${INSTALL_HOME}/lib
-
+if [[ ${DEV_ENV} == 'WORK' ]]; then
+	export BOOST_INC=$INSTALL_EXTRA_HOME/include
+	export BOOST_LIB=${INSTALL_EXTRA_HOME}/lib
+fi
 # occi stuff
 export OCCI_INC=${INSTALL_HOME}/include/occi
 export OCCI_LIB=${INSTALL_HOME}/lib/occi
@@ -43,4 +44,4 @@ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${PROJECT_ROOT}/lib/lib:${PROJECT_ROOT
 
 # amend exe library path
 export PATH=${INSTALL_TEST}/bin:${INSTALL_EXTRA_HOME}/bin:${PATH}:${PROJECT_ROOT}/bin/bin:${PROJECT_ROOT}/bin/test
-export LD_LIBRARY_PATH=${INSTALL_TEST}/lib:${INSTALL_TEST}/lib64:${INSTALL_EXTRA_HOME}lib:${LD_LIBRARY_PATH}:${PROJECT_ROOT}/lib
+export LD_LIBRARY_PATH=${INSTALL_TEST}/lib:${INSTALL_TEST}/lib64:${INSTALL_EXTRA_HOME}/lib:${LD_LIBRARY_PATH}:${PROJECT_ROOT}/lib

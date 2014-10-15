@@ -24,12 +24,13 @@ function<int(istream&)>deserialiser=[](istream&is){int ret;is>>ret;return ret;};
 function<void(ostream&,int)>serialiser=[](ostream&os,int i){os<<i;};
 fs::path qdir{"./q1"};
 using intq_t=asio::polldir_queue<int,decltype(deserialiser),decltype(serialiser)>;
-std::shared_ptr<intq_t>q{new intq_t(0,50,qdir,deserialiser,serialiser,true)};
+std::shared_ptr<intq_t>qrecv{new intq_t(0,qdir,deserialiser,serialiser,true)};
+std::shared_ptr<intq_t>qsend{new intq_t(0,qdir,deserialiser,serialiser,true)};
 
 // setup asio object
 asio::io_service ios;
-asio::polldir_queue_listener<intq_t>qlistener(::ios,q);
-asio::polldir_queue_sender<intq_t>qsender(::ios,q);
+asio::polldir_queue_listener<intq_t>qlistener(::ios,qrecv);
+asio::polldir_queue_sender<intq_t>qsender(::ios,qsend);
 
 // timer
 boost::asio::deadline_timer timer(::ios,boost::posix_time::milliseconds(5000));
@@ -51,24 +52,26 @@ void qlistener_handler(boost::system::error_code const&ec,T item){
   }
 }
 // thread function sending maxmsg messages
+template<typename T>
 void thr_send_sync_messages(){
   for(int i=0;i<maxmsg;++i){
-    BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<i;
-    qsender.sync_enq(2*i);
-    qsender.sync_enq(2*i+1);
+    T item{boost::lexical_cast<T>(i)};
+    BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
+    qsender.sync_enq(2*item);
+//    qsender.sync_enq(2*item+1);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 }
 // timer for killing dequeue
 void stopTimer(boost::system::error_code const&ec){
   BOOST_LOG_TRIVIAL(debug)<<"TICK - stopping deque ...";
-  q->disable_deq(true);
+  qrecv->disable_deq(true);
 }
 // test program
 int main(){
   try{
     // remove locks for queue
-    q->removeLockVariables(qdir);
+    qrecv->removeLockVariables(qdir);
 
     // listen/send on messages on q1
     BOOST_LOG_TRIVIAL(debug)<<"starting async_deq() ...";
@@ -76,7 +79,7 @@ int main(){
 
     // kick off sender thread
     BOOST_LOG_TRIVIAL(debug)<<"starting thread sender thread ...";
-    thread thr(thr_send_sync_messages);
+    thread thr(thr_send_sync_messages<int>);
 
     // set timer stopping dequeing on q
     BOOST_LOG_TRIVIAL(debug)<<"starting timer ...";

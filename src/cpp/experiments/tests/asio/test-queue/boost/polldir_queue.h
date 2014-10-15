@@ -1,3 +1,11 @@
+/*
+	Q: do we need to poll or is it eneough to notify via condition variables?
+	Q: what advantage would it be to use inotify for event notification
+		- possibly using normal copying of files into a directory
+		- we would not need a cache
+NOTE! the named mutex/condition does not seem to work ... maybe we need to store them in shared memory ...?
+
+*/
 #ifndef __POLLDIR_QUEUE_H__
 #define __POLLDIR_QUEUE_H__
 #include "detail/dirqueue_support.h"
@@ -5,8 +13,6 @@
 #include <utility>
 #include <list>
 #include <boost/filesystem.hpp>
-#include <boost/thread/thread_time.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
 #include <boost/interprocess/sync/named_condition.hpp>
@@ -34,15 +40,11 @@ public:
 
   // ctors,assign,dtor
   // (if maxsize == 0 checking for max numbert of queue elements is ignored)
-  polldir_queue(std::size_t maxsize,size_t pollms,fs::path const&dir,DESER deser,SERIAL serial,bool removelocks):
-      maxsize_(maxsize),pollms_(pollms),dir_(dir),deser_(deser),serial_(serial),removelocks_(removelocks),
+  polldir_queue(std::size_t maxsize,fs::path const&dir,DESER deser,SERIAL serial,bool removelocks):
+      maxsize_(maxsize),dir_(dir),deser_(deser),serial_(serial),removelocks_(removelocks),
       ipcmtx_(ipc::open_or_create,detail::dirqueue_support::getMutexName(dir).c_str()),ipccond_(ipc::open_or_create,detail::dirqueue_support::getCondName(dir).c_str()){
     // make sure path is a directory
     if(!fs::is_directory(dir_))throw std::logic_error(std::string("polldir_queue::polldir_queue: dir_: ")+dir.string()+" is not a directory");
-
-    // populate cache
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    fillCacheNolock(true);
   }
   polldir_queue(polldir_queue const&)=delete;
   polldir_queue(polldir_queue&&)=default;
@@ -54,68 +56,47 @@ public:
   // put a message into queue
   // (returns true if message was enqueued, false if enqueing was disabled)
   bool enq(T t){
-    // loop until there is room in the queue or until enquing is disabled
+    // wait for state of queue is such that we can enque an element
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    while(true){
-      // wait for either poll intervall or the state of queue is such that we can enque an element
-      pt::ptime const abstm{pt::microsec_clock::local_time()+pt::milliseconds(pollms_)};
-      bool tmo=!ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_||!fullNolock();});
+    ipccond_.wait(lock,[&](){return !enq_enabled_||!fullNolock();});
 
-      // if enq is disabled we'll return
-      if(!enq_enabled_)return false;
+    // if enq is disabled we'll return
+    if(!enq_enabled_)return false;
 
-      // if we timed out must check if queue is full
-      if(tmo)continue;
-
-      // we know we can now write message
-      detail::dirqueue_support::write(t,dir_,serial_);
-      ipccond_.notify_all();
-      return true;
-    }
+    // we know we can now write message
+    detail::dirqueue_support::write(t,dir_,serial_);
+    ipccond_.notify_all();
+    return true;
   }
   // wait until we can put a message in queue
   // (returns false if enqueing was disabled, else true)
   bool wait_enq(){
-    // loop until there is room in the queue or until enquing is disabled
+    // wait for the state of queue is such that we can return something
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    while(true){
-      // wait for either poll intervall or the state of queue is such that we can return something
-      pt::ptime const abstm{pt::microsec_clock::local_time()+pt::milliseconds(pollms_)};
-      bool tmo=!ipccond_.timed_wait(lock,abstm,[&](){return !enq_enabled_||!fullNolock();});
+    ipccond_.wait(lock,[&](){return !enq_enabled_||!fullNolock();});
 
-      // if enq is disabled we'll return
-      if(!enq_enabled_)return false;
+    // if enq is disabled we'll return
+    if(!enq_enabled_)return false;
 
-      // if we timed out continue and wait
-      if(tmo)continue;
-
-      // we know we can now write message
-      ipccond_.notify_all();
-      return true;
-    }
+    // we know queue is not full
+    ipccond_.notify_all();
+    return true;
   }
   // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(){
-    // loop until we have a message or until dequeing is disabled
+    // wait for the state of queue is such that we can return something
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    while(true){
-      // wait for either poll intervall or the state of queue is such that we can return something
-      boost::system_time const abstm{boost::get_system_time()+pt::milliseconds(pollms_)};
-      bool tmo=!ipccond_.timed_wait(lock,abstm,[&](){return !deq_enabled_||!emptyNolock();});
+    ipccond_.wait(lock,[&](){return !deq_enabled_||!emptyNolock();});
 
-      // check if dequeue was disabled
-      if(!deq_enabled_)return std::make_pair(false,T{});
+    // check if dequeue was disabled
+    if(!deq_enabled_)return std::make_pair(false,T{});
 
-      // if we timed out continue and wait
-      if(tmo)continue;
-
-      // we know the cache is not empty now so no need to check
-      fs::path file{cache_.front()};
-      cache_.pop_front();
-      T ret{detail::dirqueue_support::read<T>(file,deser_)};
-      ipccond_.notify_all();
-      return std::make_pair(true,ret);
-    }
+    // we know the cache is not empty now so no need to check
+    fs::path file{cache_.front()};
+    cache_.pop_front();
+    T ret{detail::dirqueue_support::read<T>(file,deser_)};
+    ipccond_.notify_all();
+    return std::make_pair(true,ret);
   }
   // cancel deq operations (will also release blocking threads)
   void disable_deq(bool disable){
@@ -214,7 +195,6 @@ private:
   }
   // user specified characteristics of queue
   std::size_t maxsize_;
-  std::size_t pollms_;
   fs::path dir_;
   bool removelocks_;
 

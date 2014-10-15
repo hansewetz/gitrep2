@@ -39,7 +39,7 @@ int main(int argc,char*argv[]){
     // setup queue
     function<int(istream&)>reader=[](istream&is){int ret;is>>ret;return ret;};
     function<void(ostream&,int)>writer=[](ostream&os,int i){os<<i;};
-    asio::polldir_queue<int,decltype(reader),decltype(writer)>q1{10,5000,qdir,reader,writer,true};
+    asio::polldir_queue<int,decltype(reader),decltype(writer)>q1{10,qdir,reader,writer,true};
 
     // remove locks if they exist
     q1.removeLockVariables(qdir);
