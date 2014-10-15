@@ -20,6 +20,7 @@ namespace asio= boost::asio;
 namespace fs=boost::filesystem;
 
 // value type in queues
+// (must work with operator<< and operator>>, be default constructable)
 using qval_t=std::string;
 
 // create a sender and listener queues (could be the same queue)

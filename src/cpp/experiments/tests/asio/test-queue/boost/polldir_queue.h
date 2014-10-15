@@ -24,7 +24,7 @@ namespace asio{
 
 namespace fs=boost::filesystem;
 namespace ipc=boost::interprocess;
-namespace pt= boost::posix_time;
+namespace pt=boost::posix_time;
 
 // a simple threadsafe/interprocess-safe queue using directory as queue and files as storage media for queue items
 // (mutex/condition variable names are derived from the queue name)
