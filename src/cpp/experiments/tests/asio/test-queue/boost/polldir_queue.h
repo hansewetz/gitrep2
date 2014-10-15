@@ -36,10 +36,6 @@ public:
   // (need this so we can create an item with default ctor)
   using value_type=T;
 
-  // typedef for serialiser/de-serialiser
-  using deserialiser=DESER;
-  using serialiser=SERIAL;
-
   // ctors,assign,dtor
   // (if maxsize == 0 checking for max numbert of queue elements is ignored)
   polldir_queue(std::string const&qname,std::size_t maxsize,fs::path const&dir,DESER deser,SERIAL serial,bool removelocks):

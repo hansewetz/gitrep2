@@ -27,6 +27,9 @@ public:
 private:
   std::shared_ptr<Queue>q_;
 };
+// typedefs for using standard queue listeners
+template<typename Queue>using queue_listener=basic_queue_listener<basic_queue_listener_service<>,Queue>;
+
 // --- service class -----------------------------
 // (for one io_service, only one object created)
 template<typename Impl>

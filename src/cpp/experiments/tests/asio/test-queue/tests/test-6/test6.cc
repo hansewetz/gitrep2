@@ -19,7 +19,7 @@ using namespace std::placeholders;
 namespace asio= boost::asio;
 namespace fs=boost::filesystem;
 
-// create a sender queyue and a listener queue (could be the same queue)
+// create a sender and listener queues (could be the same queue)
 function<int(istream&)>deserialiser=[](istream&is){int ret;is>>ret;return ret;};
 function<void(ostream&,int)>serialiser=[](ostream&os,int i){os<<i;};
 string qname{"q1"};
@@ -30,8 +30,8 @@ std::shared_ptr<intq_t>qsend{new intq_t(qname,0,qdir,deserialiser,serialiser,tru
 
 // setup asio object
 asio::io_service ios;
-asio::polldir_queue_listener<intq_t>qlistener(::ios,qrecv);
-asio::polldir_queue_sender<intq_t>qsender(::ios,qsend);
+asio::queue_listener<intq_t>qlistener(::ios,qrecv);
+asio::queue_sender<intq_t>qsender(::ios,qsend);
 
 // timer
 boost::asio::deadline_timer timer(::ios,boost::posix_time::milliseconds(5000));
