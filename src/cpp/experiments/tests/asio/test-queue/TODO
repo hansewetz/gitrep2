@@ -1,1 +1,7 @@
-- complete implementation of eventdur_queue
+- so that we don;t have to have timers to stop enq/deq:
+	- implement async_timed_deq()
+	- implement async_timed_enq()
+
+- implement 'socket_queue' (can be used to talk across machines)
+
+- implement 'fd_queue' (can be use to talk to moses when item type is 'string')

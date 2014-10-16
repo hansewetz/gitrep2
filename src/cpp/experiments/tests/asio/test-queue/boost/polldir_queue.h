@@ -7,6 +7,11 @@
 	D: test queue through producer/consumer in separate processes
 	D: possibly add callback when an event happens at the queue level
 
+	D: when serializing/de-serializing maybe we should return a bool indicating if the operation should
+	   be processed or if message should be ignored. For example, we might not want to throw an exception but instead 
+	   skip the message - in that case the return code should be a 'false' and the queue will log a warning message
+	   and continue
+
 */
 #ifndef __POLLDIR_QUEUE_H__
 #define __POLLDIR_QUEUE_H__

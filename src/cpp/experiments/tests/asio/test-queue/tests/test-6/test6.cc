@@ -20,7 +20,7 @@ namespace asio= boost::asio;
 namespace fs=boost::filesystem;
 
 // value type in queues
-// (must work with operator<< and operator>>, be default constructable)
+// (must work with operator<< and operator>>, and be default constructable)
 using qval_t=std::string;
 
 // create a sender and listener queues (could be the same queue)
@@ -37,7 +37,7 @@ asio::io_service ios;
 asio::queue_listener<queue_t>qlistener(::ios,qrecv);
 asio::queue_sender<queue_t>qsender(::ios,qsend);
 
-// timer
+// timer - when popping it stops deq()
 boost::asio::deadline_timer timer(::ios,boost::posix_time::milliseconds(5000));
 
 // max #of messages to send/receive
@@ -77,17 +77,18 @@ int main(){
     // remove locks for queue
     qrecv->removeLockVariables(qrecv->qname());
 
-    // listen/send on messages on q1
+    // listen for on messages on q1 (using asio)
     BOOST_LOG_TRIVIAL(debug)<<"starting async_deq() ...";
     qlistener.async_deq(qlistener_handler<qval_t>);
+
+    // set timer stopping dequeing on q
+    // (at some point we have to stop deq() or we'll sit in asio forever)
+    BOOST_LOG_TRIVIAL(debug)<<"starting timer ...";
+    timer.async_wait(stopTimer);
 
     // kick off sender thread
     BOOST_LOG_TRIVIAL(debug)<<"starting thread sender thread ...";
     thread thr(thr_send_sync_messages<qval_t>);
-
-    // set timer stopping dequeing on q
-    BOOST_LOG_TRIVIAL(debug)<<"starting timer ...";
-    timer.async_wait(stopTimer);
 
     // kick off io service
     BOOST_LOG_TRIVIAL(debug)<<"starting asio ...";
