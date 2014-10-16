@@ -4,9 +4,8 @@
 		- we would not need a cache
 	D: add shared memory to keep track of #elements in queue
 	D: (add a base class to queues (queue_base))
-	D: test queue through producer/consumer in separate processes
+	D: test queue through producer/consumer in separate processes (requires: boost 1.56)
 	D: possibly add callback when an event happens at the queue level
-
 	D: when serializing/de-serializing maybe we should return a bool indicating if the operation should
 	   be processed or if message should be ignored. For example, we might not want to throw an exception but instead 
 	   skip the message - in that case the return code should be a 'false' and the queue will log a warning message

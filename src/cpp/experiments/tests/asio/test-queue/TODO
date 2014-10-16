@@ -1,7 +1,23 @@
-- so that we don;t have to have timers to stop enq/deq:
+=== improvements ===
+
+- so that we don't have to have timers to stop enq/deq:
 	- implement async_timed_deq()
 	- implement async_timed_enq()
+	- implement async_timed_enq_wait()
 
+- add error code as return for enq()/deq() so that we can separate various failures from filtering or from disable of the queue
+	this will impact the queue_listener/queue_sender
+
+- pass queue by reference instead of as shared_ptr<> to queue_listener/queue_sender
+	(we'll hold queue by reference in queue_listener/queue_sender)
+	(this is easy but will take an hour or two)
+
+- possibly rename the 'queue' concept to 'channel'
+
+- add filter to all queues (accept/reject - default is to accept all messages)
+
+
+=== new queues ===
 - implement 'socket_queue' (can be used to talk across machines)
 
 - implement 'fd_queue' (can be use to talk to moses when item type is 'string')
