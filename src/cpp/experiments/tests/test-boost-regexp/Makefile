@@ -1,5 +1,16 @@
-test1: test1.cc
-	g++ -o test1 test1.cc -std=c++0x -lboost_regex -L$(BOOST_LIB) -I$(BOOST_INC)
+# To be built
+LOCAL_TARGET    =  test1
+LOCAL_SOTARGET  =
+LOCAL_OBJS      = test1.o
 
-clean:
-	rm -f test1 *.o
+# Control.
+LOCAL_LIBS      = -lboost_regex -lpthread
+LOCAL_LIBPATH   = -L$(BOOST_LIB)
+LOCAL_INCPATH   = -I$(BOOST_INC)
+LOCAL_DEFINES   = -DBOOST_ALL_DYN_LINK -DBOOST_IOSTREAMS_NO_LIB
+LOCAL_CXXFLAGS  =
+LOCAL_CPPFLAGS  = 
+LOCAL_LDFLAGS   =
+LOCAL_LDSOFLAGS =
+
+include $(ENV_ROOT)/makerules/build.rules

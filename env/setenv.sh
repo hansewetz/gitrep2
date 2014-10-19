@@ -34,6 +34,9 @@ export STDFLAG='-std=c++11'		# C++11
 if [[ ${DEV_ENV} == 'WORK' ]]; then
 	export BOOST_INC=$INSTALL_EXTRA_HOME/include
 	export BOOST_LIB=${INSTALL_EXTRA_HOME}/lib
+else
+	export BOOST_INC=$INSTALL_HOME/include
+	export BOOST_LIB=${INSTALL_HOME}/lib
 fi
 # occi stuff
 export OCCI_INC=${INSTALL_HOME}/include/occi
