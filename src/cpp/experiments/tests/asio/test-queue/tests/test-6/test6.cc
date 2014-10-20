@@ -34,8 +34,8 @@ std::shared_ptr<queue_t>qsend{new queue_t(qname,0,qdir,deserialiser,serialiser,t
 
 // setup asio object
 asio::io_service ios;
-asio::queue_listener<queue_t>qlistener(::ios,qrecv);
-asio::queue_sender<queue_t>qsender(::ios,qsend);
+asio::queue_listener<queue_t>qlistener(::ios,qrecv.get());
+asio::queue_sender<queue_t>qsender(::ios,qsend.get());
 
 // timer - when popping it stops deq()
 boost::asio::deadline_timer timer(::ios,boost::posix_time::milliseconds(5000));

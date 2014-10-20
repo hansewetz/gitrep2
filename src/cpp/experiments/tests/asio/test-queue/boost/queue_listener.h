@@ -16,7 +16,7 @@ template<typename Service,typename Queue>
 class basic_queue_listener:public boost::asio::basic_io_object<Service>{
 public:
   // ctor
-  explicit basic_queue_listener(boost::asio::io_service&io_service,std::shared_ptr<Queue>q):
+  explicit basic_queue_listener(boost::asio::io_service&io_service,Queue*q):
       boost::asio::basic_io_object<Service>(io_service),q_(q){
   }
   // async deq operation
@@ -25,7 +25,7 @@ public:
     this->service.async_deq(this->implementation,q_,handler);
   }
 private:
-  std::shared_ptr<Queue>q_;
+  Queue*q_;
 };
 // typedefs for using standard queue listeners
 template<typename Queue>using queue_listener=basic_queue_listener<basic_queue_listener_service<>,Queue>;
@@ -58,7 +58,7 @@ public:
   }
   // async sync deq operation
   template <typename Handler,typename Queue>
-  void async_deq(implementation_type&impl,std::shared_ptr<Queue>q,Handler handler){
+  void async_deq(implementation_type&impl,Queue*q,Handler handler){
     // this is a non-blocking operation so we are OK calling impl object in this thread
     impl->async_deq(impl,q,handler);
   }
@@ -89,7 +89,7 @@ public:
 public:
   // deque message (post request to thread)
   template<typename Handler,typename Queue>
-  void async_deq(std::shared_ptr<queue_listener_impl>impl,std::shared_ptr<Queue>q,Handler handler){
+  void async_deq(std::shared_ptr<queue_listener_impl>impl,Queue*q,Handler handler){
     impl_io_service_.post(deq_operation<Handler,Queue>(impl,post_io_service_,q,handler));
   }
 private:
@@ -98,7 +98,7 @@ private:
   class deq_operation{
   public:
     // ctor
-    deq_operation(std::shared_ptr<queue_listener_impl>impl,boost::asio::io_service&io_service,std::shared_ptr<Queue>q,Handler handler):
+    deq_operation(std::shared_ptr<queue_listener_impl>impl,boost::asio::io_service&io_service,Queue*q,Handler handler):
         wimpl_(impl),io_service_(io_service),work_(io_service),q_(q),handler_(handler) {
     }
     // function calling implementation object - runs in the thread created in ctor
@@ -119,7 +119,7 @@ private:
     std::weak_ptr<queue_listener_impl>wimpl_;
     boost::asio::io_service&io_service_;
     boost::asio::io_service::work work_;
-    std::shared_ptr<Queue>q_;
+    Queue*q_;
     Handler handler_;
   };
   // private data
