@@ -109,18 +109,18 @@ public:
 public:
   // enque message (post request to thread)
   template<typename Handler,typename Queue>
-  void async_enq(std::shared_ptr<queue_sender_impl>impl,Queue*tq,typename Queue::value_type val,Handler handler){
-    impl_io_service_.post(enq_operation<Handler,Queue>(impl,post_io_service_,tq,val,handler));
+  void async_enq(std::shared_ptr<queue_sender_impl>impl,Queue*q,typename Queue::value_type val,Handler handler){
+    impl_io_service_.post(enq_operation<Handler,Queue>(impl,post_io_service_,q,val,handler));
   }
   // wait to enq message (post request to thread)
   template<typename Handler,typename Queue>
-  void async_wait_enq(std::shared_ptr<queue_sender_impl>impl,Queue*tq,Handler handler){
-    impl_io_service_.post(wait_enq_operation<Handler,Queue>(impl,post_io_service_,tq,handler));
+  void async_wait_enq(std::shared_ptr<queue_sender_impl>impl,Queue*q,Handler handler){
+    impl_io_service_.post(wait_enq_operation<Handler,Queue>(impl,post_io_service_,q,handler));
   }
   // enque message (blocking enq)
   template<typename Queue>
-  void sync_enq(Queue*tq,typename Queue::value_type val){
-    tq->enq(val);
+  void sync_enq(Queue*q,typename Queue::value_type val){
+    q->enq(val);
   }
 private:
   // function object calling blocking enq() on queue
@@ -128,8 +128,8 @@ private:
   class enq_operation{
   public:
     // ctor
-    enq_operation(std::shared_ptr<queue_sender_impl>impl,boost::asio::io_service &io_service,Queue*tq,typename Queue::value_type val,Handler handler):
-        wimpl_(impl),io_service_(io_service),work_(io_service),tq_(tq),val_(val),handler_(handler) {
+    enq_operation(std::shared_ptr<queue_sender_impl>impl,boost::asio::io_service &io_service,Queue*q,typename Queue::value_type val,Handler handler):
+        wimpl_(impl),io_service_(io_service),work_(io_service),q_(q),val_(val),handler_(handler) {
     }
     // function calling implementation object - runs in the thread created in ctor
     void operator()(){
@@ -138,7 +138,7 @@ private:
 
       // if valid, go ahead and do (potentially) blocking call on queue, otherwise post aborted message
       if(impl){
-        bool ret{tq_->enq(val_)};
+        bool ret{q_->enq(val_)};
         boost::system::error_code ec=(!ret?boost::asio::error::operation_aborted:boost::system::error_code());
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec));
       }else{
@@ -149,7 +149,7 @@ private:
     std::weak_ptr<queue_sender_impl>wimpl_;
     boost::asio::io_service&io_service_;
     boost::asio::io_service::work work_;
-    Queue*tq_;
+    Queue*q_;
     typename Queue::value_type val_;
     Handler handler_;
   };
@@ -158,8 +158,8 @@ private:
   class wait_enq_operation{
   public:
     // ctor
-    wait_enq_operation(std::shared_ptr<queue_sender_impl>impl,boost::asio::io_service &io_service,Queue*tq,Handler handler):
-        wimpl_(impl),io_service_(io_service),work_(io_service),tq_(tq),handler_(handler) {
+    wait_enq_operation(std::shared_ptr<queue_sender_impl>impl,boost::asio::io_service &io_service,Queue*q,Handler handler):
+        wimpl_(impl),io_service_(io_service),work_(io_service),q_(q),handler_(handler) {
     }
     // function calling implementation object - runs in the thread created in ctor
     void operator()(){
@@ -168,7 +168,7 @@ private:
 
       // if valid, go ahead and do (potentially) blocking call on queue, otherwise post aborted message
       if(impl){
-        bool ret{tq_->wait_enq()};
+        bool ret{q_->wait_enq()};
         boost::system::error_code ec=(!ret?boost::asio::error::operation_aborted:boost::system::error_code());
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec));
       }else{
@@ -179,7 +179,7 @@ private:
     std::weak_ptr<queue_sender_impl>wimpl_;
     boost::asio::io_service&io_service_;
     boost::asio::io_service::work work_;
-    Queue*tq_;
+    Queue*q_;
     Handler handler_;
   };
   // private data

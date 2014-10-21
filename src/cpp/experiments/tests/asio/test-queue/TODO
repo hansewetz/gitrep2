@@ -1,8 +1,5 @@
 === improvements ===
 
-- implement 
-	- async_wait_enq
-
 - so that we don't have to have timers to stop enq/deq:
 	- implement async_timed_deq()
 	- implement async_timed_enq()

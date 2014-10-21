@@ -55,6 +55,14 @@ public:
     cond_.notify_all();
     return ret;
   }
+  // wait until we can retrieve a message from queue
+  bool wait_deq(){
+    std::unique_lock<std::mutex>lock(mtx_);
+    cond_.wait(lock,[&](){return !deq_enabled_||q_.size()>0;});
+    if(!deq_enabled_)return false;
+    cond_.notify_all();
+    return true;
+  }
   // cancel deq operations (will also release blocking threads)
   void disable_deq(bool disable){
     std::unique_lock<std::mutex>lock(mtx_);

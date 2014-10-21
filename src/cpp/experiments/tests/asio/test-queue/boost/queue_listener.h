@@ -24,6 +24,11 @@ public:
   void async_deq(Handler handler) {
     this->service.async_deq(this->implementation,q_,handler);
   }
+  // wait until we can deq a message from queue in async mode
+  template <typename Handler>
+  void async_wait_deq(Handler handler) {
+    this->service.async_wait_deq(this->implementation,q_,handler);
+  }
   // sync deq operation (blocking)
   std::pair<bool,typename Queue::value_type>sync_deq(){
     return this->service.sync_deq(this->implementation,q_);
@@ -66,6 +71,12 @@ public:
     // this is a non-blocking operation so we are OK calling impl object in this thread
     impl->async_deq(impl,q,handler);
   }
+  // async sync wait operation
+  template <typename Handler,typename Queue>
+  void async_wait_deq(implementation_type&impl,Queue*q,Handler handler){
+    // this is a non-blocking operation so we are OK calling impl object in this thread
+    impl->async_wait_deq(impl,q,handler);
+  }
   // sync deq operation (blocking)
   template <typename Queue>
   std::pair<bool,typename Queue::value_type>sync_deq(implementation_type&impl,Queue*q){
@@ -101,10 +112,15 @@ public:
   void async_deq(std::shared_ptr<queue_listener_impl>impl,Queue*q,Handler handler){
     impl_io_service_.post(deq_operation<Handler,Queue>(impl,post_io_service_,q,handler));
   }
-  // dequeue message (blocking enq)
+  // wait to deq message (post request to thread)
+  template<typename Handler,typename Queue>
+  void async_wait_deq(std::shared_ptr<queue_listener_impl>impl,Queue*q,Handler handler){
+    impl_io_service_.post(wait_deq_operation<Handler,Queue>(impl,post_io_service_,q,handler));
+  }
+  // dequeue message (blocking deq)
   template<typename Queue>
-  std::pair<bool,typename Queue::value_type>sync_deq(Queue*tq){
-    return tq->deq();
+  std::pair<bool,typename Queue::value_type>sync_deq(Queue*q){
+    return q->deq();
   }
 private:
   // function object calling blocking deq() on queue
@@ -127,6 +143,35 @@ private:
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec,ret.second));
       }else{
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,boost::asio::error::operation_aborted,typename Queue::value_type()));
+      }
+    }
+  private:
+    std::weak_ptr<queue_listener_impl>wimpl_;
+    boost::asio::io_service&io_service_;
+    boost::asio::io_service::work work_;
+    Queue*q_;
+    Handler handler_;
+  };
+  // function object calling blocking wait() on queue
+  template <typename Handler,typename Queue>
+  class wait_deq_operation{
+  public:
+    // ctor
+    wait_deq_operation(std::shared_ptr<queue_listener_impl>impl,boost::asio::io_service &io_service,Queue*q,Handler handler):
+        wimpl_(impl),io_service_(io_service),work_(io_service),q_(q),handler_(handler) {
+    }
+    // function calling implementation object - runs in the thread created in ctor
+    void operator()(){
+      // make sure implementation object is still valid
+      std::shared_ptr<queue_listener_impl>impl{wimpl_.lock()};
+
+      // if valid, go ahead and do (potentially) blocking call on queue, otherwise post aborted message
+      if(impl){
+        bool ret{q_->wait_deq()};
+        boost::system::error_code ec=(!ret?boost::asio::error::operation_aborted:boost::system::error_code());
+        this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec));
+      }else{
+        this->io_service_.post(boost::asio::detail::bind_handler(handler_,boost::asio::error::operation_aborted));
       }
     }
   private:
