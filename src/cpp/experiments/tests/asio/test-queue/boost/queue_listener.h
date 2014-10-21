@@ -24,6 +24,10 @@ public:
   void async_deq(Handler handler) {
     this->service.async_deq(this->implementation,q_,handler);
   }
+  // sync deq operation (blocking)
+  std::pair<bool,typename Queue::value_type>sync_deq(){
+    return this->service.sync_deq(this->implementation,q_);
+  }
 private:
   Queue*q_;
 };
@@ -62,6 +66,11 @@ public:
     // this is a non-blocking operation so we are OK calling impl object in this thread
     impl->async_deq(impl,q,handler);
   }
+  // sync deq operation (blocking)
+  template <typename Queue>
+  std::pair<bool,typename Queue::value_type>sync_deq(implementation_type&impl,Queue*q){
+    return impl->sync_deq(q);
+  }
 private:
   // shutdown service (required)
   void shutdown_service(){
@@ -91,6 +100,11 @@ public:
   template<typename Handler,typename Queue>
   void async_deq(std::shared_ptr<queue_listener_impl>impl,Queue*q,Handler handler){
     impl_io_service_.post(deq_operation<Handler,Queue>(impl,post_io_service_,q,handler));
+  }
+  // dequeue message (blocking enq)
+  template<typename Queue>
+  std::pair<bool,typename Queue::value_type>sync_deq(Queue*tq){
+    return tq->deq();
   }
 private:
   // function object calling blocking deq() on queue

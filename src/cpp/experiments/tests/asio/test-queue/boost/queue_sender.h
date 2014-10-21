@@ -24,14 +24,14 @@ public:
   void async_enq(typename Queue::value_type val,Handler handler) {
     this->service.async_enq(this->implementation,q_,val,handler);
   }
-  // sync enq operation (blocking)
-  void sync_enq(typename Queue::value_type val){
-    this->service.sync_enq(this->implementation,q_,val);
-  }
   // wait until we can put a message in queue in async mode
   template <typename Handler>
   void async_wait_enq(Handler handler) {
     this->service.async_wait_enq(this->implementation,q_,handler);
+  }
+  // sync enq operation (blocking)
+  void sync_enq(typename Queue::value_type val){
+    this->service.sync_enq(this->implementation,q_,val);
   }
 private:
   Queue*q_;
@@ -71,16 +71,16 @@ public:
     // this is a non-blocking operation so we are OK calling impl object in this thread
     impl->async_enq(impl,q,val,handler);
   }
-  // sync enq operation (blocking)
-  template <typename Queue>
-  void sync_enq(implementation_type&impl,Queue*q,typename Queue::value_type val){
-    impl->sync_enq(q,val);
-  }
   // async sync wait operation
   template <typename Handler,typename Queue>
   void async_wait_enq(implementation_type&impl,Queue*q,Handler handler){
     // this is a non-blocking operation so we are OK calling impl object in this thread
     impl->async_wait_enq(impl,q,handler);
+  }
+  // sync enq operation (blocking)
+  template <typename Queue>
+  void sync_enq(implementation_type&impl,Queue*q,typename Queue::value_type val){
+    impl->sync_enq(q,val);
   }
 private:
   // shutdown service (required)
@@ -112,15 +112,15 @@ public:
   void async_enq(std::shared_ptr<queue_sender_impl>impl,Queue*tq,typename Queue::value_type val,Handler handler){
     impl_io_service_.post(enq_operation<Handler,Queue>(impl,post_io_service_,tq,val,handler));
   }
-  // enque message (blocking enq)
-  template<typename Queue>
-  void sync_enq(Queue*tq,typename Queue::value_type val){
-    tq->enq(val);
-  }
   // wait to enq message (post request to thread)
   template<typename Handler,typename Queue>
   void async_wait_enq(std::shared_ptr<queue_sender_impl>impl,Queue*tq,Handler handler){
     impl_io_service_.post(wait_enq_operation<Handler,Queue>(impl,post_io_service_,tq,handler));
+  }
+  // enque message (blocking enq)
+  template<typename Queue>
+  void sync_enq(Queue*tq,typename Queue::value_type val){
+    tq->enq(val);
   }
 private:
   // function object calling blocking enq() on queue
