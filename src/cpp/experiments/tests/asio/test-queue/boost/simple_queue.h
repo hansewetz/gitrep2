@@ -4,6 +4,7 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <chrono>
 namespace boost{
 namespace asio{
 
@@ -32,10 +33,31 @@ public:
     cond_.notify_all();
     return true;
   }
+  // put a message into queue - timeout if waiting too long
+  template<typename TMO>
+  bool timed_enq(T t,TMO const&rel_time){
+    std::unique_lock<std::mutex>lock(mtx_);
+    bool tmo=!cond_.wait_for(lock,rel_time,[&](){return !enq_enabled_||q_.size()<maxsize_;});
+    if(tmo)return false;
+    if(!enq_enabled_)return false;
+    q_.push(t);
+    cond_.notify_all();
+    return true;
+  }
   // wait until we can put a message in queue
   bool wait_enq(){
     std::unique_lock<std::mutex>lock(mtx_);
     cond_.wait(lock,[&](){return !enq_enabled_||q_.size()<maxsize_;});
+    if(!enq_enabled_)return false;
+    cond_.notify_all();
+    return true;
+  }
+  // wait until we can put a message in queue - timeout if waiting too long
+  template<typename TMO>
+  bool timed_wait_enq(TMO const&rel_time){
+    std::unique_lock<std::mutex>lock(mtx_);
+    bool tmo=!cond_.wait_for(lock,rel_time,[&](){return !enq_enabled_||q_.size()<maxsize_;});
+    if(tmo)return false;
     if(!enq_enabled_)return false;
     cond_.notify_all();
     return true;
