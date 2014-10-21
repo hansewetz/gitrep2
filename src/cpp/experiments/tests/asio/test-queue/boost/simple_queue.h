@@ -101,6 +101,15 @@ public:
     cond_.notify_all();
     return true;
   }
+  // wait until we can retrieve a message from queue -  timeout if waiting too long
+  template<typename TMO>
+  bool timed_wait_deq(TMO rel_time){
+    std::unique_lock<std::mutex>lock(mtx_);
+    bool tmo=!cond_.wait_for(lock,rel_time,[&](){return !deq_enabled_||q_.size()>0;});
+    if(tmo||!deq_enabled_)return false;
+    cond_.notify_all();
+    return true;
+  }
   // cancel deq operations (will also release blocking threads)
   void disable_deq(bool disable){
     std::unique_lock<std::mutex>lock(mtx_);

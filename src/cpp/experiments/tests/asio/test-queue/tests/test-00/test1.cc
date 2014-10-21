@@ -20,7 +20,7 @@ int main(){
     // kick off a thread which enqueues a message
     std::function<void()>f=[&](){
       // sleep 2 seconds before deq()
-      std::this_thread::sleep_for(std::chrono::milliseconds(6000));
+      std::this_thread::sleep_for(std::chrono::milliseconds(4000));
       q.enq(17);
       BOOST_LOG_TRIVIAL(debug)<<"enqueued an item";
     };
@@ -28,8 +28,8 @@ int main(){
 
     // insert an element in queue
     BOOST_LOG_TRIVIAL(debug)<<"timed deq() ...";
-    std::pair<bool,int>p=q.timed_deq(tmo);
-    BOOST_LOG_TRIVIAL(debug)<<"deq(): "<<boolalpha<<p.first<<", "<<p.second;
+    bool res=q.timed_wait_deq(tmo);
+    BOOST_LOG_TRIVIAL(debug)<<"deq_wait(): "<<boolalpha<<res;
 
     // join thread
     thr.join();
