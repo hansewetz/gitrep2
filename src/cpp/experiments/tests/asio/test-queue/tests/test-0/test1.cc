@@ -19,7 +19,7 @@ int main(){
 
     // insert an element in queue
     BOOST_LOG_TRIVIAL(debug)<<"enqing one item ...";
-    bool stat1=q.timed_enq<decltype(tmo)>(17,tmo);
+    bool stat1=q.timed_enq(17,tmo);
     BOOST_LOG_TRIVIAL(debug)<<"enq(): "<<boolalpha<<stat1;
 
     // kick off thread popping an element afetr 2 second
@@ -31,8 +31,8 @@ int main(){
       };
     std::thread thr{ft};
 
-    BOOST_LOG_TRIVIAL(debug)<<"enq wait seond item ...";
-    bool stat2=q.timed_wait_enq<decltype(tmo)>(tmo);
+    BOOST_LOG_TRIVIAL(debug)<<"enq wait second item ...";
+    bool stat2=q.timed_wait_enq(tmo);
     BOOST_LOG_TRIVIAL(debug)<<"enq_wait(): "<<boolalpha<<stat2;
 
     // join thread

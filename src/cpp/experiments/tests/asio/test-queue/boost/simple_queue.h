@@ -62,13 +62,29 @@ public:
     cond_.notify_all();
     return true;
   }
-  // dequeue a message (return.first == false if deq() was disabled)
+ // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(){
     std::unique_lock<std::mutex>lock(mtx_);
     cond_.wait(lock,[&](){return !deq_enabled_||!q_.empty();});
   
-    // if deq is disabled or queue is empty return 
-    if(!deq_enabled_||q_.empty()){
+    // if deq is disabled or timeout
+    if(!deq_enabled_){
+      return std::make_pair(false,T{});
+    }
+    // check if we have a message
+    std::pair<bool,T>ret{std::make_pair(true,q_.front())};
+    q_.pop();
+    cond_.notify_all();
+    return ret;
+  }
+ // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
+  template<typename TMO>
+  std::pair<bool,T>timed_deq(TMO rel_time){
+    std::unique_lock<std::mutex>lock(mtx_);
+    bool tmo=!cond_.wait_for(lock,rel_time,[&](){return !deq_enabled_||!q_.empty();});
+  
+    // if deq is disabled or queue is empty return or timeout
+    if(tmo||!deq_enabled_){
       return std::make_pair(false,T{});
     }
     // check if we have a message
