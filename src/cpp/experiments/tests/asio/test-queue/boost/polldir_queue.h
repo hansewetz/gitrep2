@@ -100,6 +100,21 @@ public:
     ipccond_.notify_all();
     return std::make_pair(true,ret);
   }
+  // wait until we can retrieve a message from queue
+  bool wait_deq(){
+    // wait for the state of queue is such that we can return something
+    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
+    ipccond_.wait(lock,[&](){return !deq_enabled_||!emptyNolock();});
+
+    // check if dequeue was disabled
+    if(!deq_enabled_)return false;
+
+    // we know the cache is not empty now so no need to check
+    fs::path file{cache_.front()};
+    ipccond_.notify_all();
+    return true;
+  }
+
   // cancel deq operations (will also release blocking threads)
   void disable_deq(bool disable){
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
