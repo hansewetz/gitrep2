@@ -24,11 +24,10 @@ function<int(istream&)>reader=[](istream&is){int ret;is>>ret;return ret;};
 function<void(ostream&,int)>writer=[](ostream&os,int i){os<<i;};
 using queue_t=boost::asio::polldir_queue<int,decltype(reader),decltype(writer)>;
 queue_t q1{qname,10,qdir,reader,writer,true};
-shared_ptr<queue_t>q{new queue_t(qname,maxmsg,qdir,reader,writer,false)};
 
 // asio stuff
-boost::asio::queue_listener<queue_t>qlistener(::ios,q.get());
-boost::asio::queue_sender<queue_t>qsender(::ios,q.get());
+boost::asio::queue_listener<queue_t>qlistener(::ios,&q1);
+boost::asio::queue_sender<queue_t>qsender(::ios,&q1);
 boost::asio::deadline_timer timer(::ios,boost::posix_time::milliseconds(5000));
 
 // wait handler

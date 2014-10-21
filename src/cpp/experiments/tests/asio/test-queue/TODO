@@ -1,6 +1,7 @@
 === improvements ===
 
 - so that we don't have to have timers to stop enq/deq:
+	(implement them directly in queue - simplest)
 	- implement async_timed_deq()
 	- implement async_timed_enq()
 	- implement async_timed_enq_wait()
