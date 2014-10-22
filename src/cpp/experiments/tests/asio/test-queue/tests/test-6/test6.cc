@@ -19,6 +19,9 @@ using namespace std::placeholders;
 namespace asio= boost::asio;
 namespace fs=boost::filesystem;
 
+// timeout for deq()
+auto tmo_deq{std::chrono::milliseconds(3000)};
+
 // value type in queues
 // (must work with operator<< and operator>>, and be default constructable)
 using qval_t=std::string;
@@ -37,9 +40,6 @@ asio::io_service ios;
 asio::queue_listener<queue_t>qlistener(::ios,qrecv.get());
 asio::queue_sender<queue_t>qsender(::ios,qsend.get());
 
-// timer - when popping it stops deq()
-boost::asio::deadline_timer timer(::ios,boost::posix_time::milliseconds(5000));
-
 // max #of messages to send/receive
 constexpr size_t maxmsg{10};
 
@@ -47,13 +47,13 @@ constexpr size_t maxmsg{10};
 template<typename T>
 void qlistener_handler(boost::system::error_code const&ec,T item){
   if(ec==boost::asio::error::operation_aborted){
-    BOOST_LOG_TRIVIAL(debug)<<"deque() aborted (via asio), ec: "<<ec;
+    BOOST_LOG_TRIVIAL(debug)<<"deque() aborted (via asio), ec: "<<ec.message();
   }else
   if(ec.value()!=0){
-    BOOST_LOG_TRIVIAL(debug)<<"deque() error (via asio), ec: "<<ec;
+    BOOST_LOG_TRIVIAL(debug)<<"deque() error (via asio), ec: "<<ec.message();
   }else{
     BOOST_LOG_TRIVIAL(debug)<<"received item in qlistener_handler (via asio), item: "<<item<<", ec: "<<ec;
-    qlistener.async_deq(qlistener_handler<T>);
+    qlistener.timed_async_deq(qlistener_handler<T>,tmo_deq);
   }
 }
 // thread function sending maxmsg messages
@@ -67,11 +67,6 @@ void thr_send_sync_messages(){
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 }
-// timer for killing dequeue
-void stopTimer(boost::system::error_code const&ec){
-  BOOST_LOG_TRIVIAL(debug)<<"TICK - stopping deque ...";
-  qrecv->disable_deq(true);
-}
 // test program
 int main(){
   try{
@@ -80,12 +75,7 @@ int main(){
 
     // listen for on messages on q1 (using asio)
     BOOST_LOG_TRIVIAL(debug)<<"starting async_deq() ...";
-    qlistener.async_deq(qlistener_handler<qval_t>);
-
-    // set timer stopping dequeing on q
-    // (at some point we have to stop deq() or we'll sit in asio forever)
-    BOOST_LOG_TRIVIAL(debug)<<"starting timer ...";
-    timer.async_wait(stopTimer);
+    qlistener.timed_async_deq(qlistener_handler<qval_t>,tmo_deq);
 
     // kick off sender thread
     BOOST_LOG_TRIVIAL(debug)<<"starting thread sender thread ...";

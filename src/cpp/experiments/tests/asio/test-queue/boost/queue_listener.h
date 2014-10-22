@@ -24,6 +24,11 @@ public:
   void async_deq(Handler handler) {
     this->service.async_deq(this->implementation,q_,handler);
   }
+  // async deq operation - timed
+  template <typename Handler,typename TMO>
+  void timed_async_deq(Handler handler,TMO const&rel_time) {
+    this->service.timed_async_deq(this->implementation,q_,handler,rel_time);
+  }
   // wait until we can deq a message from queue in async mode
   template <typename Handler>
   void async_wait_deq(Handler handler) {
@@ -71,6 +76,12 @@ public:
     // this is a non-blocking operation so we are OK calling impl object in this thread
     impl->async_deq(impl,q,handler);
   }
+  // async sync deq operation - timed
+  template <typename Handler,typename Queue,typename TMO>
+  void timed_async_deq(implementation_type&impl,Queue*q,Handler handler,TMO const&rel_time){
+    // this is a non-blocking operation so we are OK calling impl object in this thread
+    impl->timed_async_deq(impl,q,handler,rel_time);
+  }
   // async sync wait operation
   template <typename Handler,typename Queue>
   void async_wait_deq(implementation_type&impl,Queue*q,Handler handler){
@@ -110,7 +121,12 @@ public:
   // deque message (post request to thread)
   template<typename Handler,typename Queue>
   void async_deq(std::shared_ptr<queue_listener_impl>impl,Queue*q,Handler handler){
-    impl_io_service_.post(deq_operation<Handler,Queue>(impl,post_io_service_,q,handler));
+    impl_io_service_.post(deq_operation<Handler,Queue,std::size_t>(impl,post_io_service_,q,handler));
+  }
+  // deque message (post request to thread) - timed
+  template<typename Handler,typename Queue,typename TMO>
+  void timed_async_deq(std::shared_ptr<queue_listener_impl>impl,Queue*q,Handler handler,TMO const&rel_time){
+    impl_io_service_.post(deq_operation<Handler,Queue,TMO>(impl,post_io_service_,q,handler,rel_time));
   }
   // wait to deq message (post request to thread)
   template<typename Handler,typename Queue>
@@ -124,17 +140,23 @@ public:
   }
 private:
   // function object calling blocking deq() on queue
-  template <typename Handler,typename Queue>
+  template <typename Handler,typename Queue,typename TMO>
   class deq_operation{
   public:
     // ctor
     deq_operation(std::shared_ptr<queue_listener_impl>impl,boost::asio::io_service&io_service,Queue*q,Handler handler):
-        wimpl_(impl),io_service_(io_service),work_(io_service),q_(q),handler_(handler) {
+        wimpl_(impl),io_service_(io_service),work_(io_service),q_(q),handler_(handler),is_timed_(false),rel_time_(TMO{}) {
+    }
+    // ctor - timed
+    deq_operation(std::shared_ptr<queue_listener_impl>impl,boost::asio::io_service&io_service,Queue*q,Handler handler,TMO const&rel_time):
+        wimpl_(impl),io_service_(io_service),work_(io_service),q_(q),handler_(handler),is_timed_(true),rel_time_(rel_time){
     }
     // function calling implementation object - runs in the thread created in ctor
     void operator()(){
       // make sure implementation object is still valid
       std::shared_ptr<queue_listener_impl>impl{wimpl_.lock()};
+
+// NOTE! Must take care of TMO here ...!
 
       // if valid, go ahead and do blocking call on queue, otherwise post aborted message
       boost::system::error_code ec;
@@ -151,6 +173,8 @@ private:
     boost::asio::io_service::work work_;
     Queue*q_;
     Handler handler_;
+    bool is_timed_;
+    TMO rel_time_;
   };
   // function object calling blocking wait() on queue
   template <typename Handler,typename Queue>
