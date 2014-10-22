@@ -20,7 +20,7 @@ namespace asio= boost::asio;
 namespace fs=boost::filesystem;
 
 // timeout for deq()
-auto tmo_deq{std::chrono::milliseconds(3000)};
+size_t tmo_deq{3000};
 
 // value type in queues
 // (must work with operator<< and operator>>, and be default constructable)

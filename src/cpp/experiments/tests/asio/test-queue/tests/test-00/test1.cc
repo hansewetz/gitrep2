@@ -13,7 +13,7 @@ namespace asio=boost::asio;
 int main(){
   try{
     // create queue
-    std::chrono::milliseconds tmo{5000};
+    std::size_t tmo{5000};
     size_t maxsize{1};
     asio::simple_queue<int>q{maxsize};
 

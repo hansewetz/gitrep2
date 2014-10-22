@@ -5,7 +5,6 @@ This program tests that simple_queue::timed_enq() works
 #include <boost/asio_queue.h>
 #include <boost/log/trivial.hpp>
 #include <string>
-#include <chrono>
 using namespace std;
 namespace asio=boost::asio;
 
@@ -13,7 +12,7 @@ namespace asio=boost::asio;
 int main(){
   try{
     // create queue
-    std::chrono::milliseconds tmo{5000};
+    std::size_t tmo{5000};
     size_t maxsize{1};
     asio::simple_queue<int>q{maxsize};
 

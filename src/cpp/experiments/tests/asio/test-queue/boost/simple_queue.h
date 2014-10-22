@@ -38,10 +38,9 @@ public:
     return true;
   }
   // put a message into queue - timeout if waiting too long
-  template<typename TMO>
-  bool timed_enq(T t,TMO const&rel_time,boost::system::error_code&ec){
+  bool timed_enq(T t,std::size_t ms,boost::system::error_code&ec){
     std::unique_lock<std::mutex>lock(mtx_);
-    bool tmo=!cond_.wait_for(lock,rel_time,[&](){return !enq_enabled_||q_.size()<maxsize_;});
+    bool tmo=!cond_.wait_for(lock,std::chrono::milliseconds(ms),[&](){return !enq_enabled_||q_.size()<maxsize_;});
     if(tmo){
       ec=boost::asio::error::timed_out;
       return false;
@@ -68,10 +67,9 @@ public:
     return true;
   }
   // wait until we can put a message in queue - timeout if waiting too long
-  template<typename TMO>
-  bool timed_wait_enq(TMO const&rel_time,boost::system::error_code&ec){
+  bool timed_wait_enq(std::size_t ms,boost::system::error_code&ec){
     std::unique_lock<std::mutex>lock(mtx_);
-    bool tmo=!cond_.wait_for(lock,rel_time,[&](){return !enq_enabled_||q_.size()<maxsize_;});
+    bool tmo=!cond_.wait_for(lock,std::chrono::milliseconds(ms),[&](){return !enq_enabled_||q_.size()<maxsize_;});
     if(tmo){
       ec=boost::asio::error::timed_out;
       return false;
@@ -102,10 +100,9 @@ public:
     return ret;
   }
   // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
-  template<typename TMO>
-  std::pair<bool,T>timed_deq(TMO rel_time,boost::system::error_code&ec){
+  std::pair<bool,T>timed_deq(std::size_t ms,boost::system::error_code&ec){
     std::unique_lock<std::mutex>lock(mtx_);
-    bool tmo=!cond_.wait_for(lock,rel_time,[&](){return !deq_enabled_||!q_.empty();});
+    bool tmo=!cond_.wait_for(lock,std::chrono::milliseconds(ms),[&](){return !deq_enabled_||!q_.empty();});
   
     // if deq is disabled or queue is empty return or timeout
     if(tmo){
@@ -136,10 +133,9 @@ public:
     return true;
   }
   // wait until we can retrieve a message from queue -  timeout if waiting too long
-  template<typename TMO>
-  bool timed_wait_deq(TMO rel_time,boost::system::error_code&ec){
+  bool timed_wait_deq(std::size_t ms,boost::system::error_code&ec){
     std::unique_lock<std::mutex>lock(mtx_);
-    bool tmo=!cond_.wait_for(lock,rel_time,[&](){return !deq_enabled_||q_.size()>0;});
+    bool tmo=!cond_.wait_for(lock,std::chrono::milliseconds(ms),[&](){return !deq_enabled_||q_.size()>0;});
     if(tmo){
       ec=boost::asio::error::timed_out;
       return false;
