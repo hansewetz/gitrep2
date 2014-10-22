@@ -16,7 +16,8 @@ namespace fs=boost::filesystem;
 template<typename Q>
 void sender(Q&q,size_t maxmsg){
   for(int i=0;i<maxmsg;++i){
-    q.enq(i);
+    boost::system::error_code ec;
+    q.enq(i,ec);
     std::chrono::milliseconds tmo(1000);
     std::this_thread::sleep_for(tmo);
   }
@@ -25,7 +26,8 @@ void sender(Q&q,size_t maxmsg){
 template<typename Q>
 void receiver(Q&q,size_t maxmsg){
   while(maxmsg!=0){
-    pair<bool,int>p{q.deq()};
+    boost::system::error_code ec;
+    pair<bool,int>p{q.deq(ec)};
     cout<<"deq: "<<boolalpha<<"["<<p.first<<","<<p.second<<"]"<<endl;
     --maxmsg;
   }

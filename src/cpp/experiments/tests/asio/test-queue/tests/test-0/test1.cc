@@ -19,21 +19,23 @@ int main(){
 
     // insert an element in queue
     BOOST_LOG_TRIVIAL(debug)<<"enqing one item ...";
-    bool stat1=q.timed_enq(17,tmo);
-    BOOST_LOG_TRIVIAL(debug)<<"enq(): "<<boolalpha<<stat1;
+    boost::system::error_code ec;
+    bool stat1=q.timed_enq(17,tmo,ec);
+    BOOST_LOG_TRIVIAL(debug)<<"enq(): "<<boolalpha<<stat1<<", ec: "<<ec.message();
 
     // kick off thread popping an element afetr 2 second
     std:;function<void(void)>ft=[&](){
         // sleep 2 seconds before deq()
         std::this_thread::sleep_for(std::chrono::milliseconds(6000));
-        pair<bool,int>p=q.deq();
-        BOOST_LOG_TRIVIAL(debug)<<"enq(): "<<boolalpha<<p.first<<", "<<p.second;
+        boost::system::error_code ec;
+        pair<bool,int>p=q.deq(ec);
+        BOOST_LOG_TRIVIAL(debug)<<"enq(): "<<boolalpha<<p.first<<", "<<p.second<<", ec: "<<ec.message();
       };
     std::thread thr{ft};
 
     BOOST_LOG_TRIVIAL(debug)<<"enq wait second item ...";
-    bool stat2=q.timed_wait_enq(tmo);
-    BOOST_LOG_TRIVIAL(debug)<<"enq_wait(): "<<boolalpha<<stat2;
+    bool stat2=q.timed_wait_enq(tmo,ec);
+    BOOST_LOG_TRIVIAL(debug)<<"enq_wait(): "<<boolalpha<<stat2<<", ec: "<<ec.message();
 
     // join thread
     thr.join();

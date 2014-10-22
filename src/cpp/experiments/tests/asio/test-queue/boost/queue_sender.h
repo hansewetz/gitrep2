@@ -30,8 +30,8 @@ public:
     this->service.async_wait_enq(this->implementation,q_,handler);
   }
   // sync enq operation (blocking)
-  void sync_enq(typename Queue::value_type val){
-    this->service.sync_enq(this->implementation,q_,val);
+  void sync_enq(typename Queue::value_type val,boost::system::error_code&ec){
+    this->service.sync_enq(this->implementation,q_,val,ec);
   }
 private:
   Queue*q_;
@@ -79,8 +79,8 @@ public:
   }
   // sync enq operation (blocking)
   template <typename Queue>
-  void sync_enq(implementation_type&impl,Queue*q,typename Queue::value_type val){
-    impl->sync_enq(q,val);
+  void sync_enq(implementation_type&impl,Queue*q,typename Queue::value_type val,boost::system::error_code&ec){
+    impl->sync_enq(q,val,ec);
   }
 private:
   // shutdown service (required)
@@ -119,8 +119,8 @@ public:
   }
   // enque message (blocking enq)
   template<typename Queue>
-  void sync_enq(Queue*q,typename Queue::value_type val){
-    q->enq(val);
+  void sync_enq(Queue*q,typename Queue::value_type val,boost::system::error_code&ec){
+    q->enq(val,ec);
   }
 private:
   // function object calling blocking enq() on queue
@@ -137,9 +137,9 @@ private:
       std::shared_ptr<queue_sender_impl>impl{wimpl_.lock()};
 
       // if valid, go ahead and do (potentially) blocking call on queue, otherwise post aborted message
+      boost::system::error_code ec;
       if(impl){
-        bool ret{q_->enq(val_)};
-        boost::system::error_code ec=(!ret?boost::asio::error::operation_aborted:boost::system::error_code());
+        bool ret{q_->enq(val_,ec)};
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec));
       }else{
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,boost::asio::error::operation_aborted));
@@ -167,12 +167,12 @@ private:
       std::shared_ptr<queue_sender_impl>impl{wimpl_.lock()};
 
       // if valid, go ahead and do (potentially) blocking call on queue, otherwise post aborted message
+      boost::system::error_code ec;
       if(impl){
-        bool ret{q_->wait_enq()};
-        boost::system::error_code ec=(!ret?boost::asio::error::operation_aborted:boost::system::error_code());
+        bool ret{q_->wait_enq(ec)};
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec));
       }else{
-        this->io_service_.post(boost::asio::detail::bind_handler(handler_,boost::asio::error::operation_aborted));
+        this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec));
       }
     }
   private:

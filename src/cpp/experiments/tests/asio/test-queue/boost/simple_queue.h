@@ -25,89 +25,131 @@ public:
   ~simple_queue()=default;
 
   // put a message into queue
-  bool enq(T t){
+  bool enq(T t,boost::system::error_code&ec){
     std::unique_lock<std::mutex>lock(mtx_);
     cond_.wait(lock,[&](){return !enq_enabled_||q_.size()<maxsize_;});
-    if(!enq_enabled_)return false;
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     q_.push(t);
     cond_.notify_all();
+    ec=boost::system::error_code();
     return true;
   }
   // put a message into queue - timeout if waiting too long
   template<typename TMO>
-  bool timed_enq(T t,TMO const&rel_time){
+  bool timed_enq(T t,TMO const&rel_time,boost::system::error_code&ec){
     std::unique_lock<std::mutex>lock(mtx_);
     bool tmo=!cond_.wait_for(lock,rel_time,[&](){return !enq_enabled_||q_.size()<maxsize_;});
-    if(tmo)return false;
-    if(!enq_enabled_)return false;
+    if(tmo){
+      ec=boost::asio::error::timed_out;
+      return false;
+    }
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     q_.push(t);
     cond_.notify_all();
+    ec=boost::system::error_code();
     return true;
   }
   // wait until we can put a message in queue
-  bool wait_enq(){
+  bool wait_enq(boost::system::error_code&ec){
     std::unique_lock<std::mutex>lock(mtx_);
     cond_.wait(lock,[&](){return !enq_enabled_||q_.size()<maxsize_;});
-    if(!enq_enabled_)return false;
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     cond_.notify_all();
+    ec=boost::system::error_code();
     return true;
   }
   // wait until we can put a message in queue - timeout if waiting too long
   template<typename TMO>
-  bool timed_wait_enq(TMO const&rel_time){
+  bool timed_wait_enq(TMO const&rel_time,boost::system::error_code&ec){
     std::unique_lock<std::mutex>lock(mtx_);
     bool tmo=!cond_.wait_for(lock,rel_time,[&](){return !enq_enabled_||q_.size()<maxsize_;});
-    if(tmo)return false;
-    if(!enq_enabled_)return false;
+    if(tmo){
+      ec=boost::asio::error::timed_out;
+      return false;
+    }
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     cond_.notify_all();
+    ec=boost::system::error_code();
     return true;
   }
  // dequeue a message (return.first == false if deq() was disabled)
-  std::pair<bool,T>deq(){
+  std::pair<bool,T>deq(boost::system::error_code&ec){
     std::unique_lock<std::mutex>lock(mtx_);
     cond_.wait(lock,[&](){return !deq_enabled_||!q_.empty();});
   
     // if deq is disabled or timeout
     if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
       return std::make_pair(false,T{});
     }
     // check if we have a message
     std::pair<bool,T>ret{std::make_pair(true,q_.front())};
     q_.pop();
     cond_.notify_all();
+    ec=boost::system::error_code();
     return ret;
   }
- // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
+  // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
   template<typename TMO>
-  std::pair<bool,T>timed_deq(TMO rel_time){
+  std::pair<bool,T>timed_deq(TMO rel_time,boost::system::error_code&ec){
     std::unique_lock<std::mutex>lock(mtx_);
     bool tmo=!cond_.wait_for(lock,rel_time,[&](){return !deq_enabled_||!q_.empty();});
   
     // if deq is disabled or queue is empty return or timeout
-    if(tmo||!deq_enabled_){
+    if(tmo){
+      ec=boost::asio::error::timed_out;
+       return std::make_pair(false,T{});
+    }
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
       return std::make_pair(false,T{});
     }
     // check if we have a message
     std::pair<bool,T>ret{std::make_pair(true,q_.front())};
     q_.pop();
     cond_.notify_all();
+    ec=boost::system::error_code();
     return ret;
   }
   // wait until we can retrieve a message from queue
-  bool wait_deq(){
+  bool wait_deq(boost::system::error_code&ec){
     std::unique_lock<std::mutex>lock(mtx_);
     cond_.wait(lock,[&](){return !deq_enabled_||q_.size()>0;});
-    if(!deq_enabled_)return false;
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     cond_.notify_all();
+    ec=boost::system::error_code();
     return true;
   }
   // wait until we can retrieve a message from queue -  timeout if waiting too long
   template<typename TMO>
-  bool timed_wait_deq(TMO rel_time){
+  bool timed_wait_deq(TMO rel_time,boost::system::error_code&ec){
     std::unique_lock<std::mutex>lock(mtx_);
     bool tmo=!cond_.wait_for(lock,rel_time,[&](){return !deq_enabled_||q_.size()>0;});
-    if(tmo||!deq_enabled_)return false;
+    if(tmo){
+      ec=boost::asio::error::timed_out;
+      return false;
+    }
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     cond_.notify_all();
+    ec=boost::system::error_code();
     return true;
   }
   // cancel deq operations (will also release blocking threads)

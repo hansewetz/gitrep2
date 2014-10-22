@@ -57,14 +57,16 @@ public:
   }
   // put a message into queue
   // (returns true if message was enqueued, false if enqueing was disabled)
-  bool enq(T t){
+  bool enq(T t,boost::system::error_code&ec){
     // wait for state of queue is such that we can enque an element
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     ipccond_.wait(lock,[&](){return !enq_enabled_||!fullNolock();});
 
     // if enq is disabled we'll return
-    if(!enq_enabled_)return false;
-
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     // we know we can now write message
     detail::dirqueue_support::write(t,dir_,serial_);
     ipccond_.notify_all();
@@ -72,46 +74,55 @@ public:
   }
   // wait until we can put a message in queue
   // (returns false if enqueing was disabled, else true)
-  bool wait_enq(){
+  bool wait_enq(boost::system::error_code&ec){
     // wait for the state of queue is such that we can return something
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     ipccond_.wait(lock,[&](){return !enq_enabled_||!fullNolock();});
 
     // if enq is disabled we'll return
-    if(!enq_enabled_)return false;
-
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     // we know queue is not full
     ipccond_.notify_all();
+    ec=boost::system::error_code();
     return true;
   }
   // dequeue a message (return.first == false if deq() was disabled)
-  std::pair<bool,T>deq(){
+  std::pair<bool,T>deq(boost::system::error_code&ec){
     // wait for the state of queue is such that we can return something
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     ipccond_.wait(lock,[&](){return !deq_enabled_||!emptyNolock();});
 
     // check if dequeue was disabled
-    if(!deq_enabled_)return std::make_pair(false,T{});
-
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return std::make_pair(false,T{});
+    }
     // we know the cache is not empty now so no need to check
     fs::path file{cache_.front()};
     cache_.pop_front();
     T ret{detail::dirqueue_support::read<T>(file,deser_)};
     ipccond_.notify_all();
+    ec=boost::system::error_code();
     return std::make_pair(true,ret);
   }
   // wait until we can retrieve a message from queue
-  bool wait_deq(){
+  bool wait_deq(boost::system::error_code&ec){
     // wait for the state of queue is such that we can return something
     ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
     ipccond_.wait(lock,[&](){return !deq_enabled_||!emptyNolock();});
 
     // check if dequeue was disabled
-    if(!deq_enabled_)return false;
-
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     // we know the cache is not empty now so no need to check
     fs::path file{cache_.front()};
     ipccond_.notify_all();
+    ec=boost::system::error_code();
     return true;
   }
 

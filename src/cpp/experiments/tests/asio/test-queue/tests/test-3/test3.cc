@@ -40,7 +40,7 @@ void flisten(boost::system::error_code const&ec,string s){
   // reload listener only if we have more messages
   // (if no more messages, we might still have a wait_enq outstanting)
   if(ec){
-    BOOST_LOG_TRIVIAL(debug)<<"dequed message, ec: "<<ec;
+    BOOST_LOG_TRIVIAL(debug)<<"dequed message, ec: "<<ec.message();
     return;
   }
   BOOST_LOG_TRIVIAL(debug)<<"dequed message";
@@ -55,19 +55,19 @@ void flisten(boost::system::error_code const&ec,string s){
 }
 // wait handler
 void fwait(boost::system::error_code const&ec){
-  BOOST_LOG_TRIVIAL(debug)<<"GOT WAIT MESSAGE - ec: "<<ec;
+  BOOST_LOG_TRIVIAL(debug)<<"GOT WAIT MESSAGE - ec: "<<ec.message();
   if(nmsg>0)qlistener.async_deq(flisten);
 }
 // timer handler
 void ftimer(boost::system::error_code const&ec){
-  BOOST_LOG_TRIVIAL(debug)<<"TICK - starting async read of 1 message ..., ec: "<<ec;
+  BOOST_LOG_TRIVIAL(debug)<<"TICK - starting async read of 1 message ..., ec: "<<ec.message();
   if(nmsg>0)qlistener.async_deq(flisten);
 }
 // sender handler
 void fsender(boost::system::error_code const&ec){
   // if queue is full, then wait
   if(q->full()){
-    BOOST_LOG_TRIVIAL(debug)<<"starting async_wait_enq() ..., ec: "<<ec;
+    BOOST_LOG_TRIVIAL(debug)<<"starting async_wait_enq() ..., ec: "<<ec.message();
     qsender.async_wait_enq(fwait);
   }
 }

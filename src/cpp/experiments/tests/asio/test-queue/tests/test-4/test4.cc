@@ -29,7 +29,7 @@ constexpr size_t maxmsg{10};
 size_t nreceived{0};
 template<typename T>
 void qlistener_handler(boost::system::error_code const&ec,T item){
-  BOOST_LOG_TRIVIAL(debug)<<"received item in qlistener_handler (via asio), item: "<<item<<", ec: "<<ec;
+  BOOST_LOG_TRIVIAL(debug)<<"received item in qlistener_handler (via asio), item: "<<item<<", ec: "<<ec.message();
   if(++nreceived<maxmsg)qlistener.async_deq(qlistener_handler<T>);
 }
 // thread function sending maxmsg messages
@@ -37,7 +37,8 @@ void thr_send_sync_messages(){
   for(int i=0;i<maxmsg;++i){
     int item{boost::lexical_cast<int>(i)};
     BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
-    qsender.sync_enq(item);
+    boost::system::error_code ec;
+    qsender.sync_enq(item,ec);
   }
 }
 // test program

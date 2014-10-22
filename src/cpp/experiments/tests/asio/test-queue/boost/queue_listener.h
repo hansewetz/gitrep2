@@ -30,8 +30,8 @@ public:
     this->service.async_wait_deq(this->implementation,q_,handler);
   }
   // sync deq operation (blocking)
-  std::pair<bool,typename Queue::value_type>sync_deq(){
-    return this->service.sync_deq(this->implementation,q_);
+  std::pair<bool,typename Queue::value_type>sync_deq(boost::system::error_code&ec){
+    return this->service.sync_deq(this->implementation,q_,ec);
   }
 private:
   Queue*q_;
@@ -79,8 +79,8 @@ public:
   }
   // sync deq operation (blocking)
   template <typename Queue>
-  std::pair<bool,typename Queue::value_type>sync_deq(implementation_type&impl,Queue*q){
-    return impl->sync_deq(q);
+  std::pair<bool,typename Queue::value_type>sync_deq(implementation_type&impl,Queue*q,boost::system::error_code&ec){
+    return impl->sync_deq(q,ec);
   }
 private:
   // shutdown service (required)
@@ -119,8 +119,8 @@ public:
   }
   // dequeue message (blocking deq)
   template<typename Queue>
-  std::pair<bool,typename Queue::value_type>sync_deq(Queue*q){
-    return q->deq();
+  std::pair<bool,typename Queue::value_type>sync_deq(Queue*q,boost::system::error_code&ec){
+    return q->deq(ec);
   }
 private:
   // function object calling blocking deq() on queue
@@ -137,12 +137,12 @@ private:
       std::shared_ptr<queue_listener_impl>impl{wimpl_.lock()};
 
       // if valid, go ahead and do blocking call on queue, otherwise post aborted message
+      boost::system::error_code ec;
       if(impl){
-        std::pair<bool,typename Queue::value_type>ret{q_->deq()};
-        boost::system::error_code ec=(!ret.first?boost::asio::error::operation_aborted:boost::system::error_code());
+        std::pair<bool,typename Queue::value_type>ret{q_->deq(ec)};
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec,ret.second));
       }else{
-        this->io_service_.post(boost::asio::detail::bind_handler(handler_,boost::asio::error::operation_aborted,typename Queue::value_type()));
+        this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec,typename Queue::value_type()));
       }
     }
   private:
@@ -166,12 +166,12 @@ private:
       std::shared_ptr<queue_listener_impl>impl{wimpl_.lock()};
 
       // if valid, go ahead and do (potentially) blocking call on queue, otherwise post aborted message
+      boost::system::error_code ec;
       if(impl){
-        bool ret{q_->wait_deq()};
-        boost::system::error_code ec=(!ret?boost::asio::error::operation_aborted:boost::system::error_code());
+        bool ret{q_->wait_deq(ec)};
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec));
       }else{
-        this->io_service_.post(boost::asio::detail::bind_handler(handler_,boost::asio::error::operation_aborted));
+        this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec));
       }
     }
   private:

@@ -62,7 +62,8 @@ void thr_send_sync_messages(){
   for(int i=0;i<maxmsg;++i){
     qval_t item{boost::lexical_cast<qval_t>(i)};
     BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
-    qsender.sync_enq(item);
+    boost::system::error_code ec;
+    qsender.sync_enq(item,ec);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 }

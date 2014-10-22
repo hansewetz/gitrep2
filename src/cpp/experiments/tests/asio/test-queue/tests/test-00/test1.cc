@@ -20,16 +20,18 @@ int main(){
     // kick off a thread which enqueues a message
     std::function<void()>f=[&](){
       // sleep 2 seconds before deq()
-      std::this_thread::sleep_for(std::chrono::milliseconds(4000));
-      q.enq(17);
-      BOOST_LOG_TRIVIAL(debug)<<"enqueued an item";
+      std::this_thread::sleep_for(std::chrono::milliseconds(6000));
+      boost::system::error_code ec;
+      q.enq(17,ec);
+      BOOST_LOG_TRIVIAL(debug)<<"enqueued an item, ec: "<<ec.message();
     };
     std::thread thr(f);
 
     // insert an element in queue
     BOOST_LOG_TRIVIAL(debug)<<"timed deq() ...";
-    bool res=q.timed_wait_deq(tmo);
-    BOOST_LOG_TRIVIAL(debug)<<"deq_wait(): "<<boolalpha<<res;
+    boost::system::error_code ec;
+    bool res=q.timed_wait_deq(tmo,ec);
+    BOOST_LOG_TRIVIAL(debug)<<"deq_wait(): "<<boolalpha<<res<<", ec: "<<ec.message();
 
     // join thread
     thr.join();

@@ -34,7 +34,8 @@ boost::asio::deadline_timer timer(::ios,boost::posix_time::milliseconds(5000));
 void deq_wait(boost::system::error_code const&ec){
   BOOST_LOG_TRIVIAL(debug)<<"GOT WAIT MESSAGE - ec: "<<ec;
   for(int i=0;i<maxmsg;++i){
-    pair<bool,int>p=qlistener.sync_deq();
+    boost::system::error_code ec;
+    pair<bool,int>p=qlistener.sync_deq(ec);
     BOOST_LOG_TRIVIAL(debug)<<"GOT message: "<<boolalpha<<p.first<<", "<<p.second;
   }
 }
@@ -42,7 +43,8 @@ void deq_wait(boost::system::error_code const&ec){
 void ftimer(boost::system::error_code const&ec){
   BOOST_LOG_TRIVIAL(debug)<<"TICK - sending messages ...";
   for(int i=0;i<maxmsg;++i){
-    qsender.sync_enq(i);
+    boost::system::error_code ec;
+    qsender.sync_enq(i,ec);
   }
 }
 // test program
