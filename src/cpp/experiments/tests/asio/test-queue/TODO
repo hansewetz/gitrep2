@@ -1,19 +1,8 @@
 === improvements ===
 
-- so that we don't have to have timers to stop enq/deq:
-	(implement them directly in queue - simplest)
-	- implement async_timed_deq()
-	- implement async_timed_enq()
-	- implement async_timed_enq_wait()
+ - change std::size_t ms --> chrono time
 
-- add error code as return for enq()/deq() so that we can separate various failures from filtering or from disable of the queue
-	this will impact the queue_listener/queue_sender
-
-- pass queue by reference instead of as shared_ptr<> to queue_listener/queue_sender
-	(we'll hold queue by reference in queue_listener/queue_sender)
-	(this is easy but will take an hour or two)
-
-- possibly rename the 'queue' concept to 'channel'
+- is it possible to support any 'pointer type' for queue
 
 - add filter to all queues (accept/reject - default is to accept all messages)
 
