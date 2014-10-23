@@ -46,11 +46,8 @@ constexpr size_t maxmsg{10};
 // handler for queue listener
 template<typename T>
 void qlistener_handler(boost::system::error_code const&ec,T item){
-  if(ec==boost::asio::error::operation_aborted){
+  if(ec!=0){
     BOOST_LOG_TRIVIAL(debug)<<"deque() aborted (via asio), ec: "<<ec.message();
-  }else
-  if(ec.value()!=0){
-    BOOST_LOG_TRIVIAL(debug)<<"deque() error (via asio), ec: "<<ec.message();
   }else{
     BOOST_LOG_TRIVIAL(debug)<<"received item in qlistener_handler (via asio), item: "<<item<<", ec: "<<ec;
     qlistener.timed_async_deq(qlistener_handler<T>,tmo_deq);
