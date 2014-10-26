@@ -82,7 +82,7 @@ public:
     ec=boost::system::error_code();
     return true;
   }
- // dequeue a message (return.first == false if deq() was disabled)
+  // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(boost::system::error_code&ec){
     std::unique_lock<std::mutex>lock(mtx_);
     cond_.wait(lock,[&](){return !deq_enabled_||!q_.empty();});
