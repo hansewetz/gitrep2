@@ -2,7 +2,7 @@
 This program tests the wait_deq() functionality on a queue_sender.
 */
 
-#include <boost/asio_queue.h>
+#include <boost/asio_queue.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/posix/basic_descriptor.hpp>
 #include <boost/log/trivial.hpp>

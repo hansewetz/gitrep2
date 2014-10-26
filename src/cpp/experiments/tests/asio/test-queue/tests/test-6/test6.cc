@@ -4,7 +4,7 @@ this is the same program as test4.cc but using a polldir_queue instead of a simp
 
 */
 
-#include <boost/asio_queue.h>
+#include <boost/asio_queue.hpp>
 #include <boost/asio.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>

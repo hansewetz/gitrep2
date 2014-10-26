@@ -2,7 +2,7 @@
 This program tests sync_deq()
 */
 
-#include <boost/asio_queue.h>
+#include <boost/asio_queue.hpp>
 #include <boost/asio.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>

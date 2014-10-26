@@ -2,7 +2,7 @@
 This program tests that simple_queue::timed_deq() works
 */
 
-#include <boost/asio_queue.h>
+#include <boost/asio_queue.hpp>
 #include <boost/log/trivial.hpp>
 #include <string>
 #include <chrono>
