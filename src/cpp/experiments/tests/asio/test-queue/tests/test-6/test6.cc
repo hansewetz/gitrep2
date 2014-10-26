@@ -20,7 +20,7 @@ namespace asio= boost::asio;
 namespace fs=boost::filesystem;
 
 // timeout for deq()
-size_t tmo_deq{3000};
+size_t tmo_ms{3000};
 
 // value type in queues
 // (must work with operator<< and operator>>, and be default constructable)
@@ -32,16 +32,16 @@ function<void(ostream&,qval_t const&)>serialiser=[](ostream&os,qval_t const&i){o
 string qname{"q1"};
 fs::path qdir{"./q1"};
 using queue_t=asio::polldir_queue<qval_t,decltype(deserialiser),decltype(serialiser)>;
-std::shared_ptr<queue_t>qrecv{new queue_t(qname,0,qdir,deserialiser,serialiser,true)};
-std::shared_ptr<queue_t>qsend{new queue_t(qname,0,qdir,deserialiser,serialiser,true)};
+queue_t qrecv{qname,0,qdir,deserialiser,serialiser,true};
+queue_t qsend{qname,0,qdir,deserialiser,serialiser,true};
 
 // setup asio object
 asio::io_service ios;
-asio::queue_listener<queue_t>qlistener(::ios,qrecv.get());
-asio::queue_sender<queue_t>qsender(::ios,qsend.get());
+asio::queue_listener<queue_t>qlistener(::ios,&qrecv);
+asio::queue_sender<queue_t>qsender(::ios,&qsend);
 
 // max #of messages to send/receive
-constexpr size_t maxmsg{10};
+constexpr size_t maxmsg{100};
 
 // handler for queue listener
 template<typename T>
@@ -50,7 +50,7 @@ void qlistener_handler(boost::system::error_code const&ec,T item){
     BOOST_LOG_TRIVIAL(debug)<<"deque() aborted (via asio), ec: "<<ec.message();
   }else{
     BOOST_LOG_TRIVIAL(debug)<<"received item in qlistener_handler (via asio), item: "<<item<<", ec: "<<ec;
-    qlistener.timed_async_deq(qlistener_handler<T>,tmo_deq);
+    qlistener.timed_async_deq(qlistener_handler<T>,tmo_ms);
   }
 }
 // thread function sending maxmsg messages
@@ -68,11 +68,11 @@ void thr_send_sync_messages(){
 int main(){
   try{
     // remove locks for queue
-    qrecv->removeLockVariables(qrecv->qname());
+    qrecv.removeLockVariables(qrecv.qname());
 
     // listen for on messages on q1 (using asio)
     BOOST_LOG_TRIVIAL(debug)<<"starting async_deq() ...";
-    qlistener.timed_async_deq(qlistener_handler<qval_t>,tmo_deq);
+    qlistener.timed_async_deq(qlistener_handler<qval_t>,tmo_ms);
 
     // kick off sender thread
     BOOST_LOG_TRIVIAL(debug)<<"starting thread sender thread ...";
