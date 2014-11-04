@@ -14,7 +14,7 @@
 */
 #ifndef __POLLDIR_QUEUE_H__
 #define __POLLDIR_QUEUE_H__
-#include "detail/dirqueue_support.hpp"
+#include "detail/queue_support.hpp"
 #include <string>
 #include <utility>
 #include <list>
@@ -69,7 +69,7 @@ public:
       return false;
     }
     // we know we can now write message
-    detail::dirqueue_support::write(t,dir_,serial_);
+    detail::queue_support::write(t,dir_,serial_);
     ipcond_.notify_all();
     return true;
   }
@@ -90,7 +90,7 @@ public:
       return false;
     }
     // we know we can now write message
-    detail::dirqueue_support::write(t,dir_,serial_);
+    detail::queue_support::write(t,dir_,serial_);
     ipcond_.notify_all();
     ec=boost::system::error_code();
     return true;
@@ -144,7 +144,7 @@ public:
     // we know the cache is not empty now so no need to check
     fs::path file{cache_.front()};
     cache_.pop_front();
-    T ret{detail::dirqueue_support::read<T>(file,deser_)};
+    T ret{detail::queue_support::read<T>(file,deser_)};
     ipcond_.notify_all();
     ec=boost::system::error_code();
     return std::make_pair(true,ret);
@@ -168,7 +168,7 @@ public:
     // we know the cache is not empty now so no need to check
     fs::path file{cache_.front()};
     cache_.pop_front();
-    T ret{detail::dirqueue_support::read<T>(file,deser_)};
+    T ret{detail::queue_support::read<T>(file,deser_)};
     ipcond_.notify_all();
     ec=boost::system::error_code();
     return std::make_pair(true,ret);
@@ -253,7 +253,7 @@ public:
   }
   // remove lock variables for queue
   static void removeLockVariables(std::string const&qname){
-    detail::dirqueue_support::removeLockVariables(qname);
+    detail::queue_support::removeLockVariables(qname);
   }
 private:
   // check if queue is full
@@ -279,7 +279,7 @@ private:
   void fillCacheNolock(bool forceRefill)const{
     // trash cache and re-read if 'forceRefill' is set or if cache is empty
     if(forceRefill||cache_.empty()){
-      std::list<fs::path>sortedFiles{detail::dirqueue_support::getTsOrderedFiles(dir_)};
+      std::list<fs::path>sortedFiles{detail::queue_support::getTsOrderedFiles(dir_)};
       cache_.swap(sortedFiles);
     }
   }

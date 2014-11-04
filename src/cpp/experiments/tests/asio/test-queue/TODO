@@ -1,5 +1,7 @@
 === improvements ===
 
+ - change disrectory structure so we have boost/asio instead of boost/*
+
  - change std::size_t ms --> chrono time
 
 - is it possible to support any 'pointer type' for queue
