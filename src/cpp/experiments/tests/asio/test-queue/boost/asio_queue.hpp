@@ -4,5 +4,5 @@
 #include "queue_sender.hpp"
 #include "simple_queue.hpp"
 #include "polldir_queue.hpp"
-#include "fd_queue.hpp"
+#include "fddeq_queue.hpp"
 #endif

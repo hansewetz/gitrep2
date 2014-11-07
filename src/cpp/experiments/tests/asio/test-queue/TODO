@@ -1,5 +1,7 @@
 === improvements ===
 
+ - NOTE! Write an fdenq_queue class - which allows enquing and serialising out to an fd
+
  - change disrectory structure so we have boost/asio instead of boost/*
 
  - change std::size_t ms --> chrono time

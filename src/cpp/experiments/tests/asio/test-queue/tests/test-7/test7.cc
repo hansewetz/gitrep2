@@ -16,8 +16,7 @@ using qval_t=std::string;
 
 // setup serializer/de-serializer for queue + queue-type
 function<qval_t(istream&)>deserialiser=[](istream&is){qval_t ret;is>>ret;return ret;};
-function<void(ostream&,qval_t const&)>serialiser=[](ostream&os,qval_t const&i){os<<i;};
-using queue_t=asio::fd_queue<qval_t,decltype(deserialiser),decltype(serialiser)>;
+using queue_t=asio::fddeq_queue<qval_t,decltype(deserialiser)>;
 
 // test program
 int main(){
@@ -27,20 +26,22 @@ int main(){
     pipe(fd);
     int fdread{fd[0]};
     int fdwrite{fd[1]};
-    size_t maxsize{10};
-    queue_t q{maxsize,fdread,1,deserialiser,serialiser};
+    queue_t q{fdread,deserialiser};
     
-    // write a string to fdwrite (input fd to queue
-    string s{"Hello there\n"};
-    write(fdwrite,s.c_str(),s.length());
+    // creta a stream so we can write easier to the fd
+    // NOTE!
+    
+    
 
     // deq() from queue
-    boost::system::error_code ec;
-    pair<bool,string>p{q.deq(ec)};
-    if(ec!=boost::system::error_code()){
-      cout<<"deq() error, ec: "<<ec.message()<<endl;
-    }else{
-      cout<<"deq(), item: "<<p.second<<endl;
+    while(true){
+      boost::system::error_code ec;
+      pair<bool,string>p{q.deq(ec)};
+      if(ec!=boost::system::error_code()){
+        cout<<"deq() error, ec: "<<ec.message()<<endl;
+      }else{
+        cout<<"deq(), item: "<<p.second<<endl;
+      }
     }
   }
   catch(exception const&e){

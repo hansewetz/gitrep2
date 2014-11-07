@@ -1,5 +1,5 @@
-#ifndef __DIRQUEUE_SUPPPORT_H__
-#define __DIRQUEUE_SUPPPORT_H__
+#ifndef __QUEUE_SUPPPORT_H__
+#define __QUEUE_SUPPPORT_H__
 
 #include <algorithm>
 #include <string>
@@ -8,9 +8,6 @@
 #include <utility>
 #include <fstream>
 #include <memory>
-#include <ostream>
-#include <istream>
-#include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <boost/lexical_cast.hpp>
@@ -20,8 +17,6 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
 
 namespace boost{
 namespace asio{
@@ -81,48 +76,6 @@ T read(fs::path const&fullpath,DESER deser){
   is.close();
   std::remove(fullpath.string().c_str());
   return ret;
-}
-// select from a single fd for reading - when triggered an istream is returned, or in case of a tno, an error code is returns
-// (note: thi scall is blocking until either the timer pops or an event occurs in the read fd)
-// (return false if timeout, else tru ena dfd can be read form)
-std::shared_ptr<std::istream>selectFd(int fd,std::size_t ms,boost::system::error_code&ec){
-  // set error code to OK
-  ec=boost::system::error_code{};
-
-  // setup for select statement
-  fd_set input;
-  fd_set output;
-  FD_ZERO(&input);
-  FD_ZERO(&output);
-  FD_SET(fd,&input);
-  int maxfd=fd;
-  
-  // setup for timeout
-  struct timeval tmo;
-  if(ms>0){
-    tmo.tv_sec=ms/1000;
-    tmo.tv_usec=(ms%1000)*1000;
-  }
-  // block on select - timeout if configured
-  assert(maxfd!=-1);
-  int n=select(++maxfd,&input,&output,NULL,(ms>0)?&tmo:NULL);
-
-  // check result of select
-  if(n<0)throw std::runtime_error(std::string("select() failed, errno: ")+boost::lexical_cast<std::string>(errno));
-  if(n==0){
-    ec=boost::asio::error::timed_out;
-    return std::make_shared<std::istream>(nullptr);
-  }
-  // check for tmo or data
-  // (notice that reading/writing 0 bytes from a pipe means that either the reading/writing process died)
-  if(FD_ISSET(fd,&input)){
-    return std::shared_ptr<std::istream>(
-      new std::istream(new boost::iostreams::stream_buffer<boost::iostreams::file_descriptor_source>(fd,boost::iostreams::never_close_handle)));
-  }
-  // unknown error
-
-  ec=boost::asio::error::operation_aborted;
-  return std::make_shared<std::istream>(nullptr);
 }
 }
 }
