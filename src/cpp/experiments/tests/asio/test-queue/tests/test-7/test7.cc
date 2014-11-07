@@ -6,17 +6,28 @@ this program tests the 'fd_queue' in isolation
 #include <boost/log/trivial.hpp>
 #include <string>
 #include <iostream>
+#include <functional>
+#include <memory>
 #include <unistd.h>
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
+
 using namespace std;
 namespace asio=boost::asio;
+namespace io=boost::iostreams;
+
+// create an input-stream from an fdd
+shared_ptr<istream>makeistream(int fd){
+  return shared_ptr<istream>(new istream(new io::stream_buffer<io::file_descriptor_source>(fd,io::never_close_handle)));
+}
 
 // value type in queues
 // (must work with operator<< and operator>>, and be default constructable)
 using qval_t=std::string;
 
 // setup serializer/de-serializer for queue + queue-type
-function<qval_t(istream&)>deserialiser=[](istream&is){qval_t ret;is>>ret;return ret;};
-using queue_t=asio::fddeq_queue<qval_t,decltype(deserialiser)>;
+std::function<void(ostream&,string const&)>serialiser=[](ostream&os,string const&s){os<<s;};
+using queue_t=asio::fdenq_queue<qval_t,decltype(serialiser)>;
 
 // test program
 int main(){
@@ -26,22 +37,12 @@ int main(){
     pipe(fd);
     int fdread{fd[0]};
     int fdwrite{fd[1]};
-    queue_t q{fdread,deserialiser};
+    queue_t q{fdread,serialiser};
     
     // creta a stream so we can write easier to the fd
-    // NOTE!
-    
-    
-
-    // deq() from queue
-    while(true){
-      boost::system::error_code ec;
-      pair<bool,string>p{q.deq(ec)};
-      if(ec!=boost::system::error_code()){
-        cout<<"deq() error, ec: "<<ec.message()<<endl;
-      }else{
-        cout<<"deq(), item: "<<p.second<<endl;
-      }
+    shared_ptr<istream>is(makeistream(fdread));
+    while(*is){
+      cout<<*is<<endl;
     }
   }
   catch(exception const&e){
