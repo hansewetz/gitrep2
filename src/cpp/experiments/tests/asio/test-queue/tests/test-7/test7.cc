@@ -16,34 +16,34 @@ using namespace std;
 namespace asio=boost::asio;
 namespace io=boost::iostreams;
 
-// create an input-stream from an fdd
-shared_ptr<istream>makeistream(int fd){
-  return shared_ptr<istream>(new istream(new io::stream_buffer<io::file_descriptor_source>(fd,io::never_close_handle)));
+// get an istream from a file descriptor
+std::shared_ptr<istream>makefdistream(int fd,bool close){
+  return std::shared_ptr<istream>(
+    new istream(new io::stream_buffer<io::file_descriptor_source>(fd,close?io::close_handle:io::never_close_handle)));
 }
-
-// value type in queues
-// (must work with operator<< and operator>>, and be default constructable)
+// get an ostream from a file descriptor
+std::shared_ptr<ostream>makefdostream(int fd,bool close){
+  return std::shared_ptr<ostream>(
+    new ostream(new io::stream_buffer<io::file_descriptor_sink>(fd,close?io::close_handle:io::never_close_handle)));
+}
+// queue stuff
 using qval_t=std::string;
-
-// setup serializer/de-serializer for queue + queue-type
-std::function<void(ostream&,string const&)>serialiser=[](ostream&os,string const&s){os<<s;};
-using queue_t=asio::fdenq_queue<qval_t,decltype(serialiser)>;
+std::function<void(ostream&,qval_t const&)>serialiser=[](ostream&os,qval_t const&s){os<<s;};
+using enq_t=asio::fdenq_queue<qval_t,decltype(serialiser)>;
 
 // test program
 int main(){
   try{
-    // create a queue
+    // create an fd-pipe with connected read/write fds
     int fd[2];
     pipe(fd);
     int fdread{fd[0]};
     int fdwrite{fd[1]};
-    queue_t q{fdread,serialiser};
+
+    // create a an enq() side of a queue
+    enq_t q{fdread,serialiser};
     
-    // creta a stream so we can write easier to the fd
-    shared_ptr<istream>is(makeistream(fdread));
-    while(*is){
-      cout<<*is<<endl;
-    }
+    // NOTE! Not yet done
   }
   catch(exception const&e){
     BOOST_LOG_TRIVIAL(error)<<"cought exception: "<<e.what();
