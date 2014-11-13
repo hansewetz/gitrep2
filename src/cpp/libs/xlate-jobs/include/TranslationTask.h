@@ -25,9 +25,11 @@ public:
   bool hasTargetSeg()const;
   std::string const&targetSeg()const;
   std::size_t segno()const;
+  EngineProxyId const&engineId()const;
 
   // setters
   void setTargetSeg(std::string const&seg);
+  void setEngineId(EngineProxyId const&engineId);
 
   // print function
   std::ostream&print(std::ostream&os)const;
@@ -39,6 +41,7 @@ private:
   std::string targetSeg_;
   bool hasTargetSeg_;
   std::size_t segno_;
+  EngineProxyId engineId_;
 };
 // print operator
 std::ostream&operator<<(std::ostream&os,TranslationTask const&t);

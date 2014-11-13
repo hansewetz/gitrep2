@@ -50,6 +50,7 @@ void EngineProxy::newTaskHandler(boost::system::error_code const&ec,std::shared_
   int ms_tmo{uniform_dist(e1)};
 
   // start translation
+  // cout<<"engine: "<<id_<<", job: "<<task->jobid()<<endl;
   // (simulate translation by setting up a timer and generate a 'translation' when timer pops)
   tmo_.expires_from_now(boost::posix_time::milliseconds(ms_tmo));
   tmo_.async_wait(std::bind(&EngineProxy::tmoHandler,this,_1,task));
@@ -59,7 +60,7 @@ void EngineProxy::newTaskHandler(boost::system::error_code const&ec,std::shared_
 void EngineProxy::tmoHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task){
   BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::tmoHandler - got timer event: "<<*task;
   // 'translate' task and send it on output queue
-  task->setTargetSeg(task->srcSeg()+" [engine id: "+id_.asString()+"]");
+  task->setTargetSeg(string("TRANSLATED: ")+task->srcSeg());
   qtaskSender_->sync_enq(task);
 
   // start waiting for a new task

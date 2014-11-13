@@ -37,14 +37,22 @@ string const&TranslationTask::targetSeg()const{
 size_t TranslationTask::segno()const{
   return segno_;
 }
+// get egine id translating this task
+EngineProxyId const&TranslationTask::engineId()const{
+  return engineId_;
+}
 // setters
 void TranslationTask::setTargetSeg(string const&seg){
   hasTargetSeg_=true;
   targetSeg_=seg;
 }
+// set engine id
+void TranslationTask::setEngineId(EngineProxyId const&engineId){
+  engineId_=engineId;
+}
 // print function
 ostream&TranslationTask::print(ostream&os)const{
-  return os<<"id: "<<id_<<", jobid: "<<jobid_<<", segno: "<<segno_<<", source-lan: "<<lanpair_.first<<", target-lan: "<<lanpair_.second<<", srcSeg: \""<<srcSeg_<<"\""<<", has target: "<<boolalpha<<hasTargetSeg_<<", target-seg: \""<<targetSeg_<<"\"";
+  return os<<"id: "<<id_<<", jobid: "<<jobid_<<", segno: "<<segno_<<", source-lan: "<<lanpair_.first<<", target-lan: "<<lanpair_.second<<", srcSeg: \""<<srcSeg_<<"\""<<", has target: "<<boolalpha<<hasTargetSeg_<<", target-seg: \""<<targetSeg_<<"\", engineId: \""<<engineId_<<"\"";
 }
 // print operator
 ostream&operator<<(ostream&os,TranslationTask const&t){

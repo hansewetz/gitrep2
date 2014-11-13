@@ -40,6 +40,10 @@ public:
   std::shared_ptr<TranslationTask>getNextTask();
   void addTranslatedTask(std::shared_ptr<TranslationTask>);
 
+  // get data
+  std::list<std::shared_ptr<TranslationTask>>const&translated()const;
+  std::list<std::shared_ptr<TranslationTask>>const&nonTranslated()const;
+
   // print function
   std::ostream&print(std::ostream&os)const;
 private:

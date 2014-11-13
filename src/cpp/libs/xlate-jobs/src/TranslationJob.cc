@@ -9,7 +9,7 @@ using namespace std;
 namespace xlate{
 
 // ctors
-TranslationJob::TranslationJob(std::shared_ptr<TranslateRequest>req):
+TranslationJob::TranslationJob(shared_ptr<TranslateRequest>req):
     id_(TranslationJobId()),
     lanpair_{req->lanpair()}{
 
@@ -71,7 +71,7 @@ shared_ptr<TranslationTask>TranslationJob::getNextTask(){
   return ret;
 }
 // add a translated task
-void TranslationJob::addTranslatedTask(std::shared_ptr<TranslationTask>task){
+void TranslationJob::addTranslatedTask(shared_ptr<TranslationTask>task){
   lock_guard<mutex>lock(mtx_);
 
   // make sure the task is waiting for translation
@@ -85,6 +85,14 @@ void TranslationJob::addTranslatedTask(std::shared_ptr<TranslationTask>task){
 
   // add task to translated tasks
   translated_.push_back(task);
+}
+// get translated data
+list<shared_ptr<TranslationTask>>const&TranslationJob::translated()const{
+  return translated_;
+}
+// get non-translated data
+list<shared_ptr<TranslationTask>>const&TranslationJob::nonTranslated()const{
+  return nonTranslated_;
 }
 // print function
 ostream&TranslationJob::print(ostream&os)const{
