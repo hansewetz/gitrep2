@@ -1,8 +1,3 @@
-/*
-TODO:	the scheduling policy should be made more flexible.
-	currently we complete one job before pulling in another job (when no more tasks are available we pull another job)
-	we could process multiple jobs simultaneously in a round robin fashon and keep a maximum number of jobs being process at the same time for example
-*/
 #include "xlate-jobs/TaskScheduler.h"
 #include "xlate-jobs/TranslationJob.h"
 #include "xlate-jobs/TranslationTask.h"
@@ -70,9 +65,18 @@ void TaskScheduler::newJobHandler(boost::system::error_code const&ec,std::shared
 std::shared_ptr<TranslationTask>TaskScheduler::nextTask(){
   // get task from first job, remove job if no more tasks in job and return task
   if(jobs_.empty())return std::shared_ptr<TranslationTask>(nullptr);
+
+  // get job to pull task from
   std::shared_ptr<TranslationJob>job{jobs_.front()};
   std::shared_ptr<TranslationTask>ret{job->getNextTask()};
+  
+  // remove job if it is done, else move it to back of queue
   if(job->noUntranslated()==0)jobs_.pop_front();
+  else{
+    jobs_.pop_front();
+    jobs_.push_back(job);
+  }
+  // return task to process
   return ret;
 }
 // check if there is a next task

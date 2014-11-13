@@ -9,6 +9,7 @@
 #include <boost/asio.hpp> 
 #include <boost/log/trivial.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
 
 #include <iostream>
 #include <string>
@@ -19,6 +20,41 @@ using namespace std;
 using namespace std::placeholders;
 using namespace xlate;
 
+namespace po=boost::program_options;
+namespace fs=boost::filesystem;
+
+namespace{
+po::options_description desc{string("usage: -f file -h")};
+void usage(){
+  std::cerr<<desc;
+  std::exit(1);
+}
+void usage(std::string const&msg){
+  std::cerr<<msg;
+  std::exit(1);
+}
+}
+// global parameters
+string file{""}; // file to translate
+
+// process command line params
+void processCmdLineParams(int argc,char**argv){
+  // process command line parameters
+  desc.add_options()
+    ("help,h","print help message")
+    ("file,f",po::value<string>(),"file to translate");
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc,argv,desc),vm);
+    po::notify(vm);
+
+    // check for help
+    if(vm.count("help"))usage();
+
+  // get file to translate
+  if(vm.count("file"))file=vm["file"].as<string>();
+  if(file=="")usage();
+  if(!fs::exists(file))usage("file: \"file\" is not a file or does not exist");
+}
 // handler for jobs that have been translated
 // (output queue from job repository)
 void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationJob>job,std::shared_ptr<JobQueueListener>qtransjobreceiver){
@@ -26,7 +62,10 @@ void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<Tra
   qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver));
 }
 //  main test program
-int main(){
+int main(int argc,char**argv){
+  // process command line parameters
+  processCmdLineParams(argc,argv);
+
   // setup asio stuff
   boost::asio::io_service ios;
 
@@ -36,7 +75,7 @@ int main(){
   try{
     // (1) ------------ create a translation component
     // (one translation component <--> one language pair)
-    TranslationCt tct{ios,1,3};
+    TranslationCt tct{ios,3,5};
     tct.run();
 
     // (2) ------------ create receiver of translated jobs
@@ -51,16 +90,13 @@ int main(){
     // create sender to translation repository
     std::shared_ptr<JobQueueSender>qnewjobsender{make_shared<JobQueueSender>(ios,tct.getNewJobQueue())};
 
-    // send jobs to translation component
-    for(int i=0;i<5;++i){
-      // create request from file
-      boost::filesystem::path file{"./seg1.txt"};
-      std::shared_ptr<TranslateRequest>req{reqFact.requestFromSegmentedFile(make_lanpair("en","sv"),file)};
+    // create request from file
+    std::shared_ptr<TranslateRequest>req{reqFact.requestFromSegmentedFile(make_lanpair("en","sv"),file)};
 
-      // create job from request and send it
-      std::shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};
-      qnewjobsender->async_enq(job,[](boost::system::error_code const&ec){});
-    }
+    // create job from request and send it
+    std::shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};
+    qnewjobsender->async_enq(job,[](boost::system::error_code const&ec){});
+
     // (4) ------------ run asynchronous machinery
     // (everything runs under asio with the exception of the actual engines which runs as separate processes)
     BOOST_LOG_TRIVIAL(info)<<"starting asio ...";
