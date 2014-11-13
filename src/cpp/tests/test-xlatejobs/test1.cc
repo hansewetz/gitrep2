@@ -11,6 +11,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
+#include <algorithm>
+#include <iterator>
+#include <vector>
 #include <iostream>
 #include <string>
 #include <memory>
@@ -24,36 +27,59 @@ namespace po=boost::program_options;
 namespace fs=boost::filesystem;
 
 namespace{
-po::options_description desc{string("usage: -f file -h")};
+po::options_description options{string("usage: -h file ...")};
 void usage(){
-  std::cerr<<desc;
+  std::cerr<<options;
   std::exit(1);
 }
 void usage(std::string const&msg){
-  std::cerr<<msg;
+  std::cerr<<msg<<endl;
   std::exit(1);
 }
 }
 // global parameters
-string file{""}; // file to translate
+vector<string>files; // files to translate
 
 // process command line params
 void processCmdLineParams(int argc,char**argv){
-  // process command line parameters
-  desc.add_options()
-    ("help,h","print help message")
-    ("file,f",po::value<string>(),"file to translate");
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc,argv,desc),vm);
-    po::notify(vm);
+  // add help option
+  options.add_options()("help,h","help");
+  options.add_options()("file,f","list of files to be translated");
 
-    // check for help
-    if(vm.count("help"))usage();
+  // --- setup for processing command line parametersprocess command line parameters
+  po::variables_map vm;
+  po::options_description cmdline_options("all command line options");
+
+  // setup description of trailing (hidden) options
+  po::options_description hidden_options("hidden options");
+  hidden_options.add_options()("files",po::value<vector<string> >(),"list of files to be translated");
+  po::positional_options_description p;
+  p.add("files",-1);
+
+  // consolidate all options into one description so we can parse command line
+  cmdline_options.add(options).add(hidden_options);
+  po::store(po::command_line_parser(argc,argv).options(cmdline_options).positional(p).run(),vm);
+
+  // compile process options
+  po::store(po::command_line_parser(argc,argv).options(cmdline_options).run(),vm);
+  po::notify(vm);
+
+  // get trailing options - files to late0if any)
+  std::vector<std::string>trailing;
+  if(vm.count("files")){
+    trailing=vm["files"].as<vector<string>>();
+  }
+  // --- check for help
+  if(vm.count("help"))usage();
 
   // get file to translate
-  if(vm.count("file"))file=vm["file"].as<string>();
-  if(file=="")usage();
-  if(!fs::exists(file))usage("file: \"file\" is not a file or does not exist");
+  for(auto const&t:trailing){
+    string const&file{t};
+    if(!fs::exists(file))usage("string(file: )"+file+" is not a file or doe snot exist");
+    files.push_back(file);
+  }
+  // make sure we have files to translate
+  if(files.empty())usage("must specify at least one file to translate");
 }
 // handler for jobs that have been translated
 // (output queue from job repository)
@@ -91,12 +117,13 @@ int main(int argc,char**argv){
     std::shared_ptr<JobQueueSender>qnewjobsender{make_shared<JobQueueSender>(ios,tct.getNewJobQueue())};
 
     // create request from file
-    std::shared_ptr<TranslateRequest>req{reqFact.requestFromSegmentedFile(make_lanpair("en","sv"),file)};
-
-    // create job from request and send it
-    std::shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};
-    qnewjobsender->async_enq(job,[](boost::system::error_code const&ec){});
-
+    for(auto file:files){
+      // create request, then job and send job for translation
+      std::shared_ptr<TranslateRequest>req{reqFact.requestFromSegmentedFile(make_lanpair("en","sv"),file)};
+      std::shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};
+      BOOST_LOG_TRIVIAL(info)<<"adding file: \""<<file<<"\"<< for translation (jobid: "<<job->id()<<")";
+      qnewjobsender->async_enq(job,[](boost::system::error_code const&ec){});
+    }
     // (4) ------------ run asynchronous machinery
     // (everything runs under asio with the exception of the actual engines which runs as separate processes)
     BOOST_LOG_TRIVIAL(info)<<"starting asio ...";
