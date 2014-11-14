@@ -9,7 +9,10 @@ namespace xlate{
 
 // ctor
 TaskScheduler::TaskScheduler(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qjob,std::shared_ptr<TaskQueue>qtask):
-    ios_(ios),qjobListener_(make_shared<JobQueueListener>(ios,qjob)),qtaskSender_(make_shared<TaskQueueSender>(ios,qtask)),waiting4unblock_(true){
+    ios_(ios),
+    qjobListener_(make_shared<JobQueueListener>(ios,qjob.get())),
+    qtaskSender_(make_shared<TaskQueueSender>(ios,qtask.get())),
+     waiting4unblock_(true){
 }
 // start listening on events
 void TaskScheduler::run(){
@@ -39,7 +42,10 @@ void TaskScheduler::waitUnblockHandler(boost::system::error_code const&ec){
   std::shared_ptr<TranslationTask>task{nextTask()};
   if(task){
     BOOST_LOG_TRIVIAL(debug)<<"TaskScheduler::waitUnblockHandler - enq into task queue";
-    qtaskSender_->sync_enq(task);
+    boost::system::error_code ec1;
+    qtaskSender_->sync_enq(task,ec1);
+
+    // NOTE! Should check error code
   }
   // if we have a next task, then wait for task queue to unblock
   if(hasNextTask())waitForUnblock();

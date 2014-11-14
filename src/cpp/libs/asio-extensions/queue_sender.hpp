@@ -1,6 +1,5 @@
 #ifndef __QUEUE_SENDER_H__
 #define __QUEUE_SENDER_H__
-#include "simple_queue.h"
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
 #include <cstddef>
@@ -17,7 +16,7 @@ template<typename Service,typename Queue>
 class basic_queue_sender:public boost::asio::basic_io_object<Service>{
 public:
   // ctor
-  explicit basic_queue_sender(boost::asio::io_service&io_service,std::shared_ptr<Queue>q):
+  explicit basic_queue_sender(boost::asio::io_service&io_service,Queue*q):
       boost::asio::basic_io_object<Service>(io_service),q_(q){
   }
   // async enq operation
@@ -25,21 +24,30 @@ public:
   void async_enq(typename Queue::value_type val,Handler handler) {
     this->service.async_enq(this->implementation,q_,val,handler);
   }
-  // sync enq operation (blocking)
-  void sync_enq(typename Queue::value_type val){
-    this->service.sync_enq(this->implementation,q_,val);
+  // async enq operation - timed
+  template <typename Handler>
+  void timed_async_enq(typename Queue::value_type val,Handler handler,std::size_t ms) {
+    this->service.timed_async_enq(this->implementation,q_,val,handler,ms);
   }
   // wait until we can put a message in queue in async mode
   template <typename Handler>
   void async_wait_enq(Handler handler) {
     this->service.async_wait_enq(this->implementation,q_,handler);
   }
+  // wait until we can put a message in queue in async mode - timed
+  template <typename Handler>
+  void timed_async_wait_enq(Handler handler,std::size_t ms) {
+    this->service.timed_async_wait_enq(this->implementation,q_,handler,ms);
+  }
+  // sync enq operation (blocking)
+  void sync_enq(typename Queue::value_type val,boost::system::error_code&ec){
+    this->service.sync_enq(this->implementation,q_,val,ec);
+  }
 private:
-  std::shared_ptr<Queue>q_;
+  Queue*q_;
 };
-// typedef for using standard service object
-template<typename T>
-using simple_queue_sender=basic_queue_sender<basic_queue_sender_service<>,simple_queue<T>>;
+// typedefs for using standard queue listeners
+template<typename Queue>using queue_sender=basic_queue_sender<basic_queue_sender_service<>,Queue>;
 
 // --- service class -----------------------------
 // (for one io_service, only one object created)
@@ -69,20 +77,32 @@ public:
   }
   // async sync enq operation
   template <typename Handler,typename Queue>
-  void async_enq(implementation_type&impl,std::shared_ptr<Queue>q,typename Queue::value_type val,Handler handler){
+  void async_enq(implementation_type&impl,Queue*q,typename Queue::value_type val,Handler handler){
     // this is a non-blocking operation so we are OK calling impl object in this thread
     impl->async_enq(impl,q,val,handler);
   }
-  // sync enq operation (blocking)
-  template <typename Queue>
-  void sync_enq(implementation_type&impl,std::shared_ptr<Queue>q,typename Queue::value_type val){
-    impl->sync_enq(q,val);
+  // async sync enq operation - timed
+  template <typename Handler,typename Queue>
+  void timed_async_enq(implementation_type&impl,Queue*q,typename Queue::value_type val,Handler handler,std::size_t ms){
+    // this is a non-blocking operation so we are OK calling impl object in this thread
+    impl->timed_async_enq(impl,q,val,handler,ms);
   }
   // async sync wait operation
   template <typename Handler,typename Queue>
-  void async_wait_enq(implementation_type&impl,std::shared_ptr<Queue>q,Handler handler){
+  void async_wait_enq(implementation_type&impl,Queue*q,Handler handler){
     // this is a non-blocking operation so we are OK calling impl object in this thread
     impl->async_wait_enq(impl,q,handler);
+  }
+  // async sync wait operation - timed
+  template <typename Handler,typename Queue>
+  void timed_async_wait_enq(implementation_type&impl,Queue*q,Handler handler,std::size_t ms){
+    // this is a non-blocking operation so we are OK calling impl object in this thread
+    impl->timed_async_wait_enq(impl,q,handler,ms);
+  }
+  // sync enq operation (blocking)
+  template <typename Queue>
+  void sync_enq(implementation_type&impl,Queue*q,typename Queue::value_type val,boost::system::error_code&ec){
+    impl->sync_enq(q,val,ec);
   }
 private:
   // shutdown service (required)
@@ -111,18 +131,28 @@ public:
 public:
   // enque message (post request to thread)
   template<typename Handler,typename Queue>
-  void async_enq(std::shared_ptr<queue_sender_impl>impl,std::shared_ptr<Queue>tq,typename Queue::value_type val,Handler handler){
-    impl_io_service_.post(enq_operation<Handler,Queue>(impl,post_io_service_,tq,val,handler));
+  void async_enq(std::shared_ptr<queue_sender_impl>impl,Queue*q,typename Queue::value_type val,Handler handler){
+    impl_io_service_.post(enq_operation<Handler,Queue>(impl,post_io_service_,q,val,handler));
   }
-  // enque message (blocking enq)
-  template<typename Queue>
-  void sync_enq(std::shared_ptr<Queue>tq,typename Queue::value_type val){
-    tq->enq(val);
+  // enque message (post request to thread) - timed
+  template<typename Handler,typename Queue>
+  void timed_async_enq(std::shared_ptr<queue_sender_impl>impl,Queue*q,typename Queue::value_type val,Handler handler,std::size_t ms){
+    impl_io_service_.post(enq_operation<Handler,Queue>(impl,post_io_service_,q,val,handler,ms));
   }
   // wait to enq message (post request to thread)
   template<typename Handler,typename Queue>
-  void async_wait_enq(std::shared_ptr<queue_sender_impl>impl,std::shared_ptr<Queue>tq,Handler handler){
-    impl_io_service_.post(wait_enq_operation<Handler,Queue>(impl,post_io_service_,tq,handler));
+  void async_wait_enq(std::shared_ptr<queue_sender_impl>impl,Queue*q,Handler handler){
+    impl_io_service_.post(wait_enq_operation<Handler,Queue>(impl,post_io_service_,q,handler));
+  }
+  // wait to enq message (post request to thread) - timed
+  template<typename Handler,typename Queue>
+  void timed_async_wait_enq(std::shared_ptr<queue_sender_impl>impl,Queue*q,Handler handler,std::size_t ms){
+    impl_io_service_.post(wait_enq_operation<Handler,Queue>(impl,post_io_service_,q,handler,ms));
+  }
+  // enque message (blocking enq)
+  template<typename Queue>
+  void sync_enq(Queue*q,typename Queue::value_type val,boost::system::error_code&ec){
+    q->enq(val,ec);
   }
 private:
   // function object calling blocking enq() on queue
@@ -130,8 +160,12 @@ private:
   class enq_operation{
   public:
     // ctor
-    enq_operation(std::shared_ptr<queue_sender_impl>impl,boost::asio::io_service &io_service,std::shared_ptr<Queue>tq,typename Queue::value_type val,Handler handler):
-        wimpl_(impl),io_service_(io_service),work_(io_service),tq_(tq),val_(val),handler_(handler) {
+    enq_operation(std::shared_ptr<queue_sender_impl>impl,boost::asio::io_service &io_service,Queue*q,typename Queue::value_type val,Handler handler):
+        wimpl_(impl),io_service_(io_service),work_(io_service),q_(q),val_(val),handler_(handler),timed_(false),ms_(0) {
+    }
+    // ctor - timed
+    enq_operation(std::shared_ptr<queue_sender_impl>impl,boost::asio::io_service &io_service,Queue*q,typename Queue::value_type val,Handler handler,std::size_t ms):
+        wimpl_(impl),io_service_(io_service),work_(io_service),q_(q),val_(val),handler_(handler),timed_(true),ms_(ms) {
     }
     // function calling implementation object - runs in the thread created in ctor
     void operator()(){
@@ -139,9 +173,11 @@ private:
       std::shared_ptr<queue_sender_impl>impl{wimpl_.lock()};
 
       // if valid, go ahead and do (potentially) blocking call on queue, otherwise post aborted message
+      boost::system::error_code ec;
       if(impl){
-        bool ret{tq_->enq(val_)};
-        boost::system::error_code ec=(!ret?boost::asio::error::operation_aborted:boost::system::error_code());
+        bool ret;
+        if(timed_)ret=q_->timed_enq(val_,ms_,ec);
+        else ret=q_->enq(val_,ec);
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec));
       }else{
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,boost::asio::error::operation_aborted));
@@ -151,17 +187,23 @@ private:
     std::weak_ptr<queue_sender_impl>wimpl_;
     boost::asio::io_service&io_service_;
     boost::asio::io_service::work work_;
-    std::shared_ptr<Queue>tq_;
+    Queue*q_;
     typename Queue::value_type val_;
     Handler handler_;
+    bool timed_;
+    std::size_t ms_;
   };
   // function object calling blocking wait() on queue
   template <typename Handler,typename Queue>
   class wait_enq_operation{
   public:
     // ctor
-    wait_enq_operation(std::shared_ptr<queue_sender_impl>impl,boost::asio::io_service &io_service,std::shared_ptr<Queue>tq,Handler handler):
-        wimpl_(impl),io_service_(io_service),work_(io_service),tq_(tq),handler_(handler) {
+    wait_enq_operation(std::shared_ptr<queue_sender_impl>impl,boost::asio::io_service &io_service,Queue*q,Handler handler):
+        wimpl_(impl),io_service_(io_service),work_(io_service),q_(q),handler_(handler),timed_(false),ms_(0) {
+    }
+    // ctor - timed
+    wait_enq_operation(std::shared_ptr<queue_sender_impl>impl,boost::asio::io_service &io_service,Queue*q,Handler handler,std::size_t ms):
+        wimpl_(impl),io_service_(io_service),work_(io_service),q_(q),handler_(handler),timed_(true),ms_(ms) {
     }
     // function calling implementation object - runs in the thread created in ctor
     void operator()(){
@@ -169,20 +211,23 @@ private:
       std::shared_ptr<queue_sender_impl>impl{wimpl_.lock()};
 
       // if valid, go ahead and do (potentially) blocking call on queue, otherwise post aborted message
+      boost::system::error_code ec;
       if(impl){
-        bool ret{tq_->wait_enq()};
-        boost::system::error_code ec=(!ret?boost::asio::error::operation_aborted:boost::system::error_code());
+        if(timed_)q_->wait_enq(ec);
+        else q_->wait_enq(ec);
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec));
       }else{
-        this->io_service_.post(boost::asio::detail::bind_handler(handler_,boost::asio::error::operation_aborted));
+        this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec));
       }
     }
   private:
     std::weak_ptr<queue_sender_impl>wimpl_;
     boost::asio::io_service&io_service_;
     boost::asio::io_service::work work_;
-    std::shared_ptr<Queue>tq_;
+    Queue*q_;
     Handler handler_;
+    bool timed_;
+    std::size_t ms_;
   };
   // private data
   boost::asio::io_service impl_io_service_;

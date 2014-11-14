@@ -113,7 +113,7 @@ int main(int argc,char**argv){
 
     // (2) ------------ create receiver of translated jobs
     // (we'll use the receiver to print out jobs which have been translated)
-    std::shared_ptr<JobQueueListener>qtransjobreceiver{make_shared<JobQueueListener>(ios,tct.getTranslatedJobQueue())};
+    std::shared_ptr<JobQueueListener>qtransjobreceiver{make_shared<JobQueueListener>(ios,tct.getTranslatedJobQueue().get())};
     qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver));
 
     // (3) ------------ generate and send input for translation
@@ -121,7 +121,7 @@ int main(int argc,char**argv){
     TranslationRequestFactory reqFact;
 
     // create sender to translation repository
-    std::shared_ptr<JobQueueSender>qnewjobsender{make_shared<JobQueueSender>(ios,tct.getNewJobQueue())};
+    std::shared_ptr<JobQueueSender>qnewjobsender{make_shared<JobQueueSender>(ios,tct.getNewJobQueue().get())};
 
     // create request from file
     for(auto file:files){

@@ -13,10 +13,11 @@ namespace xlate{
 TranslationJobRepository::TranslationJobRepository(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qnew,
                                                    std::shared_ptr<JobQueue>qsched,std::shared_ptr<TaskQueue>qtask,
                                                    std::shared_ptr<JobQueue>qtranslated):
-    ios_(ios),qnewListener_{make_shared<JobQueueListener>(ios_,qnew)},
-    qschedSender_{make_shared<JobQueueSender>(ios_,qsched)},
-    qtaskListener_{make_shared<TaskQueueListener>(ios_,qtask)},
-    qtransSender_{make_shared<JobQueueSender>(ios_,qtranslated)},
+    ios_(ios),
+    qnewListener_(make_shared<JobQueueListener>(ios_,qnew.get())),
+    qschedSender_(make_shared<JobQueueSender>(ios_,qsched.get())),
+    qtaskListener_(make_shared<TaskQueueListener>(ios_,qtask.get())),
+    qtransSender_(make_shared<JobQueueSender>(ios_,qtranslated.get())),
     waiting4unblock_(true){
 }
 // start listening on events
@@ -55,7 +56,10 @@ void TranslationJobRepository::waitUnblockHandler(boost::system::error_code cons
     std::shared_ptr<TranslationJob>job{newJobs_.front()};
     newJobs_.pop_front();
     BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::waitUnblockHandler - enq into scheduler queue";
-    qschedSender_->sync_enq(job);
+    boost::system::error_code ec1;
+    qschedSender_->sync_enq(job,ec1);
+
+    // NOTE! Should check error code
 
     // insert job into scheduled jobs
     schedJobs_.insert(make_pair(job->id(),job));
@@ -92,7 +96,10 @@ void TranslationJobRepository::translatedTaskHandler(boost::system::error_code c
     if(job->done()){
       // remove job form scheduled jobs and enq job on output queue
       if(it!=schedJobs_.end())schedJobs_.erase(it);
-      qtransSender_->sync_enq(job);
+      boost::system::error_code ec1;
+      qtransSender_->sync_enq(job,ec1);
+
+      // NOTE! Should check error code
 
       ++ncompleted_;
       BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::translatedTaskHandler - job DONE with id: "<<*job;

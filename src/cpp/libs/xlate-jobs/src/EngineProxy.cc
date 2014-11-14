@@ -22,7 +22,9 @@ namespace xlate{
 
 // ctor
 EngineProxy::EngineProxy(boost::asio::io_service&ios,std::shared_ptr<TaskQueue>qin,std::shared_ptr<TaskQueue>qout):
-    ios_(ios),qtaskListener_(make_shared<TaskQueueListener>(ios_,qin)),qtaskSender_(make_shared<TaskQueueSender>(ios_,qout)),
+    ios_(ios),
+    qtaskListener_(make_shared<TaskQueueListener>(ios_,qin.get())),
+    qtaskSender_(make_shared<TaskQueueSender>(ios_,qout.get())),
     tmo_(ios_,boost::posix_time::milliseconds(1)){
 }
 // wait for new task asynchronously
@@ -61,7 +63,12 @@ void EngineProxy::tmoHandler(boost::system::error_code const&ec,std::shared_ptr<
   BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::tmoHandler - got timer event: "<<*task;
   // 'translate' task and send it on output queue
   task->setTargetSeg(string("TRANSLATED: ")+task->srcSeg());
-  qtaskSender_->sync_enq(task);
+
+  // send task synchronously
+  boost::system::error_code ec1;
+  qtaskSender_->sync_enq(task,ec1);
+
+// NOTE! Should check error code here
 
   // start waiting for a new task
   waitForNewTask();
