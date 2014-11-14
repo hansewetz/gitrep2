@@ -8,6 +8,7 @@ namespace boost{
 namespace asio{
 
 // a simple thread safe queue allowing enq()  - output is sent via a file descriptor
+// (the enqueued object is serialised through the write file descriptor)
 template<typename T,typename SERIAL>
 class fdenq_queue{
 public:
@@ -16,7 +17,7 @@ public:
   using value_type=T;
 
   // ctors,assign,dtor
-  fdenq_queue(int fd,SERIAL serial):fd_(fd),serial_(serial){}
+  fdenq_queue(int fdwrite,SERIAL serial):fdwrite_(fdwrite),serial_(serial){}
   fdenq_queue(fdenq_queue const&)=delete;
   fdenq_queue(fdenq_queue&&)=default;
   fdenq_queue&operator=(fdenq_queue const&)=delete;
@@ -25,11 +26,11 @@ public:
   
   // enqueue a message (return.first == false if enq() was disabled)
   bool enq(T t,boost::system::error_code&ec){
-// NOTE!
-/*
-    detail::queue_support::write(t,dir_,serial_);
-    rerurn true;
-*/
+    // create an output stream from fdwrite, serialise object into stream
+    std::shared_ptr<std::ostream>os{detail::queue_support::makefd_ostream(fdwrite_,false)};
+    serial_(*os,t);
+    *os<<std::endl;
+    return true;
   }
   // enqueue a message (return.first == false if enq() was disabled) - timeout if waiting too long
   bool timed_enq(T t,std::size_t ms,boost::system::error_code&ec){
@@ -45,7 +46,7 @@ public:
   }
 private:
   // queue state
-  int fd_;                               // file descriptors to read from from
+  int fdwrite_;                          // file descriptors serialize object tpo
   SERIAL serial_;                        // serialise
 };
 }

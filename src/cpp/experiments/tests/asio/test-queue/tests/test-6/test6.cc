@@ -13,18 +13,38 @@ this is the same program as test4.cc but using a polldir_queue instead of a simp
 #include <memory>
 #include <thread>
 #include <functional>
+#include <iostream>
 using namespace std;
 using namespace std::placeholders;
 
 namespace asio= boost::asio;
 namespace fs=boost::filesystem;
 
+// test queue item
+class Junk{
+public:
+  friend ostream&operator<<(ostream&os,Junk const&junk){
+    os<<junk.s_<<" "<<junk.i_;
+  }
+  friend istream&operator>>(istream&is,Junk&junk){
+    is>>junk.s_>>junk.i_;
+  }
+  Junk()=default;
+  Junk(string const&s,int i):s_(s),i_(i){}
+  Junk(Junk const&)=default;
+  Junk(Junk&&)=default;
+  Junk&operator=(Junk const&)=default;
+  Junk&operator=(Junk&&)=default;
+private:
+  string s_;
+  int i_;
+};
 // timeout for deq()
 size_t tmo_ms{3000};
 
 // value type in queues
 // (must work with operator<< and operator>>, and be default constructable)
-using qval_t=std::string;
+using qval_t=Junk;
 
 // create a sender and listener queues (could be the same queue)
 function<qval_t(istream&)>deserialiser=[](istream&is){qval_t ret;is>>ret;return ret;};
@@ -41,7 +61,7 @@ asio::queue_listener<queue_t>qlistener(::ios,&qrecv);
 asio::queue_sender<queue_t>qsender(::ios,&qsend);
 
 // max #of messages to send/receive
-constexpr size_t maxmsg{100};
+constexpr size_t maxmsg{10};
 
 // handler for queue listener
 template<typename T>
@@ -57,7 +77,7 @@ void qlistener_handler(boost::system::error_code const&ec,T item){
 template<typename T>
 void thr_send_sync_messages(){
   for(int i=0;i<maxmsg;++i){
-    qval_t item{boost::lexical_cast<qval_t>(i)};
+    qval_t item{Junk{string("Hello")+boost::lexical_cast<string>(i),i}};
     BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
     boost::system::error_code ec;
     qsender.sync_enq(item,ec);
