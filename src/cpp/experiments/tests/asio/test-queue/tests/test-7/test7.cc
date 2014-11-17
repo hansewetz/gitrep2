@@ -22,27 +22,25 @@ using namespace std;
 namespace asio=boost::asio;
 namespace io=boost::iostreams;
 
-// get an istream from a file descriptor
-std::shared_ptr<istream>makefd_istream(int fd,bool close){
-  return std::shared_ptr<istream>(
-    new istream(new io::stream_buffer<io::file_descriptor_source>(fd,close?io::close_handle:io::never_close_handle)));
-}
-// set fd to non-blocking
-void setFdNonblock(int fd){
-  int flags = fcntl(fd,F_GETFL,0);
-  if(fcntl(fd, F_SETFL,flags|O_NONBLOCK)<0){
-    std::string err{strerror(errno)};
-    throw std::runtime_error(std::string("setFdNonblock: failed setting fd in non-blocking mode: ")+err);
-  }
-}
 // queue type
 using qval_t=string;
 
-// serialize an object (char by char)
+// serialize an object (notice: message boundaries are on '\n' characters)
 std::function<void(ostream&,qval_t const&)>serialiser=[](ostream&os,qval_t const&s){
   os<<s;
 };
+// de-serialize an object (notice: message boundaries are on '\n' characters)
+std::function<qval_t(istream&)>deserialiser=[](istream&is){
+  while(true){
+    string line;
+    getline(is,line);
+    if(line=="")break;
+    return line;
+  }
+};
+// queue types
 using enq_t=asio::fdenq_queue<qval_t,decltype(serialiser)>;
+using deq_t=asio::fddeq_queue<qval_t,decltype(deserialiser)>;
 
 // test program
 int main(){
@@ -56,19 +54,25 @@ int main(){
     int fdread{fd[0]};
     int fdwrite{fd[1]};
 
-    // create enq queue
-    enq_t qin{fdwrite,serialiser};
-
-    // enq() an item
+    // create queues
     boost::system::error_code ec;
-    qval_t msg{"Hello there again"};
-    qin.enq(msg,ec);
+    enq_t qin{fdwrite,serialiser};
+    deq_t qout{fdread,deserialiser};
 
-    // read from other side of pipe
-//    setFdNonblock(fdread);
-    shared_ptr<istream>is{makefd_istream(fdread,false)};
-    string line;
-    while(getline(*is,line))cout<<line<<endl;
+    // send and receive a number of messages
+    constexpr size_t maxmsg{100};
+    for(size_t i=0;i<maxmsg;++i){
+      string msg{boost::lexical_cast<string>(i)};
+
+      // enq() an item
+      cout<<">>> \""<<msg<<"\""<<endl;
+      qin.enq(msg,ec);
+
+      // deq() an item
+      pair<bool,qval_t>tout{qout.deq(ec)};
+      if(!tout.first)cout<<"failed deq(), err: "<<ec.message()<<endl;
+      else cout<<"<<< \""<<tout.second<<"\""<<endl;
+    }
   }
   catch(exception const&e){
     BOOST_LOG_TRIVIAL(error)<<"cought exception: "<<e.what();

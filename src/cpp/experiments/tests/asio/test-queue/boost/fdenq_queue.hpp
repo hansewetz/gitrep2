@@ -1,3 +1,8 @@
+/*
+NOTE!
+	- implement queue without timeouts etc.
+	- message boundaries are on '\n' characters
+*/
 #ifndef __FDENQ_QUEUE_H__
 #define __FDENQ_QUEUE_H__
 #include "detail/queue_support.hpp"

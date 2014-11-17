@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <list>
+#include <iostream>
 #include <utility>
 #include <fstream>
 #include <memory>
@@ -17,9 +18,6 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
-
-// NOTE!
-#include <iostream>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
 
@@ -83,19 +81,16 @@ T read(fs::path const&fullpath,DESER deser){
   std::remove(fullpath.string().c_str());
   return ret;
 }
-
-
-
-// NOTE!
 // get an ostream from a file descriptor
 std::shared_ptr<std::ostream>makefd_ostream(int fd,bool close){
   return std::shared_ptr<std::ostream>(
     new std::ostream(new io::stream_buffer<io::file_descriptor_sink>(fd,close?io::close_handle:io::never_close_handle)));
 }
-// NOTE!
-
-
-
+// get an istream from a file descriptor
+std::shared_ptr<std::istream>makefd_istream(int fd,bool close){
+  return std::shared_ptr<std::istream>(
+    new std::istream(new io::stream_buffer<io::file_descriptor_source>(fd,close?io::close_handle:io::never_close_handle)));
+}
 }
 }
 }
