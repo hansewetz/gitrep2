@@ -3,7 +3,9 @@
 - handle tmo correctly
 - read more than one character at a time ... must then save chars after '\n' so we won;t miss any
 - make message separator variable in ctor (default '\n')
-
+- add option to include newline or not include it in sent message
+  on receiver side, we should not include newline in message
+- test with serializing real object and base64 encode them
 
 */
 
@@ -106,12 +108,13 @@ private:
             ec=boost::system::error_code(errno,boost::system::get_posix_category());
             return T{};
           }
-          if(c==NEWLINE){
-            // don't include newline in deserialisation
-            return deser_(strstrm);
-          }
           // save character just read
           strstrm<<c;
+
+          // if we reached newline, send message including newline)
+          if(c==NEWLINE){
+            return deser_(strstrm);
+          }
         }
         // check if we read all available characters
         // (if there are no more chars to read, then restart select() statement)
