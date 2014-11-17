@@ -4,13 +4,17 @@
 #include <iostream>
 #include <functional>
 #include <memory>
+#include <thread>
 #include <unistd.h>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
 
 using namespace std;
+using namespace std::placeholders;
 namespace asio=boost::asio;
 namespace io=boost::iostreams;
+
+// ----- queue types -----
 
 // aios io service
 asio::io_service ios;
@@ -35,17 +39,33 @@ std::function<qval_t(istream&)>deserialiser=[](istream&is){
 using enq_t=asio::fdenq_queue<qval_t,decltype(serialiser)>;
 using deq_t=asio::fddeq_queue<qval_t,decltype(deserialiser)>;
 
+//  ------ asio objects, sender, callback handler etc. ---
+
+// some constants
+constexpr size_t maxmsg{10};
+
 // handler for queue listener
 template<typename T>
-void qlistener_handler(boost::system::error_code const&ec,T item){
+void qlistener_handler(boost::system::error_code const&ec,T item,asio::queue_listener<deq_t>*ql){
   if(ec!=0){
     BOOST_LOG_TRIVIAL(debug)<<"deque() aborted (via asio), ec: "<<ec.message();
   }else{
     BOOST_LOG_TRIVIAL(debug)<<"received item in qlistener_handler (via asio), item: "<<item<<", ec: "<<ec;
+    ql->async_deq(std::bind(qlistener_handler<T>,_1,_2,ql));
+  }
+}
+// thread function sending maxmsg messages
+void thr_send_sync_messages(asio::queue_sender<enq_t>*qs){
+  for(int i=0;i<maxmsg;++i){
+    qval_t item{boost::lexical_cast<string>(i)};
+    BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
+    boost::system::error_code ec;
+    qs->sync_enq(item,ec);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 }
 
-// test program
+// ------ test program
 int main(){
   try{
     // create an fd-pipe with connected read/write fds
@@ -68,11 +88,11 @@ int main(){
 
     // listen for on messages on q1 (using asio)
     BOOST_LOG_TRIVIAL(debug)<<"starting async_deq() ...";
-    qlistener.async_deq(qlistener_handler<qval_t>);
+    qlistener.async_deq(std::bind(qlistener_handler<qval_t>,_1,_2,&qlistener));
 
-    // send a message
-    qval_t msg{"Hello world"};
-    qsender.sync_enq(msg,ec);
+    // kick off sender thread
+    BOOST_LOG_TRIVIAL(debug)<<"starting thread sender thread ...";
+    std::thread thr(thr_send_sync_messages,&qsender);
 
     // kick off io service
     BOOST_LOG_TRIVIAL(debug)<<"starting asio ...";
