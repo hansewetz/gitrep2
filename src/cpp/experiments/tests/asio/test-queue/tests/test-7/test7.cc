@@ -1,13 +1,3 @@
-/*
-NOTE! How should we manage serialisation by using streams instead of file descriptors?
-      It seems not possible to flush things to the other side unless we have an 'endl'
-      Maybe we should read byte by byte and assemble messages ...
-
-*/
-/*
-this program tests the 'fd_queue' in isolation
-*/
-
 #include <boost/asio_queue.hpp>
 #include <boost/log/trivial.hpp>
 #include <string>
@@ -21,6 +11,9 @@ this program tests the 'fd_queue' in isolation
 using namespace std;
 namespace asio=boost::asio;
 namespace io=boost::iostreams;
+
+// aios io service
+asio::io_service ios;
 
 // queue type
 using qval_t=string;
@@ -42,6 +35,16 @@ std::function<qval_t(istream&)>deserialiser=[](istream&is){
 using enq_t=asio::fdenq_queue<qval_t,decltype(serialiser)>;
 using deq_t=asio::fddeq_queue<qval_t,decltype(deserialiser)>;
 
+// handler for queue listener
+template<typename T>
+void qlistener_handler(boost::system::error_code const&ec,T item){
+  if(ec!=0){
+    BOOST_LOG_TRIVIAL(debug)<<"deque() aborted (via asio), ec: "<<ec.message();
+  }else{
+    BOOST_LOG_TRIVIAL(debug)<<"received item in qlistener_handler (via asio), item: "<<item<<", ec: "<<ec;
+  }
+}
+
 // test program
 int main(){
   try{
@@ -59,20 +62,21 @@ int main(){
     enq_t qin{fdwrite,serialiser};
     deq_t qout{fdread,deserialiser};
 
-    // send and receive a number of messages
-    constexpr size_t maxmsg{100};
-    for(size_t i=0;i<maxmsg;++i){
-      string msg{boost::lexical_cast<string>(i)};
+    // setup asio object
+    asio::queue_sender<enq_t>qsender(::ios,&qin);
+    asio::queue_listener<deq_t>qlistener(::ios,&qout);
 
-      // enq() an item
-      cout<<">>> \""<<msg<<"\""<<endl;
-      qin.enq(msg,ec);
+    // listen for on messages on q1 (using asio)
+    BOOST_LOG_TRIVIAL(debug)<<"starting async_deq() ...";
+    qlistener.async_deq(qlistener_handler<qval_t>);
 
-      // deq() an item
-      pair<bool,qval_t>tout{qout.deq(ec)};
-      if(!tout.first)cout<<"failed deq(), err: "<<ec.message()<<endl;
-      else cout<<"<<< \""<<tout.second<<"\""<<endl;
-    }
+    // send a message
+    qval_t msg{"Hello world"};
+    qsender.sync_enq(msg,ec);
+
+    // kick off io service
+    BOOST_LOG_TRIVIAL(debug)<<"starting asio ...";
+    ::ios.run();
   }
   catch(exception const&e){
     BOOST_LOG_TRIVIAL(error)<<"cought exception: "<<e.what();
