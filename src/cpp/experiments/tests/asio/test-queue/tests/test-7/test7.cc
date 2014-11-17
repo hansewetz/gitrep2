@@ -28,12 +28,9 @@ std::function<void(ostream&,qval_t const&)>serialiser=[](ostream&os,qval_t const
 };
 // de-serialize an object (notice: message boundaries are on '\n' characters)
 std::function<qval_t(istream&)>deserialiser=[](istream&is){
-  while(true){
-    string line;
-    getline(is,line);
-    if(line=="")break;
-    return line;
-  }
+  string line;
+  getline(is,line);
+  return line;
 };
 // queue types
 using enq_t=asio::fdenq_queue<qval_t,decltype(serialiser)>;
@@ -55,7 +52,7 @@ void qlistener_handler(boost::system::error_code const&ec,T item,asio::queue_lis
   }
 }
 // thread function sending maxmsg messages
-void thr_send_sync_messages(asio::queue_sender<enq_t>*qs){
+void thr_send_sync_messages(asio::queue_sender<enq_t>*qs,enq_t*q){
   for(int i=0;i<maxmsg;++i){
     qval_t item{boost::lexical_cast<string>(i)};
     BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
@@ -92,7 +89,7 @@ int main(){
 
     // kick off sender thread
     BOOST_LOG_TRIVIAL(debug)<<"starting thread sender thread ...";
-    std::thread thr(thr_send_sync_messages,&qsender);
+    std::thread thr(thr_send_sync_messages,&qsender,&qin);
 
     // kick off io service
     BOOST_LOG_TRIVIAL(debug)<<"starting asio ...";

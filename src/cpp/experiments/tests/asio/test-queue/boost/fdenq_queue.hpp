@@ -12,8 +12,8 @@ NOTE!
 namespace boost{
 namespace asio{
 
-// a simple thread safe queue allowing enq()  - output is sent via a file descriptor
-// (the enqueued object is serialised through the write file descriptor)
+// a simple queue based on sending messages separated by '\n'
+// (if sending objects first serialise the object, the base64 encode it in the serialiser)
 template<typename T,typename SERIAL>
 class fdenq_queue{
 public:
@@ -48,6 +48,10 @@ public:
   // wait until we can retrieve a message from queue -  timeout if waiting too long
   bool timed_wait_enq(std::size_t ms,boost::system::error_code&ec){
     // NOTE! Not yet done
+  }
+  // get file descriptor utility functions
+  int getfd()const{
+    return fdwrite_;
   }
 private:
   // queue state

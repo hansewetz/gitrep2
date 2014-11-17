@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <list>
+#include <iostream>
 #include <utility>
 #include <fstream>
 #include <memory>
@@ -17,6 +18,8 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
 
 namespace boost{
 namespace asio{
@@ -25,6 +28,7 @@ namespace queue_support{
 
 namespace fs=boost::filesystem;
 namespace ipc=boost::interprocess;
+namespace io=boost::iostreams;
 
 namespace{
 // get all filenames in time sorted order in a dircetory
@@ -76,6 +80,16 @@ T read(fs::path const&fullpath,DESER deser){
   is.close();
   std::remove(fullpath.string().c_str());
   return ret;
+}
+// get an ostream from a file descriptor
+std::shared_ptr<std::ostream>makefd_ostream(int fd,bool close){
+  return std::shared_ptr<std::ostream>(
+    new std::ostream(new io::stream_buffer<io::file_descriptor_sink>(fd,close?io::close_handle:io::never_close_handle)));
+}
+// get an istream from a file descriptor
+std::shared_ptr<std::istream>makefd_istream(int fd,bool close){
+  return std::shared_ptr<std::istream>(
+    new std::istream(new io::stream_buffer<io::file_descriptor_source>(fd,close?io::close_handle:io::never_close_handle)));
 }
 }
 }
