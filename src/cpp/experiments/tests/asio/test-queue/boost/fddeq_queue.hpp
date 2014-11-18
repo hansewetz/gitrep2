@@ -41,7 +41,7 @@ public:
   using value_type=T;
 
   // ctors,assign,dtor
-  fddeq_queue(int fdread,DESER deser,int sep=NEWLINE):fdread_(fdread),deser_(deser),hasbuf_{false},sep_{sep}{}
+  fddeq_queue(int fdread,DESER deser,int sep=NEWLINE):fdread_(fdread),deser_(deser),sep_{sep}{}
   fddeq_queue(fddeq_queue const&)=delete;
   fddeq_queue(fddeq_queue&&)=default;
   fddeq_queue&operator=(fddeq_queue const&)=delete;
@@ -86,18 +86,6 @@ private:
     std::stringstream strstrm;        // collect read chars in a stringstream
     bool firsttime{true};             // track if this is the first time we call select
 
-    // if we are only checking for timeout, then first check if we havebuffer
-    if(!getMsg&&hasbuf_){
-      // no timeout - we have a message waiting
-      ec= boost::system::error_code{};
-      return T{};
-    }
-    // check if we already have a character buffered - if so, save character in buffer
-    if(hasbuf_){
-      hasbuf_=false;
-      strstrm<<buf_;
-      firsttime=false;
-    }
     // loop until we have a message (or until we timeout)
     while(true){
       // setup to listen on fd descriptor
@@ -120,7 +108,7 @@ private:
 
       // check for error
       if(n<0){
-        ec=boost::asio::error::timed_out;
+        ec=boost::system::error_code(errno,boost::system::get_posix_category());
         return T{};
       }
       // check for tmo
@@ -130,22 +118,21 @@ private:
       }
       // check if we got some data
       if(FD_ISSET(fdread_,&input)){
+        // if we are only checking if we have a message we are done here
+        if(!getMsg){
+          ec= boost::system::error_code{};
+          return T{};
+        }
         // read up to '\n' inclusive
         ssize_t count{0};
         while(true){
+          // read next character in message
           char c;
           ssize_t stat;
           while((stat=::read(fdread_,&c,1))==EINTR){}
           if(stat!=1){
             // create a boost::system::error_code from errno
             ec=boost::system::error_code(errno,boost::system::get_posix_category());
-            return T{};
-          }
-          // check if we are only checking for tmo
-          if(!getMsg){
-            hasbuf_=true;
-            buf_=c;
-            ec= boost::system::error_code{};
             return T{};
           }
           // save character just read
@@ -165,8 +152,6 @@ private:
   // queue state
   int fdread_;                           // file descriptors to read from from
   DESER deser_;                          // de-serialiser
-  bool hasbuf_;                          // has a character in a buffer which must be taken into account when reading next message
-  char buf_;                             // character which must be be the first character in next message
   int sep_;                              // message separator
 };
 }
