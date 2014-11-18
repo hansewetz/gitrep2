@@ -30,14 +30,14 @@ template<typename T,typename DESER>
 class fddeq_queue{
 public:
   // default message separaor
-  constexpr static int NEWLINE='\n';
+  constexpr static char NEWLINE='\n';
 
   // typedef for value stored in queue
   // (need this so we can create an item with default ctor)
   using value_type=T;
 
   // ctors,assign,dtor
-  fddeq_queue(int fdread,DESER deser,int sep=NEWLINE):fdread_(fdread),deser_(deser),sep_{sep}{}
+  fddeq_queue(int fdread,DESER deser,char sep=NEWLINE):fdread_(fdread),deser_(deser),sep_{sep}{}
   fddeq_queue(fddeq_queue const&)=delete;
   fddeq_queue(fddeq_queue&&)=default;
   fddeq_queue&operator=(fddeq_queue const&)=delete;
@@ -148,7 +148,7 @@ private:
   // queue state
   int fdread_;                           // file descriptors to read from from
   DESER deser_;                          // de-serialiser
-  int sep_;                              // message separator
+  char sep_;                             // message separator
 };
 }
 }
