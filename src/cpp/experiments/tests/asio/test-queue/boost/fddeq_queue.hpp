@@ -1,12 +1,8 @@
 /* NOTE!
 
-TODO
-	- we should have two timeouts
-		- message arrival timeout
-		- message reception timeout (#ms between bytes arriving while reading message)
 
 IMPROVEMENTS:
-	- add blocking/non-blocking calls for deq operations
+	- we should have two timeouts, message timeout, byte timeout
 	- read more than one character at a time ... must then buffer what we have read
 	- add option to include newline or not include it in sent message on receiver side, we should not include newline in message
 

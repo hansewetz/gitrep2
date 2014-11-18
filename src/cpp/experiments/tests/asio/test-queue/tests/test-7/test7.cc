@@ -98,7 +98,7 @@ int main(){
     asio::queue_sender<enq_t>qsender(::ios,&qin);
     asio::queue_listener<deq_t>qlistener(::ios,&qout);
 
-    // wait until a message is available for at most 100ms
+    // wait for at most 100ms for a message to become available
     BOOST_LOG_TRIVIAL(debug)<<"starting waiting for asio message ...";
     qlistener.timed_async_wait_deq(std::bind(qlistener_waiter_handler<qval_t>,_1,&qlistener),1100);
 
