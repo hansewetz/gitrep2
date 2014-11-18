@@ -7,7 +7,7 @@ TODO
 
 IMPROVEMENTS:
 	- add blocking/non-blocking calls for deq operations
-	- read more than one character at a time ... must then save chars after '\n' so we won;t miss any
+	- read more than one character at a time ... must then buffer what we have read
 	- make message separator variable in ctor (default '\n')
 	- add option to include newline or not include it in sent message on receiver side, we should not include newline in message
 
@@ -34,12 +34,15 @@ namespace asio{
 template<typename T,typename DESER>
 class fddeq_queue{
 public:
+  // default message separaor
+  constexpr static int NEWLINE='\n';
+
   // typedef for value stored in queue
   // (need this so we can create an item with default ctor)
   using value_type=T;
 
   // ctors,assign,dtor
-  fddeq_queue(int fdread,DESER deser):fdread_(fdread),deser_(deser),hasbuf_{false}{}
+  fddeq_queue(int fdread,DESER deser,int sep=NEWLINE):fdread_(fdread),deser_(deser),hasbuf_{false},sep_{sep}{}
   fddeq_queue(fddeq_queue const&)=delete;
   fddeq_queue(fddeq_queue&&)=default;
   fddeq_queue&operator=(fddeq_queue const&)=delete;
@@ -61,13 +64,15 @@ public:
   // wait until we can retrieve a message from queue
   bool wait_deq(boost::system::error_code&ec){
     deserialize(0,ec,false);
-    if(ec==boost::asio::error::timed_out)return false;
     if(ec.value()!=0)return false;
     return true;
   }
   // wait until we can retrieve a message from queue -  timeout if waiting too long
   bool timed_wait_deq(std::size_t ms,boost::system::error_code&ec){
-    // NOTE! Not yet done
+    deserialize(ms,ec,false);
+    if(ec==boost::asio::error::timed_out)return false;
+    if(ec.value()!=0)return false;
+    return true;
   }
   // get file descriptor utility functions
   // (note: be carefulll when using - never close the fd unless you know no operation is in progress)
@@ -148,7 +153,7 @@ private:
           strstrm<<c;
 
           // if we reached newline, send message including newline)
-          if(c==NEWLINE){
+          if(c==sep_){
             return deser_(strstrm);
           }
         }
@@ -163,7 +168,7 @@ private:
   DESER deser_;                          // de-serialiser
   bool hasbuf_;                          // has a character in a buffer which must be taken into account when reading next message
   char buf_;                             // character which must be be the first character in next message
-  constexpr static int NEWLINE='\n';
+  int sep_;                              // message separator
 };
 }
 }

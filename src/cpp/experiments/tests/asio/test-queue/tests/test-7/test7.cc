@@ -64,6 +64,10 @@ void qlistener_waiter_handler(boost::system::error_code const&ec,asio::queue_lis
 }
 // thread function sending maxmsg messages
 void thr_send_sync_messages(asio::queue_sender<enq_t>*qs,enq_t*q){
+  // wait and send messages for 1 second
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+  // send messages
   for(int i=0;i<maxmsg;++i){
     qval_t item{string{"Message: "}+boost::lexical_cast<string>(i)};
     BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
@@ -94,9 +98,9 @@ int main(){
     asio::queue_sender<enq_t>qsender(::ios,&qin);
     asio::queue_listener<deq_t>qlistener(::ios,&qout);
 
-    // listen for on messages on q1 (using asio)
+    // wait until a message is available for at most 100ms
     BOOST_LOG_TRIVIAL(debug)<<"starting waiting for asio message ...";
-    qlistener.async_wait_deq(std::bind(qlistener_waiter_handler<qval_t>,_1,&qlistener));
+    qlistener.timed_async_wait_deq(std::bind(qlistener_waiter_handler<qval_t>,_1,&qlistener),1100);
 
     // kick off sender thread
     BOOST_LOG_TRIVIAL(debug)<<"starting thread sender thread ...";
