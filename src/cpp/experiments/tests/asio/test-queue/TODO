@@ -1,8 +1,8 @@
 === improvements ===
 
- - NOTE! Write an fdenq_queue class - which allows enquing and serialising out to an fd
+ - copy new fd queues to library ones they have been tested
 
- - change disrectory structure so we have boost/asio instead of boost/*
+ - change disrectory structure so we have boost/asio instead of boost-extensions/*
 
  - change std::size_t ms --> chrono time
 
@@ -14,4 +14,4 @@
 === new queues ===
 - implement 'socket_queue' (can be used to talk across machines)
 
-- implement 'fd_queue' (can be use to talk to moses when item type is 'string')
+- implement 'shareddier_queue' for queues on shared dierctories

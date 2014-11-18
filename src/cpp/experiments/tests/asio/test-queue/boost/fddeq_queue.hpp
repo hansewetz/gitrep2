@@ -1,5 +1,7 @@
 /* NOTE!
 
+IMPORTANT:
+	- add abiity to cancel an operation
 
 IMPROVEMENTS:
 	- we should have two timeouts, message timeout, byte timeout
