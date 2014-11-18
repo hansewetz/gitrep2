@@ -5,12 +5,8 @@ TODO
 		- message arrival timeout
 		- message reception timeout (#ms between bytes arriving while reading message)
 
-
-	- wait to add blocking of queue.
-		- Implement everything else first
-
-
 IMPROVEMENTS:
+	- add blocking/non-blocking calls for deq operations
 	- read more than one character at a time ... must then save chars after '\n' so we won;t miss any
 	- make message separator variable in ctor (default '\n')
 	- add option to include newline or not include it in sent message on receiver side, we should not include newline in message
@@ -52,19 +48,19 @@ public:
   
   // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(boost::system::error_code&ec){
-    T ret{deserialize(0,ec,false)};
+    T ret{deserialize(0,ec,true)};
     if(ec!=boost::system::error_code())return std::make_pair(false,ret);
     return make_pair(true,ret);
   }
   // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
   std::pair<bool,T>timed_deq(std::size_t ms,boost::system::error_code&ec){
-    T ret{deserialize(ms,ec,false)};
+    T ret{deserialize(ms,ec,true)};
     if(ec!=boost::system::error_code())return std::make_pair(false,ret);
     return make_pair(true,ret);
   }
   // wait until we can retrieve a message from queue
   bool wait_deq(boost::system::error_code&ec){
-    deserialize(0,ec,true);
+    deserialize(0,ec,false);
     if(ec==boost::asio::error::timed_out)return false;
     if(ec.value()!=0)return false;
     return true;
@@ -81,13 +77,13 @@ public:
 private:
   // deserialise an object from an fd stream
   // or wait until there is a message to read - in this case, a default cibstructed object is returned
-  T deserialize(std::size_t ms,boost::system::error_code&ec,bool checkMsg){
+  T deserialize(std::size_t ms,boost::system::error_code&ec,bool getMsg){
     T ret;                            // return value from this function (default ctor if no error)
     std::stringstream strstrm;        // collect read chars in a stringstream
     bool firsttime{true};             // track if this is the first time we call select
 
     // if we are only checking for timeout, then first check if we havebuffer
-    if(checkMsg&&hasbuf_){
+    if(!getMsg&&hasbuf_){
       // no timeout - we have a message waiting
       ec= boost::system::error_code{};
       return T{};
@@ -142,7 +138,7 @@ private:
             return T{};
           }
           // check if we are only checking for tmo
-          if(checkMsg){
+          if(!getMsg){
             hasbuf_=true;
             buf_=c;
             ec= boost::system::error_code{};

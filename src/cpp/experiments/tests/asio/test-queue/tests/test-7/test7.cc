@@ -65,7 +65,7 @@ void qlistener_waiter_handler(boost::system::error_code const&ec,asio::queue_lis
 // thread function sending maxmsg messages
 void thr_send_sync_messages(asio::queue_sender<enq_t>*qs,enq_t*q){
   for(int i=0;i<maxmsg;++i){
-    qval_t item{boost::lexical_cast<string>(i)};
+    qval_t item{string{"Message: "}+boost::lexical_cast<string>(i)};
     BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
     boost::system::error_code ec;
     qs->sync_enq(item,ec);
