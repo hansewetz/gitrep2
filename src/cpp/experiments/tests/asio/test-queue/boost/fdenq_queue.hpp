@@ -43,14 +43,6 @@ public:
   // enqueue a message (return.first == false if enq() was disabled)
   bool enq(T t,boost::system::error_code&ec){
     return this->send(t,0,ec,true);
-
-/*
-    // create an output stream from fdwrite, serialise object into stream
-    std::shared_ptr<std::ostream>os{detail::queue_support::makefd_ostream(fdwrite_,false)};
-    serial_(*os,t);
-    *os<<std::endl;
-    return true;
-*/
   }
   // enqueue a message (return.first == false if enq() was disabled) - timeout if waiting too long
   bool timed_enq(T t,std::size_t ms,boost::system::error_code&ec){
