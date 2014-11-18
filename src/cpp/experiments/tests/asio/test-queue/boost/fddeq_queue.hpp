@@ -8,7 +8,6 @@ TODO
 IMPROVEMENTS:
 	- add blocking/non-blocking calls for deq operations
 	- read more than one character at a time ... must then buffer what we have read
-	- make message separator variable in ctor (default '\n')
 	- add option to include newline or not include it in sent message on receiver side, we should not include newline in message
 
 TESTING:
