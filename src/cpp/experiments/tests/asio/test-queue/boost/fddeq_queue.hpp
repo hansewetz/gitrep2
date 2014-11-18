@@ -52,19 +52,22 @@ public:
   
   // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(boost::system::error_code&ec){
-    T ret{deserialize(0,ec)};
+    T ret{deserialize(0,ec,false)};
     if(ec!=boost::system::error_code())return std::make_pair(false,ret);
     return make_pair(true,ret);
   }
   // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
   std::pair<bool,T>timed_deq(std::size_t ms,boost::system::error_code&ec){
-    T ret{deserialize(ms,ec)};
+    T ret{deserialize(ms,ec,false)};
     if(ec!=boost::system::error_code())return std::make_pair(false,ret);
     return make_pair(true,ret);
   }
   // wait until we can retrieve a message from queue
   bool wait_deq(boost::system::error_code&ec){
-    // NOTE! Not yet done
+    deserialize(0,ec,true);
+    if(ec==boost::asio::error::timed_out)return false;
+    if(ec.value()!=0)return false;
+    return true;
   }
   // wait until we can retrieve a message from queue -  timeout if waiting too long
   bool timed_wait_deq(std::size_t ms,boost::system::error_code&ec){
@@ -77,14 +80,20 @@ public:
   }
 private:
   // deserialise an object from an fd stream
-  T deserialize(std::size_t ms,boost::system::error_code&ec){
+  // or wait until there is a message to read - in this case, a default cibstructed object is returned
+  T deserialize(std::size_t ms,boost::system::error_code&ec,bool checkMsg){
     T ret;                            // return value from this function (default ctor if no error)
     std::stringstream strstrm;        // collect read chars in a stringstream
     bool firsttime{true};             // track if this is the first time we call select
 
-    // check if we already have a character buffered
+    // if we are only checking for timeout, then first check if we havebuffer
+    if(checkMsg&&hasbuf_){
+      // no timeout - we have a message waiting
+      ec= boost::system::error_code{};
+      return T{};
+    }
+    // check if we already have a character buffered - if so, save character in buffer
     if(hasbuf_){
-      // save character, reset buffer and set that this is not the first time
       hasbuf_=false;
       strstrm<<buf_;
       firsttime=false;
@@ -130,6 +139,13 @@ private:
           if(stat!=1){
             // create a boost::system::error_code from errno
             ec=boost::system::error_code(errno,boost::system::get_posix_category());
+            return T{};
+          }
+          // check if we are only checking for tmo
+          if(checkMsg){
+            hasbuf_=true;
+            buf_=c;
+            ec= boost::system::error_code{};
             return T{};
           }
           // save character just read

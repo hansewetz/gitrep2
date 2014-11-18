@@ -52,6 +52,16 @@ void qlistener_handler(boost::system::error_code const&ec,T item,asio::queue_lis
     ql->timed_async_deq(std::bind(qlistener_handler<T>,_1,_2,ql),tmo_ms);
   }
 }
+// handler for waiting for queue message
+template<typename T>
+void qlistener_waiter_handler(boost::system::error_code const&ec,asio::queue_listener<deq_t>*ql){
+  if(ec!=0){
+    BOOST_LOG_TRIVIAL(debug)<<"deque() aborted (via asio), ec: "<<ec.message();
+  }else{
+    BOOST_LOG_TRIVIAL(debug)<<"an asio message waiting ...";
+    ql->timed_async_deq(std::bind(qlistener_handler<T>,_1,_2,ql),tmo_ms);
+  }
+}
 // thread function sending maxmsg messages
 void thr_send_sync_messages(asio::queue_sender<enq_t>*qs,enq_t*q){
   for(int i=0;i<maxmsg;++i){
@@ -85,8 +95,8 @@ int main(){
     asio::queue_listener<deq_t>qlistener(::ios,&qout);
 
     // listen for on messages on q1 (using asio)
-    BOOST_LOG_TRIVIAL(debug)<<"starting async_deq() ...";
-    qlistener.timed_async_deq(std::bind(qlistener_handler<qval_t>,_1,_2,&qlistener),tmo_ms);
+    BOOST_LOG_TRIVIAL(debug)<<"starting waiting for asio message ...";
+    qlistener.async_wait_deq(std::bind(qlistener_waiter_handler<qval_t>,_1,&qlistener));
 
     // kick off sender thread
     BOOST_LOG_TRIVIAL(debug)<<"starting thread sender thread ...";
