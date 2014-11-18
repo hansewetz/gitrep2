@@ -40,6 +40,7 @@ using deq_t=asio::fddeq_queue<qval_t,decltype(deserialiser)>;
 
 // some constants
 constexpr size_t maxmsg{10};
+constexpr size_t tmo_ms{2000};
 
 // handler for queue listener
 template<typename T>
@@ -48,7 +49,7 @@ void qlistener_handler(boost::system::error_code const&ec,T item,asio::queue_lis
     BOOST_LOG_TRIVIAL(debug)<<"deque() aborted (via asio), ec: "<<ec.message();
   }else{
     BOOST_LOG_TRIVIAL(debug)<<"received item in qlistener_handler (via asio), item: "<<item<<", ec: "<<ec;
-    ql->async_deq(std::bind(qlistener_handler<T>,_1,_2,ql));
+    ql->timed_async_deq(std::bind(qlistener_handler<T>,_1,_2,ql),tmo_ms);
   }
 }
 // thread function sending maxmsg messages
@@ -85,7 +86,7 @@ int main(){
 
     // listen for on messages on q1 (using asio)
     BOOST_LOG_TRIVIAL(debug)<<"starting async_deq() ...";
-    qlistener.async_deq(std::bind(qlistener_handler<qval_t>,_1,_2,&qlistener));
+    qlistener.timed_async_deq(std::bind(qlistener_handler<qval_t>,_1,_2,&qlistener),tmo_ms);
 
     // kick off sender thread
     BOOST_LOG_TRIVIAL(debug)<<"starting thread sender thread ...";
@@ -94,6 +95,15 @@ int main(){
     // kick off io service
     BOOST_LOG_TRIVIAL(debug)<<"starting asio ...";
     ::ios.run();
+
+    // join thread
+    BOOST_LOG_TRIVIAL(debug)<<"joining thread ...";
+    if(thr.joinable())thr.join();
+
+    // cleanup
+    BOOST_LOG_TRIVIAL(debug)<<"closing fds ...";
+    close(fdwrite);
+    close(fdread);
   }
   catch(exception const&e){
     BOOST_LOG_TRIVIAL(error)<<"cought exception: "<<e.what();

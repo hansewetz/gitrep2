@@ -1,11 +1,22 @@
 /* NOTE!
 
-- handle tmo correctly
-- read more than one character at a time ... must then save chars after '\n' so we won;t miss any
-- make message separator variable in ctor (default '\n')
-- add option to include newline or not include it in sent message
-  on receiver side, we should not include newline in message
-- test with serializing real object and base64 encode them
+TODO
+	- we should have two timeouts
+		- message arrival timeout
+		- message reception timeout (#ms between bytes arriving while reading message)
+
+
+	- wait to add blocking of queue.
+		- Implement everything else first
+
+
+IMPROVEMENTS:
+	- read more than one character at a time ... must then save chars after '\n' so we won;t miss any
+	- make message separator variable in ctor (default '\n')
+	- add option to include newline or not include it in sent message on receiver side, we should not include newline in message
+
+TESTING:
+	- test with serializing real object and base64 encode them
 
 */
 
@@ -22,6 +33,8 @@ namespace asio{
 
 // a simple queue based on sending messages separated by '\n'
 // (if sending objects first serialise the object, the base64 encode it in the serialiser)
+// (the tmo in ms is based on message timeout - if no message starts arriving within timeout, the function times out)
+// (ones we have started to read a message, the message will never timeout)
 template<typename T,typename DESER>
 class fddeq_queue{
 public:
@@ -30,7 +43,7 @@ public:
   using value_type=T;
 
   // ctors,assign,dtor
-  fddeq_queue(int fdread,DESER deser):fdread_(fdread),deser_(deser){}
+  fddeq_queue(int fdread,DESER deser):fdread_(fdread),deser_(deser),hasbuf_{false}{}
   fddeq_queue(fddeq_queue const&)=delete;
   fddeq_queue(fddeq_queue&&)=default;
   fddeq_queue&operator=(fddeq_queue const&)=delete;
@@ -45,7 +58,9 @@ public:
   }
   // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
   std::pair<bool,T>timed_deq(std::size_t ms,boost::system::error_code&ec){
-    // NOTE! Not yet done
+    T ret{deserialize(ms,ec)};
+    if(ec!=boost::system::error_code())return std::make_pair(false,ret);
+    return make_pair(true,ret);
   }
   // wait until we can retrieve a message from queue
   bool wait_deq(boost::system::error_code&ec){
@@ -66,6 +81,15 @@ private:
     T ret;                            // return value from this function (default ctor if no error)
     std::stringstream strstrm;        // collect read chars in a stringstream
     bool firsttime{true};             // track if this is the first time we call select
+
+    // check if we already have a character buffered
+    if(hasbuf_){
+      // save character, reset buffer and set that this is not the first time
+      hasbuf_=false;
+      strstrm<<buf_;
+      firsttime=false;
+    }
+    // loop until we have a message (or until we timeout)
     while(true){
       // setup to listen on fd descriptor
       fd_set input;
@@ -73,7 +97,7 @@ private:
       FD_SET(fdread_,&input);
       int maxfd=fdread_;
 
-      // setup for timeout
+      // setup for timeout (ones we get a message we don't timeout)
       struct timeval tmo;
       if(firsttime&&ms>0){
         // set timeout in select statement
@@ -125,6 +149,8 @@ private:
   // queue state
   int fdread_;                           // file descriptors to read from from
   DESER deser_;                          // de-serialiser
+  bool hasbuf_;                          // has a character in a buffer which must be taken into account when reading next message
+  char buf_;                             // character which must be be the first character in next message
   constexpr static int NEWLINE='\n';
 };
 }
