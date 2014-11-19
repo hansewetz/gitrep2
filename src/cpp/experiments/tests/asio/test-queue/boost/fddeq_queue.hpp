@@ -1,8 +1,5 @@
 /* NOTE!
 
-IMPORTANT:
-	- add abiity to cancel an operation
-
 IMPROVEMENTS:
 	- we should have two timeouts, message timeout, byte timeout
 	- read more than one character at a time ... must then buffer what we have read
@@ -28,6 +25,7 @@ namespace asio{
 // (if sending objects first serialise the object, the base64 encode it in the serialiser)
 // (the tmo in ms is based on message timeout - if no message starts arriving within timeout, the function times out)
 // (ones we have started to read a message, the message will never timeout)
+// (the class is meant to be used in singele threaded mode and is not thread safe)
 template<typename T,typename DESER>
 class fddeq_queue{
 public:

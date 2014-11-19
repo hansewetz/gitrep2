@@ -14,6 +14,15 @@ using namespace std::placeholders;
 namespace asio=boost::asio;
 namespace io=boost::iostreams;
 
+// ----- some constants -----
+namespace {
+size_t msgcount{0};
+constexpr size_t maxmsg{10000};
+constexpr size_t tmo_deq_ms{2000};
+constexpr size_t tmo_enq_ms{1000};
+constexpr size_t tmo_between_send{10};
+}
+
 // ----- queue types -----
 
 // aios io service
@@ -37,14 +46,6 @@ using enq_t=asio::fdenq_queue<qval_t,decltype(serialiser)>;
 using deq_t=asio::fddeq_queue<qval_t,decltype(deserialiser)>;
 
 //  ------ asio objects, sender, callback handler etc. ---
-
-// some constants
-namespace {
-size_t msgcount{0};
-constexpr size_t maxmsg{10};
-constexpr size_t tmo_deq_ms{2000};
-constexpr size_t tmo_enq_ms{1000};
-}
 
 // handler for queue listener
 template<typename T>
@@ -78,7 +79,7 @@ void qsender_handler(boost::system::error_code const&ec,asio::queue_sender<enq_t
     qval_t newmsg{boost::lexical_cast<string>(msgcount++)};
     BOOST_LOG_TRIVIAL(debug)<<"sending message: \""<<newmsg<<"\"";
     qs->timed_async_enq(newmsg,std::bind(qsender_handler,_1,qs),tmo_enq_ms);
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    std::this_thread::sleep_for(std::chrono::milliseconds(tmo_between_send));
   }
 }
 // handler for waiting for starting sending messages

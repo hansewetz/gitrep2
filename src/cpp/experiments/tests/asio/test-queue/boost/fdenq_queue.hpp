@@ -1,8 +1,5 @@
 /* NOTE!
 
-IMPORTANT:
-	- add abiity to cancel an operation
-
 IMPROVEMENTS:
 	- we should have two timeouts, message timeout, byte timeout
 	- read more than one character at a time ... must then buffer what we have read
@@ -23,8 +20,11 @@ TESTING:
 namespace boost{
 namespace asio{
 
-// a simple queue based on sending messages separated by '\n'
-// (if sending objects first serialise the object, the base64 encode it in the serialiser)
+// a simple queue based on receiving messages separated by '\n'
+// (if recieving objects which are serialised, they should have been serialised and then encoded)
+// (the tmo in ms is based on message timeout - if no message starts arriving within timeout, the function times out)
+// (ones we have started to send a message, the message will never timeout)
+// (the class is meant to be used in singele threaded mode and is not thread safe)
 template<typename T,typename SERIAL>
 class fdenq_queue{
 public:
