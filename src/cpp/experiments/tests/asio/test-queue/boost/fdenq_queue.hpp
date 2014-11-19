@@ -1,9 +1,10 @@
-/* NOTE!
+/* TODO
+
+CANCELLATION: it's not clear how cancellation would be implemented - for right now I'll skip it
 
 IMPROVEMENTS:
 	- we should have two timeouts, message timeout, byte timeout
 	- read more than one character at a time ... must then buffer what we have read
-	- add option to include newline or not include it in sent message on receiver side, we should not include newline in message
 	- maybe we should createa stream and serialise directoy into fd - we would have problems with tmos though ...
 
 TESTING:
@@ -28,11 +29,11 @@ namespace asio{
 template<typename T,typename SERIAL>
 class fdenq_queue{
 public:
-  // default message separaor
-  constexpr static char NEWLINE='\n';
-
   // typedef for value stored in queue
   using value_type=T;
+
+  // default message separaor
+  constexpr static char NEWLINE='\n';
 
   // ctors,assign,dtor
   fdenq_queue(int fdwrite,SERIAL serial,char sep=NEWLINE):fdwrite_(fdwrite),serial_(serial),sep_(sep){}
@@ -58,7 +59,7 @@ public:
   bool timed_wait_enq(std::size_t ms,boost::system::error_code&ec){
     return this->sendwait(nullptr,ms,ec,false);
   }
-  // get file descriptor utility functions
+  // get underlying file descriptor
   int getfd()const{
     return fdwrite_;
   }
@@ -70,7 +71,7 @@ private:
     bool firsttime{true};             // track if this is the first time we call select
 
     // serialise object and get it as a string
-    // (no need if we don;t need to send object)
+    // (no need if we don't need to send object)
     std::string str;
     if(sendMsg){
       serial_(strstrm,*t);

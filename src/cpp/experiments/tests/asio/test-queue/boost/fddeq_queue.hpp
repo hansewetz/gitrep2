@@ -1,9 +1,10 @@
-/* NOTE!
+/* TODO
+
+CANCELLATION: it's not clear how cancellation would be implemented - for right now I'll skip it
 
 IMPROVEMENTS:
 	- we should have two timeouts, message timeout, byte timeout
 	- read more than one character at a time ... must then buffer what we have read
-	- add option to include newline or not include it in sent message on receiver side, we should not include newline in message
 
 TESTING:
 	- test with serializing real object and base64 encode them
@@ -29,12 +30,11 @@ namespace asio{
 template<typename T,typename DESER>
 class fddeq_queue{
 public:
+  // typedef for value stored in queue
+  using value_type=T;
+
   // default message separaor
   constexpr static char NEWLINE='\n';
-
-  // typedef for value stored in queue
-  // (need this so we can create an item with default ctor)
-  using value_type=T;
 
   // ctors,assign,dtor
   fddeq_queue(int fdread,DESER deser,char sep=NEWLINE):fdread_(fdread),deser_(deser),sep_{sep}{}
@@ -69,8 +69,7 @@ public:
     if(ec.value()!=0)return false;
     return true;
   }
-  // get file descriptor utility functions
-  // (note: be carefulll when using - never close the fd unless you know no operation is in progress)
+  // get underlying file descriptor
   int getfd()const{
     return fdread_;
   }
