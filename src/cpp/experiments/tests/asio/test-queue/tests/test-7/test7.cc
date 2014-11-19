@@ -12,12 +12,12 @@
 using namespace std;
 using namespace std::placeholders;
 namespace asio=boost::asio;
-namespace io=boost::iostreams;
+//namespace io=boost::iostreams;
 
 // ----- some constants -----
 namespace {
 size_t msgcount{0};
-constexpr size_t maxmsg{10000};
+constexpr size_t maxmsg{10};
 constexpr size_t tmo_deq_ms{2000};
 constexpr size_t tmo_enq_ms{1000};
 constexpr size_t tmo_between_send{10};
