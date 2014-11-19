@@ -13,9 +13,10 @@ TESTING:
 
 #ifndef __FDDEQ_QUEUE_H__
 #define __FDDEQ_QUEUE_H__
-#include "detail/queue_support.hpp"
+//#include "detail/queue_support.hpp"
 #include <utility>
 #include <iostream>
+#include <string>
 #include <sstream>
 #include <unistd.h>
 
@@ -37,12 +38,12 @@ public:
   constexpr static char NEWLINE='\n';
 
   // ctors,assign,dtor
-  fddeq_queue(int fdread,DESER deser,char sep=NEWLINE):fdread_(fdread),deser_(deser),sep_{sep}{}
+  fddeq_queue(int fdread,DESER deser,bool closeOnExit=false,char sep=NEWLINE):fdread_(fdread),deser_(deser),sep_{sep},closeOnExit_(closeOnExit){}
   fddeq_queue(fddeq_queue const&)=delete;
   fddeq_queue(fddeq_queue&&)=default;
   fddeq_queue&operator=(fddeq_queue const&)=delete;
   fddeq_queue&operator=(fddeq_queue&&)=default;
-  ~fddeq_queue()=default;
+  ~fddeq_queue(){if(closeOnExit_)detail::queue_support::eclose(fdread_,false);}
   
   // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(boost::system::error_code&ec){
@@ -144,6 +145,7 @@ private:
   int fdread_;                           // file descriptors to read from from
   DESER deser_;                          // de-serialiser
   char sep_;                             // message separator
+  bool closeOnExit_;                     // close fd on exit
 };
 }
 }

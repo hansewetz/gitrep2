@@ -9,8 +9,10 @@
 #include <utility>
 #include <fstream>
 #include <memory>
+#include <stdexcept>
 #include <errno.h>
 #include <fcntl.h>
+#include <string.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
@@ -80,6 +82,17 @@ T read(fs::path const&fullpath,DESER deser){
   is.close();
   std::remove(fullpath.string().c_str());
   return ret;
+}
+// close a file descriptor
+int eclose(int fd,bool throwExcept){
+  while(close(fd)<0&&errno==EINTR);
+  if(errno&&throwExcept){
+    std::string err{strerror(errno)};
+    char buf[1024];
+    ::strerror_r(errno,buf,1024);
+    throw std::runtime_error(std::string("eclose: failed closing fd:" )+buf);
+  }
+  return errno;
 }
 }
 }

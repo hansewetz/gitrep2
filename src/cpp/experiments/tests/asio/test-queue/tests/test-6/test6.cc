@@ -21,20 +21,20 @@ namespace asio= boost::asio;
 namespace fs=boost::filesystem;
 
 // test queue item
-class Junk{
+class Message{
 public:
-  friend ostream&operator<<(ostream&os,Junk const&junk){
+  friend ostream&operator<<(ostream&os,Message const&junk){
     os<<junk.s_<<" "<<junk.i_;
   }
-  friend istream&operator>>(istream&is,Junk&junk){
+  friend istream&operator>>(istream&is,Message&junk){
     is>>junk.s_>>junk.i_;
   }
-  Junk()=default;
-  Junk(string const&s,int i):s_(s),i_(i){}
-  Junk(Junk const&)=default;
-  Junk(Junk&&)=default;
-  Junk&operator=(Junk const&)=default;
-  Junk&operator=(Junk&&)=default;
+  Message()=default;
+  Message(string const&s,int i):s_(s),i_(i){}
+  Message(Message const&)=default;
+  Message(Message&&)=default;
+  Message&operator=(Message const&)=default;
+  Message&operator=(Message&&)=default;
 private:
   string s_;
   int i_;
@@ -44,9 +44,9 @@ size_t tmo_ms{3000};
 
 // value type in queues
 // (must work with operator<< and operator>>, and be default constructable)
-using qval_t=Junk;
+using qval_t=Message;
 
-// create a sender and listener queues (could be the same queue)
+// create sender and listener queues (could be the same queue)
 function<qval_t(istream&)>deserialiser=[](istream&is){qval_t ret;is>>ret;return ret;};
 function<void(ostream&,qval_t const&)>serialiser=[](ostream&os,qval_t const&i){os<<i;};
 string qname{"q1"};
@@ -61,7 +61,7 @@ asio::queue_listener<queue_t>qlistener(::ios,&qrecv);
 asio::queue_sender<queue_t>qsender(::ios,&qsend);
 
 // max #of messages to send/receive
-constexpr size_t maxmsg{10};
+constexpr size_t maxmsg{3};
 
 // handler for queue listener
 template<typename T>
@@ -77,7 +77,7 @@ void qlistener_handler(boost::system::error_code const&ec,T item){
 template<typename T>
 void thr_send_sync_messages(){
   for(int i=0;i<maxmsg;++i){
-    qval_t item{Junk{string("Hello")+boost::lexical_cast<string>(i),i}};
+    qval_t item{Message{string("Hello")+boost::lexical_cast<string>(i),i}};
     BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
     boost::system::error_code ec;
     qsender.sync_enq(item,ec);

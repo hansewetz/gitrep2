@@ -110,8 +110,9 @@ int main(){
 
     // create queues
     boost::system::error_code ec;
-    enq_t qin{fdwrite,serialiser};
-    deq_t qout{fdread,deserialiser};
+    bool closeFdsOnExit{true};
+    enq_t qin{fdwrite,serialiser,closeFdsOnExit};
+    deq_t qout{fdread,deserialiser,closeFdsOnExit};
 
     // setup asio object
     asio::queue_sender<enq_t>qsender(::ios,&qin);
@@ -128,11 +129,6 @@ int main(){
 
     BOOST_LOG_TRIVIAL(debug)<<"starting asio ...";
     ::ios.run();
-
-    // cleanup
-    BOOST_LOG_TRIVIAL(debug)<<"closing fds ...";
-    close(fdwrite);
-    close(fdread);
   }
   catch(exception const&e){
     BOOST_LOG_TRIVIAL(error)<<"cought exception: "<<e.what();

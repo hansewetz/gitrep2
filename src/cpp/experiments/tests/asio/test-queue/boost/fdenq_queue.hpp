@@ -15,6 +15,7 @@ TESTING:
 #ifndef __FDENQ_QUEUE_H__
 #define __FDENQ_QUEUE_H__
 #include "detail/queue_support.hpp"
+#include <string>
 #include <utility>
 #include <unistd.h>
 
@@ -36,12 +37,12 @@ public:
   constexpr static char NEWLINE='\n';
 
   // ctors,assign,dtor
-  fdenq_queue(int fdwrite,SERIAL serial,char sep=NEWLINE):fdwrite_(fdwrite),serial_(serial),sep_(sep){}
+  fdenq_queue(int fdwrite,SERIAL serial,bool closeOnExit=false,char sep=NEWLINE):fdwrite_(fdwrite),serial_(serial),sep_(sep),closeOnExit_(closeOnExit){}
   fdenq_queue(fdenq_queue const&)=delete;
   fdenq_queue(fdenq_queue&&)=default;
   fdenq_queue&operator=(fdenq_queue const&)=delete;
   fdenq_queue&operator=(fdenq_queue&&)=default;
-  ~fdenq_queue()=default;
+  ~fdenq_queue(){if(closeOnExit_)detail::queue_support::eclose(fdwrite_,false);}
   
   // enqueue a message (return.first == false if enq() was disabled)
   bool enq(T t,boost::system::error_code&ec){
@@ -140,6 +141,7 @@ private:
   int fdwrite_;                          // file descriptors serialize object tpo
   SERIAL serial_;                        // serialise
   char sep_;                             // message separator
+  bool closeOnExit_;                     // close fd on exit
 };
 }
 }

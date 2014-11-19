@@ -55,7 +55,7 @@ using deq_t=asio::fddeq_queue<string,decltype(deserialiser)>;
 // handle a message we received asynchrounosly
 void qlistener_handler(boost::system::error_code const&ec,string msg,asio::queue_listener<deq_t>*ql){
   if(ec!=0)BOOST_LOG_TRIVIAL(info)<<"deque() aborted (via asio), cause: "<<ec.message();
-  }else{
+  else{
     // kick off waiting for another message asynchrounosly
     BOOST_LOG_TRIVIAL(info)<<"received msg in qlistener_handler (via asio), msg: \""<<msg<<"\", cause: "<<ec;
     ql->timed_async_deq(std::bind(qlistener_handler,_1,_2,ql),tmo_deq_ms);
@@ -81,35 +81,34 @@ int main(){
     int fdread,fdwrite;
     int cpid=spawnPipeChild("/bin/cat",vector<string>{"cat"},fdread,fdwrite,true);
 
-    // error code from asio calls
-    boost::system::error_code ec;
+    // enclose queues in a scope so that fds are closed automatically when leaving scope
+    // (if queues are not destroyed, the child process will hang and wait for more input)
+    // (we could of course just close the fds ourselves ... by we not be lazy ...)
+    {
+      // error code from asio calls
+      boost::system::error_code ec;
 
-    // create queues
-    enq_t qsend{fdwrite,serialiser};
-    deq_t qrecv{fdread,deserialiser};
+      // create queues (sepcify to close fds on desctruction)
+      enq_t qsend{fdwrite,serialiser,true};
+      deq_t qrecv{fdread,deserialiser,true};
     
-    // setup queue sender/listener
-    asio::queue_sender<enq_t>qsender(::ios,&qsend);
-    asio::queue_listener<deq_t>qlistener(::ios,&qrecv);
+      // setup queue sender/listener
+      asio::queue_sender<enq_t>qsender(::ios,&qsend);
+      asio::queue_listener<deq_t>qlistener(::ios,&qrecv);
 
-    // kick off listening for messages asynchronously
-    BOOST_LOG_TRIVIAL(debug)<<"start sending messages asynchrounously ...";
-    string msg{boost::lexical_cast<string>(msgcount++)};
-    qsender.timed_async_enq(msg,std::bind(qsender_handler,_1,&qsender),tmo_enq_ms);
+      // kick off listening for messages asynchronously
+      BOOST_LOG_TRIVIAL(info)<<"start sending messages asynchrounously ...";
+      string msg{boost::lexical_cast<string>(msgcount++)};
+      qsender.timed_async_enq(msg,std::bind(qsender_handler,_1,&qsender),tmo_enq_ms);
 
-    // kick off sending messages asynchronously
-    BOOST_LOG_TRIVIAL(info)<<"starting waiting for asio message ...";
-    qlistener.timed_async_deq(std::bind(qlistener_handler,_1,_2,&qlistener),tmo_deq_ms);
+      // kick off sending messages asynchronously
+      BOOST_LOG_TRIVIAL(info)<<"starting waiting for asio message ...";
+      qlistener.timed_async_deq(std::bind(qlistener_handler,_1,_2,&qlistener),tmo_deq_ms);
 
-    // run asio
-    BOOST_LOG_TRIVIAL(info)<<"starting asio ...";
-    ::ios.run();
-
-    // cleanup
-    BOOST_LOG_TRIVIAL(info)<<"closing fds ...";
-    eclose(fdwrite);
-    eclose(fdread);
-
+      // run asio
+      BOOST_LOG_TRIVIAL(info)<<"starting asio ...";
+      ::ios.run();
+    }
     // wait for child
     BOOST_LOG_TRIVIAL(info)<<"waiting for child (pid: "<<cpid<<") ..."<<endl;
     int waitstat;
