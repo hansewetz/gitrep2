@@ -39,8 +39,12 @@ using deq_t=asio::fddeq_queue<qval_t,decltype(deserialiser)>;
 //  ------ asio objects, sender, callback handler etc. ---
 
 // some constants
+namespace {
+size_t msgcount{0};
 constexpr size_t maxmsg{10};
-constexpr size_t tmo_ms{2000};
+constexpr size_t tmo_deq_ms{2000};
+constexpr size_t tmo_enq_ms{1000};
+}
 
 // handler for queue listener
 template<typename T>
@@ -49,21 +53,20 @@ void qlistener_handler(boost::system::error_code const&ec,T msg,asio::queue_list
     BOOST_LOG_TRIVIAL(debug)<<"deque() aborted (via asio), ec: "<<ec.message();
   }else{
     BOOST_LOG_TRIVIAL(debug)<<"received msg in qlistener_handler (via asio), msg: \""<<msg<<"\", ec: "<<ec;
-    ql->timed_async_deq(std::bind(qlistener_handler<T>,_1,_2,ql),tmo_ms);
+    ql->timed_async_deq(std::bind(qlistener_handler<T>,_1,_2,ql),tmo_deq_ms);
   }
 }
-// handler for waiting for queue message
+// handler for waiting for starting to listen to messages
 template<typename T>
 void qlistener_waiter_handler(boost::system::error_code const&ec,asio::queue_listener<deq_t>*ql){
   if(ec!=0){
-    BOOST_LOG_TRIVIAL(debug)<<"deque() aborted (via asio), ec: "<<ec.message();
+    BOOST_LOG_TRIVIAL(debug)<<"deque-wait() aborted (via asio), ec: "<<ec.message();
   }else{
     BOOST_LOG_TRIVIAL(debug)<<"an asio message waiting ...";
-    ql->timed_async_deq(std::bind(qlistener_handler<T>,_1,_2,ql),tmo_ms);
+    ql->timed_async_deq(std::bind(qlistener_handler<T>,_1,_2,ql),tmo_deq_ms);
   }
 }
 // handler for queue sender
-static size_t msgcount{0};
 void qsender_handler(boost::system::error_code const&ec,asio::queue_sender<enq_t>*qs){
   // print item if error code is OK
   if(ec)BOOST_LOG_TRIVIAL(debug)<<"queue sender interupted (via asio): ignoring callback, ec: "<<ec;
@@ -74,8 +77,21 @@ void qsender_handler(boost::system::error_code const&ec,asio::queue_sender<enq_t
     // sent next message asynchrounously
     qval_t newmsg{boost::lexical_cast<string>(msgcount++)};
     BOOST_LOG_TRIVIAL(debug)<<"sending message: \""<<newmsg<<"\"";
-    qs->async_enq(newmsg,std::bind(qsender_handler,_1,qs));
+    qs->timed_async_enq(newmsg,std::bind(qsender_handler,_1,qs),tmo_enq_ms);
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
+  }
+}
+// handler for waiting for starting sending messages
+void qsender_waiter_handler(boost::system::error_code const&ec,asio::queue_sender<enq_t>*qs){
+  if(ec!=0){
+    BOOST_LOG_TRIVIAL(debug)<<"enq-wait() aborted (via asio), ec: "<<ec.message();
+  }else{
+    BOOST_LOG_TRIVIAL(debug)<<"it's now possible to send messages ...";
+
+    // kick off async message sender
+    qval_t newmsg{boost::lexical_cast<string>(msgcount++)};
+    BOOST_LOG_TRIVIAL(debug)<<"sending message: \""<<newmsg<<"\"";
+    qs->timed_async_enq(newmsg,std::bind(qsender_handler,_1,qs),tmo_enq_ms);
   }
 }
 
@@ -100,14 +116,14 @@ int main(){
     asio::queue_sender<enq_t>qsender(::ios,&qin);
     asio::queue_listener<deq_t>qlistener(::ios,&qout);
 
-    // kick off sender in async mode
+    // wait tmo_enq_ms ms until we can send a message
     qval_t msg{boost::lexical_cast<string>(msgcount++)};
-    BOOST_LOG_TRIVIAL(debug)<<"sending message: \""<<msg<<"\"";
-    qsender.async_enq(msg,std::bind(qsender_handler,_1,&qsender));
+    BOOST_LOG_TRIVIAL(debug)<<"waiting until we can send messages ... ";
+    qsender.timed_async_wait_enq(std::bind(qsender_waiter_handler,_1,&qsender),tmo_enq_ms);
 
-    // wait for at most 100ms for a message to become available
+    // wait for at most tmo_deq_ms ms for a message to become available
     BOOST_LOG_TRIVIAL(debug)<<"starting waiting for asio message ...";
-    qlistener.timed_async_wait_deq(std::bind(qlistener_waiter_handler<qval_t>,_1,&qlistener),1100);
+    qlistener.timed_async_wait_deq(std::bind(qlistener_waiter_handler<qval_t>,_1,&qlistener),tmo_deq_ms);
 
     BOOST_LOG_TRIVIAL(debug)<<"starting asio ...";
     ::ios.run();

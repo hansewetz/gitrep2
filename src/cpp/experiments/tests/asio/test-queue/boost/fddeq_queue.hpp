@@ -48,25 +48,25 @@ public:
   
   // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(boost::system::error_code&ec){
-    T ret{deserialize(0,ec,true)};
+    T ret{recvwait(0,ec,true)};
     if(ec!=boost::system::error_code())return std::make_pair(false,ret);
     return make_pair(true,ret);
   }
   // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
   std::pair<bool,T>timed_deq(std::size_t ms,boost::system::error_code&ec){
-    T ret{deserialize(ms,ec,true)};
+    T ret{recvwait(ms,ec,true)};
     if(ec!=boost::system::error_code())return std::make_pair(false,ret);
     return make_pair(true,ret);
   }
   // wait until we can retrieve a message from queue
   bool wait_deq(boost::system::error_code&ec){
-    deserialize(0,ec,false);
+    recvwait(0,ec,false);
     if(ec.value()!=0)return false;
     return true;
   }
   // wait until we can retrieve a message from queue -  timeout if waiting too long
   bool timed_wait_deq(std::size_t ms,boost::system::error_code&ec){
-    deserialize(ms,ec,false);
+    recvwait(ms,ec,false);
     if(ec==boost::asio::error::timed_out)return false;
     if(ec.value()!=0)return false;
     return true;
@@ -79,7 +79,7 @@ public:
 private:
   // deserialise an object from an fd stream
   // or wait until there is a message to read - in this case, a default cibstructed object is returned
-  T deserialize(std::size_t ms,boost::system::error_code&ec,bool getMsg){
+  T recvwait(std::size_t ms,boost::system::error_code&ec,bool getMsg){
     T ret;                            // return value from this function (default ctor if no error)
     std::stringstream strstrm;        // collect read chars in a stringstream
     bool firsttime{true};             // track if this is the first time we call select
@@ -102,7 +102,7 @@ private:
       }
       // block on select - timeout if configured
       assert(maxfd!=-1);
-      int n=select(++maxfd,&input,NULL,NULL,(ms>0)?&tmo:NULL);
+      int n=::select(++maxfd,&input,NULL,NULL,ms>0?&tmo:NULL);
 
       // check for error
       if(n<0){

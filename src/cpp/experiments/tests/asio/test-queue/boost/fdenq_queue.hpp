@@ -44,19 +44,19 @@ public:
   
   // enqueue a message (return.first == false if enq() was disabled)
   bool enq(T t,boost::system::error_code&ec){
-    return this->send(t,0,ec,true);
+    return this->sendwait(&t,0,ec,true);
   }
   // enqueue a message (return.first == false if enq() was disabled) - timeout if waiting too long
   bool timed_enq(T t,std::size_t ms,boost::system::error_code&ec){
-    // NOTE! Not yet done
+    return this->sendwait(&t,ms,ec,true);
   }
   // wait until we can retrieve a message from queue
   bool wait_enq(boost::system::error_code&ec){
-    // NOTE! Not yet done
+    return this->sendwait(nullptr,0,ec,false);
   }
   // wait until we can retrieve a message from queue -  timeout if waiting too long
   bool timed_wait_enq(std::size_t ms,boost::system::error_code&ec){
-    // NOTE! Not yet done
+    return this->sendwait(nullptr,ms,ec,false);
   }
   // get file descriptor utility functions
   int getfd()const{
@@ -65,7 +65,7 @@ public:
 private:
   // serialise an object from an fd stream or wait until we timeout
   // (returns true we we could serialise object, false otherwise - error code will be non-zero if false)
-  bool send(T const&t,std::size_t ms,boost::system::error_code&ec,bool sendMsg){
+  bool sendwait(T const*t,std::size_t ms,boost::system::error_code&ec,bool sendMsg){
     std::stringstream strstrm;        // serialised object
     bool firsttime{true};             // track if this is the first time we call select
 
@@ -73,7 +73,7 @@ private:
     // (no need if we don;t need to send object)
     std::string str;
     if(sendMsg){
-      serial_(strstrm,t);
+      serial_(strstrm,*t);
       strstrm<<sep_;
       str=strstrm.str();
     }
@@ -81,7 +81,7 @@ private:
     std::string::iterator send{str.end()};
 
     // loop until we have written message or timed out
-    while(sbegin!=send){
+    while(true){
       // setup to listen on fd descriptor
       fd_set output;
       FD_ZERO(&output);
@@ -98,7 +98,7 @@ private:
       }
       // block on select - timeout if configured
       assert(maxfd!=-1);
-      int n=select(++maxfd,NULL,&output,NULL,(ms>0)?&tmo:NULL);
+      int n=::select(++maxfd,NULL,&output,NULL,ms>0?&tmo:NULL);
 
       // check for error
       if(n<0){
@@ -132,6 +132,8 @@ private:
           ++count;
         }
       }
+      // check if we are done
+      if(sbegin==send)return true;
     }
   }
   // queue state
