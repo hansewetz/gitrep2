@@ -79,7 +79,6 @@ private:
   T recvwait(std::size_t ms,boost::system::error_code&ec,bool getMsg){
     T ret;                            // return value from this function (default ctor if no error)
     std::stringstream strstrm;        // collect read chars in a stringstream
-    bool firsttime{true};             // track if this is the first time we call select
 
     // loop until we have a message (or until we timeout)
     while(true){
@@ -91,12 +90,9 @@ private:
 
       // setup for timeout (ones we get a message we don't timeout)
       struct timeval tmo;
-      if(firsttime&&ms>0){
-        // set timeout in select statement
-        tmo.tv_sec=ms/1000;
-        tmo.tv_usec=(ms%1000)*1000;
-        firsttime=false;
-      }
+      tmo.tv_sec=ms/1000;
+      tmo.tv_usec=(ms%1000)*1000;
+      
       // block on select - timeout if configured
       assert(maxfd!=-1);
       int n=::select(++maxfd,&input,NULL,NULL,ms>0?&tmo:NULL);
@@ -134,17 +130,17 @@ private:
           strstrm<<c;
 
           // if we reached newline, send message including newline)
-          if(c==sep_){
-            return deser_(strstrm);
-          }
+          if(c==sep_)return deser_(strstrm);
         }
         // check if we read all available characters
         // (if there are no more chars to read, then restart select() statement)
         if(++count==n)break;
       }
+      // restet tmo 0 zero ms since we don't timeout ones we start reading a message
+      ms=0;
     }
   }
-  // queue state
+  // state of queue
   int fdread_;                           // file descriptors to read from from
   DESER deser_;                          // de-serialiser
   char sep_;                             // message separator

@@ -68,7 +68,6 @@ private:
   // (returns true we we could serialise object, false otherwise - error code will be non-zero if false)
   bool sendwait(T const*t,std::size_t ms,boost::system::error_code&ec,bool sendMsg){
     std::stringstream strstrm;        // serialised object
-    bool firsttime{true};             // track if this is the first time we call select
 
     // serialise object and get it as a string
     // (no need if we don't need to send object)
@@ -91,12 +90,9 @@ private:
 
       // setup for timeout (ones we start writing a message we won't timeout)
       struct timeval tmo;
-      if(firsttime&&ms>0){
-        // set timeout in select statement
-        tmo.tv_sec=ms/1000;
-        tmo.tv_usec=(ms%1000)*1000;
-        firsttime=false;
-      }
+      tmo.tv_sec=ms/1000;
+      tmo.tv_usec=(ms%1000)*1000;
+      
       // block on select - timeout if configured
       assert(maxfd!=-1);
       int n=::select(++maxfd,NULL,&output,NULL,ms>0?&tmo:NULL);
@@ -135,12 +131,15 @@ private:
       }
       // check if we are done
       if(sbegin==send)return true;
+
+      // restet tmo 0 zero ms since we don't timeout ones we start reading a message
+      ms=0;
     }
   }
-  // queue state
+  // state of queue
   int fdwrite_;                          // file descriptors serialize object tpo
   SERIAL serial_;                        // serialise
-  char sep_;                              // message separator
+  char sep_;                             // message separator
 };
 }
 }
