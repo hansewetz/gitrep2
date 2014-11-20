@@ -41,13 +41,13 @@ EngineProxy::~EngineProxy(){
   // if engine is running we must wait for it
   if(state_!=EngineProxy::state_t::NOT_RUNNING){
     int waitstat;
-    BOOST_LOG_TRIVIAL(info)<<"waiting for child (pid: "<<cpid_<<") ..."<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<"waiting for child (pid: "<<cpid_<<") ..."<<endl;
     while(waitpid(cpid_,&waitstat,0)!=cpid_);
   }
 }
 // wait for new task asynchronously
 void EngineProxy::run(){
-  BOOST_LOG_TRIVIAL(info)<<"starting new engine with id: "<<id_<<" ...";
+  BOOST_LOG_TRIVIAL(debug)<<"starting new engine with id: "<<id_<<" ...";
 
   // switch to directory to run engine from
   if(chdir(PROGDIR)!=0){
@@ -68,7 +68,7 @@ void EngineProxy::run(){
 
   // wait for a task to translate
   waitForNewTask();
-  BOOST_LOG_TRIVIAL(info)<<"engine with id: "<<id_<<" started";
+  BOOST_LOG_TRIVIAL(debug)<<"engine with id: "<<id_<<" started";
 }
 // get engine id
 EngineProxyId EngineProxy::id()const{
