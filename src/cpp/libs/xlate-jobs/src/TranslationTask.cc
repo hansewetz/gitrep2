@@ -6,7 +6,7 @@ namespace xlate{
 
 // ctor
 TranslationTask::TranslationTask(TranslationJobId const&jobid,LanguagePair const&lanpair,string const&seg,size_t segno):
-  jobid_(jobid),id_(TranslationTaskId()),lanpair_(lanpair),srcSeg_(seg),segno_(segno){
+  jobid_(jobid),id_(TranslationTaskId()),lanpair_(lanpair),srcSeg_(seg),segno_(segno),hasTargetSeg_(false){
 }
 // get id of task
 TranslationTaskId  const&TranslationTask::id()const{

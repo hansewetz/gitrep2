@@ -75,7 +75,7 @@ int spawnPipeChild(string const&file,vector<string>args,int&fdRead,int&fdWrite,b
     ptmpargs[args.size()]=0;
 
     // execute child process
-    if(execv(file.c_str(),tmpargs)<0){
+    if(execvp(file.c_str(),tmpargs)<0){
       string err{strerror(errno)};
       THROW_RUNTIME("spawnPipeChild: failed executing execl: "<<err);
     }else{
