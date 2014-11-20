@@ -8,9 +8,6 @@
 #include <sys/wait.h>
 #include <boost/asio.hpp>
 
-// NOTE!
-#include <iostream>
-
 using namespace std;
 using namespace placeholders;
 namespace asio=boost::asio;
@@ -50,6 +47,8 @@ EngineProxy::~EngineProxy(){
 }
 // wait for new task asynchronously
 void EngineProxy::run(){
+  BOOST_LOG_TRIVIAL(info)<<"starting new engine with id: "<<id_<<" ...";
+
   // switch to directory to run engine from
   if(chdir(PROGDIR)!=0){
     THROW_RUNTIME("EngineProxy::run() - could not switch to directory: "<<PROGDIR);
@@ -69,6 +68,7 @@ void EngineProxy::run(){
 
   // wait for a task to translate
   waitForNewTask();
+  BOOST_LOG_TRIVIAL(info)<<"engine with id: "<<id_<<" started";
 }
 // get engine id
 EngineProxyId EngineProxy::id()const{

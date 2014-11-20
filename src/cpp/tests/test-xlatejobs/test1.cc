@@ -89,7 +89,7 @@ void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<Tra
   
   // print translated segments
   list<shared_ptr<TranslationTask>>const&translated{job->translated()};
-  for(shared_ptr<TranslationTask>task:translated)cout<<"["<<task->srcSeg()<<"]-->["<<task->targetSeg()<<"][jobid: "<<task->jobid()<<"][segno: "<<task->segno()<<"][id: "<<task->id()<<"]"<<endl;
+  for(shared_ptr<TranslationTask>task:translated)cout<<"["<<task->srcSeg()<<"]-->["<<task->targetSeg()<<"][jobid: "<<task->jobid()<<"][segno: "<<task->segno()<<"][id: "<<task->id()<<"][engine: "<<task->engineId()<<"]"<<endl;
   cout<<endl;
 //  for(shared_ptr<TranslationTask>task:translated)cout<<"[jobid: "<<task->jobid()<<"]"<<endl;
 }
@@ -105,11 +105,11 @@ int main(int argc,char**argv){
   // (true: log debug info, false: do not log debug info)
   utils::initBoostFileLogging(false);
   try{
-    // (1) ------------ create a translation component
+    // (1) ------------ create a translation component and kick it off
     // (one translation component <--> one language pair)
     size_t maxSegInParallel{3};
     size_t maxEngines{10};
-    TranslationCt tct{ios,3,1};
+    TranslationCt tct{ios,maxSegInParallel,maxEngines};
     tct.run();
 
     // (2) ------------ create receiver of translated jobs
