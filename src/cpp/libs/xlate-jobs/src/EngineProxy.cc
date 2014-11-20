@@ -1,34 +1,60 @@
-/*
-NOTE!
------
-we are simulating translation by setting up a timer after receiving a task
-when the timer pops we send a 'translated' task to output queue
-
-what we should do is this: (we'll go between states: [WAITING-FOR-TASK and WAITING-FOR-TRANSLATION] with events (GOT-TASK, GOT-TMO, GOT-TRANSLATION)
-	- wait for a task asyncrounosly
-	- when receiving task setup a timer, setup a listener on engine reception and send task text to engine
-	- if time pops then the engine timed out - should kill engine and restrt it
-	- if we receive a response form engine we cancel the timer and send the task on output queue
-*/
 #include "xlate-jobs/EngineProxy.h"
 #include "xlate-jobs/TranslationTask.h"
+#include "utils/sysUtils.h"
 #include <boost/log/trivial.hpp>
 #include <chrono>
 #include <random>
 #include <boost/asio.hpp>
+
 using namespace std;
-using namespace std::placeholders;
+using namespace placeholders;
+namespace asio=boost::asio;
+
 namespace xlate{
 
+// serialise/deserialise segments to/from engines
+namespace{
+  // serialize an object to be sent (notice: message boundaries are on '\n' characters)
+  void serialiser(std::ostream&os,string const&s){
+    os<<s;
+  }
+  // de-serialize an object we received (notice: message boundaries are on '\n' characters)
+  string deserialiser(istream&is){
+    string line;
+    getline(is,line);
+    return line;
+  }
+}
+
 // ctor
-EngineProxy::EngineProxy(boost::asio::io_service&ios,std::shared_ptr<TaskQueue>qin,std::shared_ptr<TaskQueue>qout):
+EngineProxy::EngineProxy(asio::io_service&ios,shared_ptr<TaskQueue>qin,shared_ptr<TaskQueue>qout):
     ios_(ios),
     qtaskListener_(make_shared<TaskQueueListener>(ios_,qin.get())),
     qtaskSender_(make_shared<TaskQueueSender>(ios_,qout.get())),
-    tmo_(ios_,boost::posix_time::milliseconds(1)){
+    state_{state_t(EngineProxy::state_t::NOT_RUNNING)}{
 }
 // wait for new task asynchronously
 void EngineProxy::run(){
+  // switch to directory to run engine from
+  if(chdir(PROGDIR)!=0){
+    THROW_RUNTIME("EngineProxy::run() - could not switch to directory: "<<PROGDIR);
+  }
+  // start engine (we should never be her unless engine is not running)
+  int fdToEngine;
+  int fdFromEngine;
+  int cpid=utils::spawnPipeChild(PROGPATH,vector<string>{PROGNAME},fdFromEngine,fdToEngine,true);
+
+  // NOTE! Must wait for cpid in dtor
+
+  // create queues to/from engine
+  qToEngine_=make_shared<qToEngine_t>(fdToEngine,serialiser,true);
+  qFromEngine_=make_shared<qFromEngine_t>(fdFromEngine,deserialiser,true);
+
+  // create sender/listener to/from engines
+  qsenderToEngine_=make_shared<asio::queue_sender<qToEngine_t>>(ios_,qToEngine_.get());
+  qListenerFromEngine_=make_shared<asio::queue_listener<qFromEngine_t>>(ios_,qFromEngine_.get());
+
+  // wait for a task to translate
   waitForNewTask();
 }
 // get engine id
@@ -38,37 +64,45 @@ EngineProxyId EngineProxy::id()const{
 // wait for new task
 void EngineProxy::waitForNewTask(){
   BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::waitForNewTask - wating for new task to translate";
-  qtaskListener_->async_deq(std::bind(&EngineProxy::newTaskHandler,this,_1,_2));
+  qtaskListener_->async_deq(bind(&EngineProxy::newTaskHandler,this,_1,_2));
+  state_=EngineProxy::state_t::WAITING4TASK;
 }
 // handle a new task
-void EngineProxy::newTaskHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task){
+void EngineProxy::newTaskHandler(boost::system::error_code const&ec,shared_ptr<TranslationTask>task){
   BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::newTaskHandler - got task event: "<<*task;
 
-  // generate a random timeout time for translation
-  // (should be a fixed timeout when calling a real engine)
-  std::random_device rd;
-  std::default_random_engine e1(rd());
-  std::uniform_int_distribution<int>uniform_dist(500, 5000);
-  int ms_tmo{uniform_dist(e1)};
+  // start translation synchrounosly (send segment to qtaskSender_)
+  // (notice: we send segment synchrounously)
+  boost::system::error_code ec1;
+  qsenderToEngine_->sync_enq(task->srcSeg(),ec1);
 
-  // start translation
-  // cout<<"engine: "<<id_<<", job: "<<task->jobid()<<endl;
-  // (simulate translation by setting up a timer and generate a 'translation' when timer pops)
-  tmo_.expires_from_now(boost::posix_time::milliseconds(ms_tmo));
-  tmo_.async_wait(std::bind(&EngineProxy::tmoHandler,this,_1,task));
+  // Check error code
+  // NOTE! Not yet done
+
+  // we are now translating
+  state_=EngineProxy::state_t::TRANSLATING;
+
+  // start waiting for translated segment back from engine
+  qListenerFromEngine_->timed_async_deq(std::bind(&EngineProxy::engineListenerHandler,this,_1,_2,task),xlateTmoMs_);
 }
-// handle translation timeout
-// (here we simulate translation through the timeout)
-void EngineProxy::tmoHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task){
-  BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::tmoHandler - got timer event: "<<*task;
-  // 'translate' task and send it on output queue
-  task->setTargetSeg(string("TRANSLATED: ")+task->srcSeg());
+// handler for segments arriving from engine
+void EngineProxy::engineListenerHandler(boost::system::error_code const&ec,string const&msg,shared_ptr<TranslationTask>task){
+  // check for timeout
+  // NOTE! Not yet done
 
-  // send task synchronously
+  // check error code 
+  // NOTE! Not yet done
+
+  // set translated segment
+  BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - got translated task: "<<*task;
+  task->setTargetSeg(msg);
+
+  // send translated task
   boost::system::error_code ec1;
   qtaskSender_->sync_enq(task,ec1);
 
-// NOTE! Should check error code here
+  // check error code
+  // NOTE! Not yet done
 
   // start waiting for a new task
   waitForNewTask();

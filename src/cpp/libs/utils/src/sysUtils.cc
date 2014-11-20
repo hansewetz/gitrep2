@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/prctl.h>
+
 using namespace std;
 namespace utils{
 
@@ -49,18 +50,18 @@ int spawnPipeChild(string const&file,vector<string>args,int&fdRead,int&fdWrite,b
   setFdNonblock(fromChild[0]);
 
   // fork child process
-  int stat=fork();
-  if(stat==0){ // child
+  int pid=fork();
+  if(pid==0){ // child
     // die if parent dies so we won't become a zombie
     if(dieWhenParentDies&&prctl(PR_SET_PDEATHSIG,SIGHUP)<0){
       string err{strerror(errno)};
       THROW_RUNTIME("spawnPipeChild: failed call to prctl(...): "<<err);
     }
     // dup stdin/stdout ---> pipe, and close original pipe fds
-    eclose(0);eclose(1);
+    close(0);close(1);
     edup(toChild[0]);edup(fromChild[1]);
-    eclose(toChild[1]);eclose(fromChild[0]);
-    eclose(toChild[0]);eclose(fromChild[1]);
+    close(toChild[1]);close(fromChild[0]);
+    close(toChild[0]);close(fromChild[1]);
 
     // setup for calling execv 
     // (we don't care if we leak memory since we'll overlay process using exec)
@@ -83,14 +84,14 @@ int spawnPipeChild(string const&file,vector<string>args,int&fdRead,int&fdWrite,b
       THROW_RUNTIME("spawnPipeChild: failed executing execl: "<<err);
     }
   }else
-  if(stat>0){ // parent
+  if(pid>0){ // parent
     // close fds we don't use
-    eclose(fromChild[1]);eclose(toChild[0]);
+    close(fromChild[1]);close(toChild[0]);
 
     // set return parameters and return child pid
     fdRead=fromChild[0];
     fdWrite=toChild[1];
-    return stat;
+    return pid;
   }else{
     // fork failed
     string err{strerror(errno)};

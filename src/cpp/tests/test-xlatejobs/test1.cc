@@ -89,10 +89,9 @@ void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<Tra
   
   // print translated segments
   list<shared_ptr<TranslationTask>>const&translated{job->translated()};
-/*
-  for(shared_ptr<TranslationTask> task:translated)cout<<task->targetSeg()<<" [jobid: "<<task->jobid()<<"][segno: "<<task->segno()<<"][id: "<<task->id()<<"]"<<endl;
-  for(shared_ptr<TranslationTask> task:translated)cout<<"[jobid: "<<task->jobid()<<"]"<<endl;
-*/
+  for(shared_ptr<TranslationTask>task:translated)cout<<"["<<task->srcSeg()<<"]-->["<<task->targetSeg()<<"][jobid: "<<task->jobid()<<"][segno: "<<task->segno()<<"][id: "<<task->id()<<"]"<<endl;
+  cout<<endl;
+//  for(shared_ptr<TranslationTask>task:translated)cout<<"[jobid: "<<task->jobid()<<"]"<<endl;
 }
 //  main test program
 int main(int argc,char**argv){
@@ -108,7 +107,7 @@ int main(int argc,char**argv){
   try{
     // (1) ------------ create a translation component
     // (one translation component <--> one language pair)
-    TranslationCt tct{ios,3,10};
+    TranslationCt tct{ios,3,1};
     tct.run();
 
     // (2) ------------ create receiver of translated jobs
