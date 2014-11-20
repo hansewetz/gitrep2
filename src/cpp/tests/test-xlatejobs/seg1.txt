@@ -2,3 +2,6 @@ hello world again
 there is a bird on the computer
 there are many computers in this room
 git sucks as a source controll system
+the stork came and laid an egg
+the project tok an awfull long time to complete
+the architectural methodology doe snot follow the standard EU Commission rigif procedure

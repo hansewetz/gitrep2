@@ -4,7 +4,12 @@
 #include <boost/log/trivial.hpp>
 #include <chrono>
 #include <random>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <boost/asio.hpp>
+
+// NOTE!
+#include <iostream>
 
 using namespace std;
 using namespace placeholders;
@@ -31,7 +36,17 @@ EngineProxy::EngineProxy(asio::io_service&ios,shared_ptr<TaskQueue>qin,shared_pt
     ios_(ios),
     qtaskListener_(make_shared<TaskQueueListener>(ios_,qin.get())),
     qtaskSender_(make_shared<TaskQueueSender>(ios_,qout.get())),
-    state_{state_t(EngineProxy::state_t::NOT_RUNNING)}{
+    state_{state_t(EngineProxy::state_t::NOT_RUNNING)},
+    cpid_(-1){
+}
+// dtor
+EngineProxy::~EngineProxy(){
+  // if engine is running we must wait for it
+  if(state_!=EngineProxy::state_t::NOT_RUNNING){
+    int waitstat;
+    BOOST_LOG_TRIVIAL(info)<<"waiting for child (pid: "<<cpid_<<") ..."<<endl;
+    while(waitpid(cpid_,&waitstat,0)!=cpid_);
+  }
 }
 // wait for new task asynchronously
 void EngineProxy::run(){
@@ -42,9 +57,7 @@ void EngineProxy::run(){
   // start engine (we should never be her unless engine is not running)
   int fdToEngine;
   int fdFromEngine;
-  int cpid=utils::spawnPipeChild(PROGPATH,vector<string>{PROGNAME},fdFromEngine,fdToEngine,true);
-
-  // NOTE! Must wait for cpid in dtor
+  cpid_=utils::spawnPipeChild(PROGPATH,vector<string>{PROGNAME},fdFromEngine,fdToEngine,true);
 
   // create queues to/from engine
   qToEngine_=make_shared<qToEngine_t>(fdToEngine,serialiser,true);
@@ -88,15 +101,17 @@ void EngineProxy::newTaskHandler(boost::system::error_code const&ec,shared_ptr<T
 // handler for segments arriving from engine
 void EngineProxy::engineListenerHandler(boost::system::error_code const&ec,string const&msg,shared_ptr<TranslationTask>task){
   // check for timeout
-  // NOTE! Not yet done
+  if(ec==boost::asio::error::timed_out){
+// NOTE! Do something better
+    task->setTargetSeg("<TIMEOUT>");
+  }else{
+    // check error code 
+    // NOTE! Not yet done
 
-  // check error code 
-  // NOTE! Not yet done
-
-  // set translated segment
-  BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - got translated task: "<<*task;
-  task->setTargetSeg(msg);
-
+    // set translated segment
+    BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - got translated task: "<<*task;
+    task->setTargetSeg(msg);
+  }
   // send translated task
   boost::system::error_code ec1;
   qtaskSender_->sync_enq(task,ec1);

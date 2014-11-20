@@ -14,7 +14,7 @@ class EngineProxy{
 public:
   // NOTE! program to start - hard coded it for right now
   constexpr static char const*PROGDIR="/ec/prod/exodus/dgt/local/exodus/user/potocva/OPERATINGHOME/ensv-all";
-  constexpr static char const*PROGPATH="/ec/prod/exodus/dgt/local/exodus/user/potocva/OPERATINGHOME/ensv-all/junk";
+  constexpr static char const*PROGPATH="/ec/prod/exodus/dgt/local/exodus/user/potocva/OPERATINGHOME/ensv-all/translate";
   constexpr static char const*PROGNAME="translate";
 
   // state of this engine proxy
@@ -30,7 +30,7 @@ public:
   EngineProxy(EngineProxy&&)=default;
   EngineProxy&operator=(EngineProxy const&)=delete;
   EngineProxy&operator=(EngineProxy&&)=default;
-  ~EngineProxy()=default;
+  ~EngineProxy();
 
   // run engine
   void run();
@@ -47,11 +47,13 @@ private:
   EngineProxyId id_;
 
   // state of proxy
-  // NOTE! We don;t really use state for anything ... we can probably get rid of it
   state_t state_;
 
+  // pid of engine child
+  int cpid_;
+
   // translation tmo ms
-  std::size_t xlateTmoMs_=3000; // NOTE! Hard coded
+  std::size_t xlateTmoMs_=70000; // NOTE! Hard coded
 
   // asio stuff
   boost::asio::io_service&ios_;

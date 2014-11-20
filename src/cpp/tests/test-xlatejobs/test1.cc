@@ -107,6 +107,8 @@ int main(int argc,char**argv){
   try{
     // (1) ------------ create a translation component
     // (one translation component <--> one language pair)
+    size_t maxSegInParallel{3};
+    size_t maxEngines{10};
     TranslationCt tct{ios,3,1};
     tct.run();
 
