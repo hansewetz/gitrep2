@@ -13,7 +13,6 @@ TESTING:
 
 #ifndef __FDDEQ_QUEUE_H__
 #define __FDDEQ_QUEUE_H__
-//#include "detail/queue_support.hpp"
 #include <utility>
 #include <iostream>
 #include <string>
