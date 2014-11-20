@@ -53,7 +53,7 @@ using enq_t=asio::fdenq_queue<string,decltype(serialiser)>;
 using deq_t=asio::fddeq_queue<string,decltype(deserialiser)>;
 
 // handle a message we received asynchrounosly
-void qlistener_handler(boost::system::error_code const&ec,string msg,asio::queue_listener<deq_t>*ql){
+void qlistener_handler(boost::system::error_code const&ec,string const&msg,asio::queue_listener<deq_t>*ql){
   if(ec!=0)BOOST_LOG_TRIVIAL(info)<<"deque() aborted (via asio), cause: "<<ec.message();
   else{
     // kick off waiting for another message asynchrounosly
