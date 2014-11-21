@@ -64,17 +64,15 @@ asio::queue_sender<queue_t>qsender(::ios,&qsend);
 constexpr size_t maxmsg{3};
 
 // handler for queue listener
-template<typename T>
-void qlistener_handler(boost::system::error_code const&ec,T item){
+void qlistener_handler(boost::system::error_code const&ec,qval_t const&item){
   if(ec!=0){
     BOOST_LOG_TRIVIAL(debug)<<"deque() aborted (via asio), ec: "<<ec.message();
   }else{
     BOOST_LOG_TRIVIAL(debug)<<"received item in qlistener_handler (via asio), item: "<<item<<", ec: "<<ec;
-    qlistener.timed_async_deq(qlistener_handler<T>,tmo_ms);
+    qlistener.timed_async_deq(qlistener_handler,tmo_ms);
   }
 }
 // thread function sending maxmsg messages
-template<typename T>
 void thr_send_sync_messages(){
   for(int i=0;i<maxmsg;++i){
     qval_t item{Message{string("Hello")+boost::lexical_cast<string>(i),i}};
@@ -92,11 +90,11 @@ int main(){
 
     // listen for on messages on q1 (using asio)
     BOOST_LOG_TRIVIAL(debug)<<"starting async_deq() ...";
-    qlistener.timed_async_deq(qlistener_handler<qval_t>,tmo_ms);
+    qlistener.timed_async_deq(qlistener_handler,tmo_ms);
 
     // kick off sender thread
     BOOST_LOG_TRIVIAL(debug)<<"starting thread sender thread ...";
-    thread thr(thr_send_sync_messages<qval_t>);
+    thread thr(thr_send_sync_messages);
 
     // kick off io service
     BOOST_LOG_TRIVIAL(debug)<<"starting asio ...";
