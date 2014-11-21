@@ -49,14 +49,10 @@ EngineProxy::~EngineProxy(){
 void EngineProxy::run(){
   BOOST_LOG_TRIVIAL(debug)<<"starting new engine with id: "<<id_<<" ...";
 
-  // switch to directory to run engine from
-  if(chdir(PROGDIR)!=0){
-    THROW_RUNTIME("EngineProxy::run() - could not switch to directory: "<<PROGDIR);
-  }
   // start engine (we should never be her unless engine is not running)
   int fdToEngine;
   int fdFromEngine;
-  cpid_=utils::spawnPipeChild(PROGPATH,vector<string>{PROGNAME},fdFromEngine,fdToEngine,true);
+  cpid_=utils::spawnPipeChild(PROGPATH,vector<string>{PROGNAME},fdFromEngine,fdToEngine,true,PROGDIR);
 
   // create queues to/from engine
   qToEngine_=make_shared<qToEngine_t>(fdToEngine,serialiser,true);

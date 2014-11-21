@@ -16,6 +16,6 @@ void setFdNonblock(int fd);
 // fork/exec an executable and setup an in-memory pipe between the two, returns child pid
 // (child will read/write from/to stdin/stdout)
 // (file - executable file, args - argv[0] ...)
-int spawnPipeChild(std::string const&file,std::vector<std::string>args,int&fdRead,int&fdWrite,bool dieWhenParentDies);
+int spawnPipeChild(std::string const&file,std::vector<std::string>args,int&fdRead,int&fdWrite,bool dieWhenParentDies,std::string const&childdir);
 }
 #endif

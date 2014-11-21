@@ -17,7 +17,7 @@ int main(){
 
     // spawn '/bin/cat' as child process
     int fdRead,fdWrite;
-    int cpid=spawnPipeChild("/bin/cat",vector<string>{"cat"},fdRead,fdWrite,true);
+    int cpid=spawnPipeChild("/bin/cat",vector<string>{"cat"},fdRead,fdWrite,true,".");
 
     // setup reading from child asynchronously and capture each read line (and error) in a callback function
     // (will invoke callback function with a string after stripping it form newline)

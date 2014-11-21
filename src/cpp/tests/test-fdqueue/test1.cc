@@ -79,7 +79,7 @@ int main(){
   try{
     // spawn '/bin/cat' as child process
     int fdread,fdwrite;
-    int cpid=spawnPipeChild("/bin/cat",vector<string>{"cat"},fdread,fdwrite,true);
+    int cpid=spawnPipeChild("/bin/cat",vector<string>{"cat"},fdread,fdwrite,true,".");
 
     // enclose queues in a scope so that fds are closed automatically when leaving scope
     // (if queues are not destroyed, the child process will hang and wait for more input)

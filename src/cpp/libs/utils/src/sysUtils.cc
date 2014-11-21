@@ -38,7 +38,7 @@ void setFdNonblock(int fd){
   }
 }
 // spawn child process setting up stdout and stdin as a pipe
-int spawnPipeChild(string const&file,vector<string>args,int&fdRead,int&fdWrite,bool dieWhenParentDies){
+int spawnPipeChild(string const&file,vector<string>args,int&fdRead,int&fdWrite,bool dieWhenParentDies,string const&childdir){
   // create pipe between child and parent
   int fromChild[2];
   int toChild[2];
@@ -52,6 +52,11 @@ int spawnPipeChild(string const&file,vector<string>args,int&fdRead,int&fdWrite,b
   // fork child process
   int pid=fork();
   if(pid==0){ // child
+    // change directory
+    if(chdir(childdir.c_str())!=0){
+      string err{strerror(errno)};
+      THROW_RUNTIME("spawnPipeChild: failed executing chdir: "<<err);
+    }
     // die if parent dies so we won't become a zombie
     if(dieWhenParentDies&&prctl(PR_SET_PDEATHSIG,SIGHUP)<0){
       string err{strerror(errno)};

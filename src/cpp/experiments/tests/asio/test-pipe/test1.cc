@@ -129,7 +129,7 @@ void setFdNonblock(int fd){
 }
 // spawn child process setting up stdout and stdin as a pipe
 // (returns child process pid)
-int spawnPipeChild(string const&file,vector<string>args,int&fdRead,int&fdWrite,bool dieWhenParentDies){
+int spawnPipeChild(string const&file,vector<string>args,int&fdRead,int&fdWrite,bool dieWhenParentDies,string const&childdir){
   // create pipe between child and parent
   int fromChild[2];
   int toChild[2];
@@ -147,6 +147,11 @@ int spawnPipeChild(string const&file,vector<string>args,int&fdRead,int&fdWrite,b
     if(dieWhenParentDies&&prctl(PR_SET_PDEATHSIG,SIGHUP)<0){
       string err{strerror(errno)};
       THROW_RUNTIME("spawnPipeChild: failed call to prctl(...): "<<err);
+    }
+    // change directory
+    if(chdir(childdir.c_str())!=0){
+      string err{strerror(errno)};
+      THROW_RUNTIME("spawnPipeChild: failed executing chdir: "<<err);
     }
     // dup stdin/stdout ---> pipe, and close original pipe fds
     eclose(0);eclose(1);
@@ -199,7 +204,7 @@ int main(){
     int fdRead1,fdWrite1;
     string execFile{"/bin/cat"};
     vector<string>execArgs{"cat"};
-    int cpid1=spawnPipeChild(execFile,execArgs,fdRead1,fdWrite1,true);
+    int cpid1=spawnPipeChild(execFile,execArgs,fdRead1,fdWrite1,true,".");
 
     // setup reading from child asynchronously and capture each read line in a callback function
     // (will invoke callback function with a string after stripping it form newline)
