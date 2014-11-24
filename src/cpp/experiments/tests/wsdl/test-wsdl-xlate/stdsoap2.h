@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 /*
 	stdsoap2.h 2.8.17r
 

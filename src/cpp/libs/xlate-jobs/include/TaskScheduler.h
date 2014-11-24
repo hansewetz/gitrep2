@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 #ifndef __TASK_SCHEDULER_H__
 #define __TASK_SCHEDULER_H__
 #include "xlate-jobs/JobQueue.h"

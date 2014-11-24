@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 //gsoap ns service name:	xlate Simple xlator service
 //gsoap ns service protocol:	SOAP
 //gsoap ns service style:	rpc

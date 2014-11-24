@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 /*
 	Q: what advantage would it be to use inotify for event notification
 		- possibly using normal copying of files into a directory

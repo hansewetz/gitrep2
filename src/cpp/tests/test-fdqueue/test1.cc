@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 /*
 This program:
 	- start child process and setup of queue_sender<> and queue_listener<> connected to child process stdin/stdout

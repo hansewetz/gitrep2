@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 /*
 This program tests the wait_enq() functionality on a queue_sender.
 Notice that ones a wait_enq() call has been made, there could be a posibility that no event triggers the handler callback.

@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 // Knuth: Alg. L, section 7.2.1.2, Volume 4A
 // generate all permutations from a sorted list - do not generate duplicate permutation objects
 // (slighly simplified compare dto dscription in Knuth)

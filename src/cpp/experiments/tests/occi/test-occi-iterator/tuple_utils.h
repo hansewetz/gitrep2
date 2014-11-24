@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 #ifndef __TUPLE_UTILS_H__
 #define __TUPLE_UTILS_H__
 #include <ostream>

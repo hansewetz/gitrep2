@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 #ifndef __ENGINE_PROXY_H__
 #define __ENGINE_PROXY_H__
 #include "asio-extensions/asio_queue.hpp"

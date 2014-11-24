@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 #ifndef __POLL_DIR_QUEUE_H__
 #define __POLL_DIR_QUEUE_H__
 #include "bpf_queue/Queue.h"

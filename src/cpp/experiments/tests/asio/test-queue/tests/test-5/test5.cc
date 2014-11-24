@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 /*
   test program for polldir_queue.
   program kicks off a sender thread and a receiver thread and terminates when a specified #of messages has been received

@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 #ifndef __TRANSLATE_JOB_H__
 #define __TRANSLATE_JOB_H__
 #include "xlate-jobs/Identifiers.h"

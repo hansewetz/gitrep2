@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 /* TODO
 
 CANCELLATION: it's not clear how cancellation would be implemented - for right now I'll skip it

@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 /*
 this program has one queue with a thread doing sync_enq and an asio in main thread doing async_deq
 this is the same program as test4.cc but using a polldir_queue instead of a simple_queue
