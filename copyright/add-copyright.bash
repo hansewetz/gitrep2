@@ -48,6 +48,7 @@ for file in ${FILES}; do
   else
     cat ${file} | cat >> ${file}.tmp                        # no copy right notice found
   fi
+  dos2unix ${file}.tmp
   mv ${file}.tmp ${file}
 done
 
