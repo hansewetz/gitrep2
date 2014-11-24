@@ -30,19 +30,19 @@ fi
 # loop through all source files in repository
 echo "INFO: looping through all 'h,hpp,cc,Makefile' files ..."
 FILES=`find . -type f -name '*.h' -or -name '*.cc' -or -name '*.hpp' -or -name Makefile`
+COUNT=0
 for file in ${FILES}; do
   echo "updating file ${file} ..."
 
-  # remove copyright notice - must be one line
-  # NOTE! Not yet done
-
-  # add copyright noice - must be one line
+  # remove first line of file and add copyright notice
   cp ${CFILE} ${file}.tmp
   echo >> ${file}.tmp
-  cat ${file} >> ${file}.tmp
+  echo >> ${file}.tmp
+  cat ${file} | sed '1d' >> ${file}.tmp
   mv ${file}.tmp ${file}
 done
 
 # no errors so far
+echo "INFO: updated ${COUNT} files - don't forget to compile and then commit
 exit 0
 
