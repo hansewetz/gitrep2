@@ -11,7 +11,7 @@ namespace xlate{
 class EngineEnv{
 public:
   // ctors,assign,dtor
-  EngineEnv(fs::path const&basepath,fs::path const&ename,fs::path const&tmpdir,fs::path const&trainenv);
+  EngineEnv(fs::path const&exedir,fs::path const&progpath,std::string const&ename);
   EngineEnv(EngineEnv const&)=default;
   EngineEnv(EngineEnv&&)=default;
   EngineEnv&operator=(EngineEnv const&)=default;
@@ -19,16 +19,13 @@ public:
   ~EngineEnv()=default;
 
   // getters
-  fs::path const&basepath()const;
-  fs::path const&ename()const;
-  fs::path const&tmpdir()const;
-  fs::path const&trainenv()const;
+  fs::path const&exedir()const;
+  fs::path const&progpath()const;
+  std::string const&ename()const;
 private:
-  fs::path basepath_;        // path to directory under which language engines are stored
-  fs::path ename_;           // name of engine executable
-  fs::path tmpdir_;          // temporary directory
-  fs::path trainenv_;        // engine needs TRAININGENVIRONMENT env variable
-  //                         // add command line options
+  fs::path exedir_;          // directory t execute from
+  fs::path progpath_;        // path to directory under which language engines are stored
+  std::string ename_;        // name of engine executable
 };
 // print operator
 std::ostream&operator<<(std::ostream&os,EngineEnv const&);

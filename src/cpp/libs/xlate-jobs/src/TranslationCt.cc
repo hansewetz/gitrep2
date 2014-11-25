@@ -6,11 +6,12 @@
 #include "xlate-jobs/TranslationJobRepository.h"
 #include "xlate-jobs/TaskScheduler.h"
 #include "xlate-jobs/EngineProxy.h"
+#include "xlate-jobs/EngineEnv.h"
 using namespace std;
 namespace xlate{
 
 // ctor
-TranslationCt::TranslationCt(boost::asio::io_service&ios,size_t maxScheduledJobs,size_t maxEngines):
+TranslationCt::TranslationCt(boost::asio::io_service&ios,size_t maxScheduledJobs,size_t maxEngines,shared_ptr<EngineEnv>enngineenv):
     ios_(ios),
     qschedTaskSize_(maxEngines),qschedJobSize_(maxScheduledJobs),
     maxEngines_(maxEngines),
@@ -20,11 +21,11 @@ TranslationCt::TranslationCt(boost::asio::io_service&ios,size_t maxScheduledJobs
     qtransTasks_{make_shared<TaskQueue>(qtransTasksSize_)},
     qtransJobs_{make_shared<JobQueue>(qtransJobSize_)},
     jobrep_{make_shared<TranslationJobRepository>(ios_,qnewJob_,qschedJob_,qtransTasks_,qtransJobs_)},
-    scheduler_{make_shared<TaskScheduler>(ios_,qschedJob_,qschedTask_)}{
+    scheduler_{make_shared<TaskScheduler>(ios_,qschedJob_,qschedTask_)},enngineenv_(enngineenv){
 
   // create engines and start running each engine in a separate thread
   for(size_t i=0;i<maxEngines_;++i){
-    std::shared_ptr<EngineProxy>engine{make_shared<EngineProxy>(ios_,qschedTask_,qtransTasks_)};
+    std::shared_ptr<EngineProxy>engine{make_shared<EngineProxy>(ios_,qschedTask_,qtransTasks_,enngineenv_)};
     engines_.push_back(engine);
   }
 }

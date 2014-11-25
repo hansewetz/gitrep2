@@ -5,18 +5,18 @@ namespace fs=boost::filesystem;
 namespace xlate{
 
 // ctot
-EngineEnv::EngineEnv(fs::path const&basepath,fs::path const&ename,fs::path const&tmpdir,fs::path const&trainenv):
-    basepath_(basepath),ename_(ename),tmpdir_(tmpdir),trainenv_(trainenv){
+EngineEnv::EngineEnv(fs::path const&exedir,fs::path const&progpath,std::string const&ename):
+    exedir_(exedir),progpath_(progpath),ename_(ename){
 }
+
 // getters
-fs::path const&EngineEnv::basepath()const{return basepath_;}
-fs::path const&EngineEnv::ename()const{return ename_;}
-fs::path const&EngineEnv::tmpdir()const{return tmpdir_;}
-fs::path const&EngineEnv::trainenv()const{return trainenv_;}
+fs::path const&EngineEnv::exedir()const{return exedir_;}
+fs::path const&EngineEnv::progpath()const{return progpath_;}
+std::string const&EngineEnv::ename()const{return ename_;}
 
 // print operator
 ostream&operator<<(ostream&os,EngineEnv const&env){
-  return os<<"basepath: "<<env.basepath().string()<<", engine-name: "<<env.ename().string()<<", tmpdir: "<<env.tmpdir().string()<<", trainenv: "<<env.trainenv().string();
+  return os<<"exedir: "<<env.exedir().string()<<", engine-name: "<<env.ename()<<", progpath: "<<env.progpath().string();
 }
 }
 

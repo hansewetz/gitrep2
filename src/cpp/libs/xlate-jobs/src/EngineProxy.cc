@@ -1,6 +1,7 @@
 // (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
 
 #include "xlate-jobs/EngineProxy.h"
+#include "xlate-jobs/EngineEnv.h"
 #include "xlate-jobs/TranslationTask.h"
 #include "utils/sysUtils.h"
 #include <boost/log/trivial.hpp>
@@ -31,12 +32,12 @@ namespace{
 }
 
 // ctor
-EngineProxy::EngineProxy(asio::io_service&ios,shared_ptr<TaskQueue>qin,shared_ptr<TaskQueue>qout):
+EngineProxy::EngineProxy(asio::io_service&ios,shared_ptr<TaskQueue>qin,shared_ptr<TaskQueue>qout,shared_ptr<EngineEnv>engineenv):
     ios_(ios),
     qtaskListener_(make_shared<TaskQueueListener>(ios_,qin.get())),
     qtaskSender_(make_shared<TaskQueueSender>(ios_,qout.get())),
     state_{state_t(EngineProxy::state_t::NOT_RUNNING)},
-    cpid_(-1){
+    cpid_(-1),engineenv_(engineenv){
 }
 // dtor
 EngineProxy::~EngineProxy(){
@@ -54,7 +55,7 @@ void EngineProxy::run(){
   // start engine (we should never be her unless engine is not running)
   int fdToEngine;
   int fdFromEngine;
-  cpid_=utils::spawnPipeChild(PROGPATH,vector<string>{PROGNAME},fdFromEngine,fdToEngine,true,PROGDIR);
+  cpid_=utils::spawnPipeChild(engineenv_->progpath().string(),vector<string>{engineenv_->ename()},fdFromEngine,fdToEngine,true,engineenv_->exedir().string());
 
   // create queues to/from engine
   qToEngine_=make_shared<qToEngine_t>(fdToEngine,serialiser,true);

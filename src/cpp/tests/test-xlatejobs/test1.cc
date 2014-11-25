@@ -5,6 +5,7 @@
 #include "xlate-jobs/TranslateRequest.h"
 #include "xlate-jobs/TranslationJob.h"
 #include "xlate-jobs/LanguageCode.h"
+#include "xlate-jobs/EngineEnv.h"
 #include "xlate-tools/TranslationRequestFactory.h"
 #include "utils/logUtils.h"
 
@@ -21,6 +22,12 @@
 #include <memory>
 #include <thread>
 
+// NOTE! Hard codeded - should be taken from command line parameters and having default
+constexpr static char const*EXEDIR="/ec/prod/exodus/dgt/local/exodus/user/potocva/OPERATINGHOME/ensv-all";
+constexpr static char const*PROGPATH="/ec/prod/exodus/dgt/local/exodus/user/potocva/OPERATINGHOME/ensv-all/translate";
+constexpr static char const*PROGNAME="translate";
+
+// namespace stuff
 using namespace std;
 using namespace std::placeholders;
 using namespace xlate;
@@ -28,6 +35,7 @@ using namespace xlate;
 namespace po=boost::program_options;
 namespace fs=boost::filesystem;
 
+// usage information
 namespace{
 po::options_description options{string("usage: -h file ...")};
 void usage(){
@@ -39,9 +47,12 @@ void usage(std::string const&msg){
   std::exit(1);
 }
 }
-// global parameters
-vector<string>files; // files to translate
-
+// command line parameters
+namespace{
+vector<string>files;               // files to translate
+size_t maxJobsInParallel{3};       // max #of segements to translate in parallel
+size_t maxEngines{10};             // max #of engines to start
+}
 // process command line params
 void processCmdLineParams(int argc,char**argv){
   // add help option
@@ -90,9 +101,9 @@ void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<Tra
   qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver));
   
   // print translated segments
+  cout<<endl<<"------------------------------------- job#: "<<job->id()<<endl;
   list<shared_ptr<TranslationTask>>const&translated{job->translated()};
-  for(shared_ptr<TranslationTask>task:translated)cout<<"["<<task->srcSeg()<<"]-->["<<task->targetSeg()<<"][jobid: "<<task->jobid()<<"][segno: "<<task->segno()<<"][id: "<<task->id()<<"][engine: "<<task->engineId()<<"]"<<endl;
-  cout<<endl;
+  for(shared_ptr<TranslationTask>task:translated)cout<<"["<<task->srcSeg()<<"]-->["<<task->targetSeg()<<"][segno: "<<task->segno()<<"][id: "<<task->id()<<"][engine: "<<task->engineId()<<"]"<<endl;
 //  for(shared_ptr<TranslationTask>task:translated)cout<<"[jobid: "<<task->jobid()<<"]"<<endl;
 }
 //  main test program
@@ -107,11 +118,12 @@ int main(int argc,char**argv){
   // (true: log debug info, false: do not log debug info)
   utils::initBoostFileLogging(false);
   try{
+    // (0) setu engine environment 
+    shared_ptr<EngineEnv>engineenv=make_shared<EngineEnv>(EXEDIR,PROGPATH,PROGNAME);
+    
     // (1) ------------ create a translation component and kick it off
     // (one translation component <--> one language pair)
-    size_t maxSegInParallel{3};
-    size_t maxEngines{10};
-    TranslationCt tct{ios,maxSegInParallel,maxEngines};
+    TranslationCt tct{ios,maxJobsInParallel,maxEngines,engineenv};
     tct.run();
 
     // (2) ------------ create receiver of translated jobs

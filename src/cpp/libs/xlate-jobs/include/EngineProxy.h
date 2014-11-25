@@ -10,15 +10,11 @@ namespace xlate{
 
 // forward decl.
 class TranslationTask;
+class EngineEnv;
 
 // class scheduling tasks taken from a job repository
 class EngineProxy{
 public:
-  // NOTE! program to start - hard coded it for right now
-  constexpr static char const*PROGDIR="/ec/prod/exodus/dgt/local/exodus/user/potocva/OPERATINGHOME/ensv-all";
-  constexpr static char const*PROGPATH="/ec/prod/exodus/dgt/local/exodus/user/potocva/OPERATINGHOME/ensv-all/translate";
-  constexpr static char const*PROGNAME="translate";
-
   // state of this engine proxy
   enum class state_t{NOT_RUNNING=0,WAITING4TASK=1,TRANSLATING=2};
 
@@ -27,7 +23,7 @@ public:
   using qFromEngine_t=boost::asio::fddeq_queue<std::string,std::function<std::string(std::istream&)>>;
 
   // ctors,assign,dtor
-  EngineProxy(boost::asio::io_service&ios,std::shared_ptr<TaskQueue>qin,std::shared_ptr<TaskQueue>qout);
+  EngineProxy(boost::asio::io_service&ios,std::shared_ptr<TaskQueue>qin,std::shared_ptr<TaskQueue>qout,std::shared_ptr<EngineEnv>engineenv);
   EngineProxy(EngineProxy const&)=delete;
   EngineProxy(EngineProxy&&)=default;
   EngineProxy&operator=(EngineProxy const&)=delete;
@@ -71,6 +67,9 @@ private:
   // sender/listener talking to engines
   std::shared_ptr<boost::asio::queue_sender<qToEngine_t>>qsenderToEngine_;
   std::shared_ptr<boost::asio::queue_listener<qFromEngine_t>>qListenerFromEngine_;
+
+  // engine environment
+  std::shared_ptr<EngineEnv>engineenv_;
 };
 }
 #endif

@@ -15,12 +15,13 @@ namespace xlate{
 class TranslationJobRepository;
 class TaskScheduler;
 class EngineProxy;
+class EngineEnv;
 
 // translation component for a language pair
 class TranslationCt{
 public:
   // ctors,assign,dtor
-  TranslationCt(boost::asio::io_service&ios,std::size_t maxScheduledJobs,std::size_t maxEngines);
+  TranslationCt(boost::asio::io_service&ios,std::size_t maxScheduledJobs,std::size_t maxEngines,std::shared_ptr<EngineEnv>enngineenv);
   TranslationCt(TranslationCt const&);
   TranslationCt(TranslationCt&&);
   TranslationCt&operator=(TranslationCt const&)=delete;
@@ -53,6 +54,7 @@ private:
 
   // other configuration parameters
   std::size_t maxEngines_;
+  std::shared_ptr<EngineEnv>enngineenv_;
 
   // components
   std::shared_ptr<TranslationJobRepository>jobrep_;
