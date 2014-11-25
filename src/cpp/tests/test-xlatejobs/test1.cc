@@ -7,6 +7,7 @@
 #include "xlate-jobs/LanguageCode.h"
 #include "xlate-jobs/EngineEnv.h"
 #include "xlate-tools/TranslationRequestFactory.h"
+#include "xlate-tools/JobHandlerScreenPrinter.h"
 #include "utils/logUtils.h"
 
 #include <boost/asio.hpp> 
@@ -99,14 +100,10 @@ void processCmdLineParams(int argc,char**argv){
 void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationJob>job,std::shared_ptr<JobQueueListener>qtransjobreceiver){
   BOOST_LOG_TRIVIAL(info)<<">>>>translated job: "<<*job;
   qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver));
-  
-  // print translated segments
-  cout<<endl<<"------------------------------------- job#: "<<job->id()<<endl;
-  list<shared_ptr<TranslationTask>>const&translated{job->translated()};
-  for(shared_ptr<TranslationTask>task:translated)cout<<"["<<task->srcSeg()<<"]-->["<<task->targetSeg()<<"][segno: "<<task->segno()<<"][id: "<<task->id()<<"][engine: "<<task->engineId()<<"]"<<endl;
-  cout<<"------------------------------------------------------------------------------"<<endl;
 
-//  for(shared_ptr<TranslationTask>task:translated)cout<<"[jobid: "<<task->jobid()<<"]"<<endl;
+  // create a job handler which print the job to screen
+  shared_ptr<JobHandler>jobHandler=make_shared<JobHandlerScreenPrinter>(job);
+  (*jobHandler)();
 }
 //  main test program
 int main(int argc,char**argv){
