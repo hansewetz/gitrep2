@@ -13,5 +13,10 @@ fs::path const&EngineEnv::basepath()const{return basepath_;}
 fs::path const&EngineEnv::ename()const{return ename_;}
 fs::path const&EngineEnv::tmpdir()const{return tmpdir_;}
 fs::path const&EngineEnv::trainenv()const{return trainenv_;}
+
+// print operator
+ostream&operator<<(ostream&os,EngineEnv const&env){
+  return os<<"basepath: "<<env.basepath().string()<<", engine-name: "<<env.ename().string()<<", tmpdir: "<<env.tmpdir().string()<<", trainenv: "<<env.trainenv().string();
+}
 }
 
