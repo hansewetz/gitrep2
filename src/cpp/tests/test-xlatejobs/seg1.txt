@@ -6,6 +6,8 @@ the stork came and laid an egg
 the project took an awfull long time to complete
 the architectural methodology does not follow the standard EU Commission right procedure
 the procedures must be followed or there will be conseqeunces
-using PM2 is a really bad idea - it's probably better to use the OPPP methodology
+using PM2 is a really bad idea - it's probably better to use the OPPM methodology
 the Jaguar, not the car, attacked the trainer
 The following sentence is a segment which is false
+we need a better infrastructure in order to build a proper translation system
+we need a better infrastructure in order to build a proper translation system
