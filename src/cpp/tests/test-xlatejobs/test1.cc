@@ -104,6 +104,8 @@ void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<Tra
   cout<<endl<<"------------------------------------- job#: "<<job->id()<<endl;
   list<shared_ptr<TranslationTask>>const&translated{job->translated()};
   for(shared_ptr<TranslationTask>task:translated)cout<<"["<<task->srcSeg()<<"]-->["<<task->targetSeg()<<"][segno: "<<task->segno()<<"][id: "<<task->id()<<"][engine: "<<task->engineId()<<"]"<<endl;
+  cout<<"------------------------------------------------------------------------------"<<endl;
+
 //  for(shared_ptr<TranslationTask>task:translated)cout<<"[jobid: "<<task->jobid()<<"]"<<endl;
 }
 //  main test program
