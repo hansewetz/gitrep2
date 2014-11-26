@@ -50,6 +50,9 @@ EngineProxy::~EngineProxy(){
 }
 // wait for new task asynchronously
 void EngineProxy::run(){
+  // check if we can start engine
+  if(state_!=EngineProxy::state_t::NOT_RUNNING)return;
+
   BOOST_LOG_TRIVIAL(debug)<<"starting new engine with id: "<<id_<<" ...";
 
   // start engine (we should never be her unless engine is not running)
@@ -62,6 +65,7 @@ void EngineProxy::run(){
   qFromEngine_=make_shared<qFromEngine_t>(fdFromEngine,deserialiser,true);
 
   // create sender/listener to/from engines
+  // (setup to cloe fds on destruction)
   qsenderToEngine_=make_shared<asio::queue_sender<qToEngine_t>>(ios_,qToEngine_.get());
   qListenerFromEngine_=make_shared<asio::queue_listener<qFromEngine_t>>(ios_,qFromEngine_.get());
 
@@ -71,7 +75,14 @@ void EngineProxy::run(){
 }
 // stop engine
 void EngineProxy::stop(){
-  // NOTE!
+  // nothing to do if we are not running
+  if(state_==EngineProxy::state_t::NOT_RUNNING)return;
+
+  // shutdown engine
+  qListenerFromEngine_.reset();
+  qsenderToEngine_.reset();
+  qFromEngine_.reset();
+  qsenderToEngine_.reset();
 }
 // get engine id
 EngineProxyId EngineProxy::id()const{
