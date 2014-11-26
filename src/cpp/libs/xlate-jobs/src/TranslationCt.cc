@@ -38,6 +38,13 @@ void TranslationCt::run(){
   scheduler_->run();
   for(auto e:engines_)e->run();
 }
+// stop component
+void TranslationCt::stop(){
+  // NOTE! Testing
+  for(auto e:engines_)e->stop();
+
+  // NOTE! Not yet done
+}
 // get #of jobs in system
 size_t TranslationCt::size()const{
   return jobrep_->size();

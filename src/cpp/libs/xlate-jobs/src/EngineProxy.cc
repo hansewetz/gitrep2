@@ -79,10 +79,12 @@ void EngineProxy::stop(){
   if(state_==EngineProxy::state_t::NOT_RUNNING)return;
 
   // shutdown engine
+  BOOST_LOG_TRIVIAL(debug)<<"stopping engine with id: "<<id_<<" ...";
   qListenerFromEngine_.reset();
   qsenderToEngine_.reset();
   qFromEngine_.reset();
   qsenderToEngine_.reset();
+  BOOST_LOG_TRIVIAL(debug)<<"engine with id: "<<id_<<" stopped";
 }
 // get engine id
 EngineProxyId EngineProxy::id()const{

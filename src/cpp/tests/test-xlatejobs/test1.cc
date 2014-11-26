@@ -109,6 +109,7 @@ void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<Tra
   // if we have processed all files, then stop asio
  if(tct->size()==0){
     BOOST_LOG_TRIVIAL(info)<<"stopping asio ...";
+    tct->stop();
     // NOTE! Stop TranslationCt now
   }else{
     // listen to next job

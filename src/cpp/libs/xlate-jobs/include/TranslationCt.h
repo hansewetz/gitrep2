@@ -30,6 +30,7 @@ public:
 
   // start translation componnet
   void run();
+  void stop();
 
   // get #of jobs in system
   std::size_t size()const;
