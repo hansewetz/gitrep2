@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+
 #ifndef __JOB_HANDLER_H__
 #define __JOB_HANDLER_H__
 #include "xlate-jobs/TranslationJob.h"
