@@ -29,6 +29,9 @@ public:
 
   // start listening on events
   void run();
+
+  // get some info from repository
+  std::size_t size()const;
 private:
   // asio objects
   boost::asio::io_service&ios_;

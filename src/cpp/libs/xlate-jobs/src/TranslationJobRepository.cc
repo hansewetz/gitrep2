@@ -28,6 +28,10 @@ void TranslationJobRepository::run(){
   waitForNewJob();
   waitForTranslatedTask();
 }
+// get #of jobs in repository
+size_t TranslationJobRepository::size()const{
+  return newJobs_.size()+schedJobs_.size();
+}
 // wait for scheduler queue to unblock
 void TranslationJobRepository::waitForUnblock(){
   BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::waitForUnblock - enabling unblock events";
@@ -62,6 +66,7 @@ void TranslationJobRepository::waitUnblockHandler(boost::system::error_code cons
     qschedSender_->sync_enq(job,ec1);
 
     // NOTE! Should check error code
+    // ...
 
     // insert job into scheduled jobs
     schedJobs_.insert(make_pair(job->id(),job));
@@ -102,6 +107,7 @@ void TranslationJobRepository::translatedTaskHandler(boost::system::error_code c
       qtransSender_->sync_enq(job,ec1);
 
       // NOTE! Should check error code
+      // ...
 
       ++ncompleted_;
       BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::translatedTaskHandler - job DONE with id: "<<*job;

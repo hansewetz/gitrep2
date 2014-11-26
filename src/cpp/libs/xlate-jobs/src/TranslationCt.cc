@@ -38,6 +38,10 @@ void TranslationCt::run(){
   scheduler_->run();
   for(auto e:engines_)e->run();
 }
+// get #of jobs in system
+size_t TranslationCt::size()const{
+  return jobrep_->size();
+}
 // get job queue for new jobs
 std::shared_ptr<JobQueue>TranslationCt::getNewJobQueue()const{
   return qnewJob_;

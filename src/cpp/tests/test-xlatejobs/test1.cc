@@ -36,6 +36,9 @@ using namespace xlate;
 namespace po=boost::program_options;
 namespace fs=boost::filesystem;
 
+// setup asio stuff
+boost::asio::io_service ios;
+
 // usage information
 namespace{
 po::options_description options{string("usage: -h file ...")};
@@ -97,21 +100,25 @@ void processCmdLineParams(int argc,char**argv){
 }
 // handler for jobs that have been translated
 // (output queue from job repository)
-void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationJob>job,std::shared_ptr<JobQueueListener>qtransjobreceiver){
+void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationJob>job,std::shared_ptr<JobQueueListener>qtransjobreceiver,TranslationCt*tct){
+  // print job to screen
   BOOST_LOG_TRIVIAL(info)<<">>>>translated job: "<<*job;
-  qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver));
-
-  // create a job handler which print the job to screen
   shared_ptr<JobHandler>jobHandler=make_shared<JobHandlerScreenPrinter>(job);
   (*jobHandler)();
+
+  // if we have processed all files, then stop asio
+ if(tct->size()==0){
+    BOOST_LOG_TRIVIAL(info)<<"stopping asio ...";
+    // NOTE! Stop TranslationCt now
+  }else{
+    // listen to next job
+    qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver,tct));
+  }
 }
 //  main test program
 int main(int argc,char**argv){
   // process command line parameters
   processCmdLineParams(argc,argv);
-
-  // setup asio stuff
-  boost::asio::io_service ios;
 
   // set log level
   // (true: log debug info, false: do not log debug info)
@@ -122,20 +129,20 @@ int main(int argc,char**argv){
     
     // (1) ------------ create a translation component and kick it off
     // (one translation component <--> one language pair)
-    TranslationCt tct{ios,maxJobsInParallel,maxEngines,engineenv};
+    TranslationCt tct{::ios,maxJobsInParallel,maxEngines,engineenv};
     tct.run();
 
     // (2) ------------ create receiver of translated jobs
     // (we'll use the receiver to print out jobs which have been translated)
-    std::shared_ptr<JobQueueListener>qtransjobreceiver{make_shared<JobQueueListener>(ios,tct.getTranslatedJobQueue().get())};
-    qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver));
+    std::shared_ptr<JobQueueListener>qtransjobreceiver{make_shared<JobQueueListener>(::ios,tct.getTranslatedJobQueue().get())};
+    qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver,&tct));
 
     // (3) ------------ generate and send input for translation
     // create a request factory
     TranslationRequestFactory reqFact;
 
     // create sender to translation repository
-    std::shared_ptr<JobQueueSender>qnewjobsender{make_shared<JobQueueSender>(ios,tct.getNewJobQueue().get())};
+    std::shared_ptr<JobQueueSender>qnewjobsender{make_shared<JobQueueSender>(::ios,tct.getNewJobQueue().get())};
 
     // create request from file
     for(auto file:files){
@@ -148,7 +155,7 @@ int main(int argc,char**argv){
     // (4) ------------ run asynchronous machinery
     // (everything runs under asio with the exception of the actual engines which runs as separate processes)
     BOOST_LOG_TRIVIAL(info)<<"starting asio ...";
-    ios.run();
+    ::ios.run();
   }
   catch(exception const&e){
     BOOST_LOG_TRIVIAL(debug)<<"cought exception: "<<e.what();

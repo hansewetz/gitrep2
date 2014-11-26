@@ -31,7 +31,10 @@ public:
   // start translation componnet
   void run();
 
-  // getters
+  // get #of jobs in system
+  std::size_t size()const;
+
+  // queue getters
   std::shared_ptr<JobQueue>getNewJobQueue()const;
   std::shared_ptr<JobQueue>getTranslatedJobQueue()const;
 private:
