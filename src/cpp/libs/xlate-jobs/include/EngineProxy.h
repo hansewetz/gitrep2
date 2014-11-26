@@ -32,6 +32,7 @@ public:
 
   // run engine
   void run();
+  void stop();
 
   // getters
   EngineProxyId id()const;

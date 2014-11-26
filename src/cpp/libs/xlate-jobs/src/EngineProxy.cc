@@ -69,6 +69,10 @@ void EngineProxy::run(){
   waitForNewTask();
   BOOST_LOG_TRIVIAL(debug)<<"engine with id: "<<id_<<" started";
 }
+// stop engine
+void EngineProxy::stop(){
+  // NOTE!
+}
 // get engine id
 EngineProxyId EngineProxy::id()const{
   return id_;
@@ -79,7 +83,7 @@ void EngineProxy::waitForNewTask(){
   qtaskListener_->async_deq(bind(&EngineProxy::newTaskHandler,this,_1,_2));
   state_=EngineProxy::state_t::WAITING4TASK;
 }
-// handle a new task
+// handle a new task to be translated
 void EngineProxy::newTaskHandler(boost::system::error_code const&ec,shared_ptr<TranslationTask>task){
   BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::newTaskHandler - got task event: "<<*task;
 
@@ -88,9 +92,17 @@ void EngineProxy::newTaskHandler(boost::system::error_code const&ec,shared_ptr<T
   boost::system::error_code ec1;
   qsenderToEngine_->sync_enq(task->srcSeg(),ec1);
 
-  // Check error code
-  // NOTE! Not yet done
-
+  // if operation was aborted we stop engine
+  if(ec1==boost::asio::error::operation_aborted){
+    BOOST_LOG_TRIVIAL(warning)<<"EngineProxy::engineListenerHandler - sending of segment to engine aborted, stopping engine";
+    stop();
+    return;
+  }else
+  if(ec1!= boost::system::error_code()){
+    BOOST_LOG_TRIVIAL(warning)<<"EngineProxy::engineListenerHandler - sending of segment to engine failed, stopping engine, ec: "<<ec1.message();
+    stop();
+    return;
+  }
   // we are now translating
   state_=EngineProxy::state_t::TRANSLATING;
 
@@ -99,14 +111,20 @@ void EngineProxy::newTaskHandler(boost::system::error_code const&ec,shared_ptr<T
 }
 // handler for segments arriving from engine
 void EngineProxy::engineListenerHandler(boost::system::error_code const&ec,string const&msg,shared_ptr<TranslationTask>task){
-  // check for timeout
+  // check for aborted - in this case we stop engine
+  if(ec==boost::asio::error::operation_aborted){
+    BOOST_LOG_TRIVIAL(warning)<<"EngineProxy::engineListenerHandler - sending of segment to engine aborted, stopping engine";
+    stop();
+    return;
+  }else
   if(ec==boost::asio::error::timed_out){
-// NOTE! Do something better
     task->setTargetSeg("<TIMEOUT>");
+  }else
+  if(ec!=boost::system::error_code()){
+    BOOST_LOG_TRIVIAL(warning)<<"EngineProxy::engineListenerHandler - sending of segment to engine failed, stopping engine, ec: "<<ec.message();
+    stop();
+    return;
   }else{
-    // check error code 
-    // NOTE! Not yet done
-
     // set translated segment
     BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - got translated task: "<<*task;
     task->setTargetSeg(msg);
@@ -114,9 +132,6 @@ void EngineProxy::engineListenerHandler(boost::system::error_code const&ec,strin
   // send translated task
   boost::system::error_code ec1;
   qtaskSender_->sync_enq(task,ec1);
-
-  // check error code
-  // NOTE! Not yet done
 
   // start waiting for a new task
   waitForNewTask();
