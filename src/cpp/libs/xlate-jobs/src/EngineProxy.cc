@@ -44,8 +44,9 @@ EngineProxy::~EngineProxy(){
   // if engine is running we must wait for it
   if(state_!=EngineProxy::state_t::NOT_RUNNING){
     int waitstat;
-    BOOST_LOG_TRIVIAL(debug)<<"waiting for child (pid: "<<cpid_<<") ..."<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<"waiting for child (pid: "<<cpid_<<") ...";
     while(waitpid(cpid_,&waitstat,0)!=cpid_);
+    cpid_=-1;
   }
 }
 // wait for new task asynchronously
@@ -77,13 +78,18 @@ void EngineProxy::run(){
 void EngineProxy::stop(){
   // nothing to do if we are not running
   if(state_==EngineProxy::state_t::NOT_RUNNING)return;
+  state_=EngineProxy::state_t::NOT_RUNNING;
 
-  // shutdown engine
-  BOOST_LOG_TRIVIAL(debug)<<"stopping engine with id: "<<id_<<" ...";
-  qListenerFromEngine_.reset();
-  qsenderToEngine_.reset();
-  qFromEngine_.reset();
-  qsenderToEngine_.reset();
+  // shutdown connection to engine - only need to close one pipe
+  BOOST_LOG_TRIVIAL(debug)<<"stopping engine with id: "<<id_<<", pid: "<<cpid_<<" ...";
+  qToEngine_.reset();
+
+  // wait for engine to stop
+  int waitstat;
+  BOOST_LOG_TRIVIAL(debug)<<"waiting for child (pid: "<<cpid_<<") ...";
+  while(waitpid(cpid_,&waitstat,0)!=cpid_);
+  cpid_=-1;
+
   BOOST_LOG_TRIVIAL(debug)<<"engine with id: "<<id_<<" stopped";
 }
 // get engine id

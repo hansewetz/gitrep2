@@ -1,4 +1,1 @@
 hello world again
-there is a bird on the computer
-there are many computers in this room
-git sucks as a source controll system

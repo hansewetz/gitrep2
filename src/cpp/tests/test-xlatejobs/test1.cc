@@ -55,7 +55,7 @@ void usage(std::string const&msg){
 namespace{
 vector<string>files;               // files to translate
 size_t maxJobsInParallel{3};       // max #of segements to translate in parallel
-size_t maxEngines{10};             // max #of engines to start
+size_t maxEngines{1};             // max #of engines to start
 }
 // process command line params
 void processCmdLineParams(int argc,char**argv){
@@ -108,9 +108,8 @@ void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<Tra
 
   // if we have processed all files, then stop asio
  if(tct->size()==0){
-    BOOST_LOG_TRIVIAL(info)<<"stopping asio ...";
+    // stop translation ct
     tct->stop();
-    // NOTE! Stop TranslationCt now
   }else{
     // listen to next job
     qtransjobreceiver->async_deq(std::bind(translatedJobHandler,_1,_2,qtransjobreceiver,tct));
@@ -123,7 +122,7 @@ int main(int argc,char**argv){
 
   // set log level
   // (true: log debug info, false: do not log debug info)
-  utils::initBoostFileLogging(false);
+  utils::initBoostFileLogging(true);
   try{
     // (0) setu engine environment 
     shared_ptr<EngineEnv>engineenv=make_shared<EngineEnv>(EXEDIR,PROGPATH,PROGNAME);
@@ -157,6 +156,7 @@ int main(int argc,char**argv){
     // (everything runs under asio with the exception of the actual engines which runs as separate processes)
     BOOST_LOG_TRIVIAL(info)<<"starting asio ...";
     ::ios.run();
+    BOOST_LOG_TRIVIAL(info)<<"asio stopped";
   }
   catch(exception const&e){
     BOOST_LOG_TRIVIAL(debug)<<"cought exception: "<<e.what();
