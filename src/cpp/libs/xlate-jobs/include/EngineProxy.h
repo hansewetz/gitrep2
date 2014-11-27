@@ -55,7 +55,7 @@ private:
   int cpid_;
 
   // translation tmo ms
-  std::size_t xlateTmoMs_=70000; // NOTE! Hard coded
+  std::size_t xlateTmoMs_=120000; // NOTE! Hard coded
 
   // asio stuff
   boost::asio::io_service&ios_;

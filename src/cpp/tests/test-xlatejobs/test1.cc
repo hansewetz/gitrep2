@@ -131,7 +131,7 @@ int main(int argc,char**argv){
 
   // set log level
   // (true: log debug info, false: do not log debug info)
-  utils::initBoostFileLogging(true);
+  utils::initBoostFileLogging(false);
   try{
     // (0) setu engine environment 
     shared_ptr<EngineEnv>engineenv=make_shared<EngineEnv>(EXEDIR,PROGPATH,PROGNAME);
