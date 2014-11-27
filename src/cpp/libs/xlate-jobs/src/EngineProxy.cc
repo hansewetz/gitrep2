@@ -41,13 +41,7 @@ EngineProxy::EngineProxy(asio::io_service&ios,shared_ptr<TaskQueue>qin,shared_pt
 }
 // dtor
 EngineProxy::~EngineProxy(){
-  // if engine is running we must wait for it
-  if(state_!=EngineProxy::state_t::NOT_RUNNING){
-    int waitstat;
-    BOOST_LOG_TRIVIAL(debug)<<"waiting for child (pid: "<<cpid_<<") ...";
-    while(waitpid(cpid_,&waitstat,0)!=cpid_);
-    cpid_=-1;
-  }
+  stopEngine();
 }
 // wait for new task asynchronously
 void EngineProxy::run(){
@@ -78,19 +72,9 @@ void EngineProxy::run(){
 void EngineProxy::stop(){
   // nothing to do if we are not running
   if(state_==EngineProxy::state_t::NOT_RUNNING)return;
-  state_=EngineProxy::state_t::NOT_RUNNING;
-
-  // shutdown connection to engine - only need to close one pipe
-  BOOST_LOG_TRIVIAL(debug)<<"stopping engine with id: "<<id_<<", pid: "<<cpid_<<" ...";
-  qToEngine_.reset();
 
   // wait for engine to stop
-  int waitstat;
-  BOOST_LOG_TRIVIAL(debug)<<"waiting for child (pid: "<<cpid_<<") ...";
-  while(waitpid(cpid_,&waitstat,0)!=cpid_);
-  cpid_=-1;
-
-  BOOST_LOG_TRIVIAL(debug)<<"engine with id: "<<id_<<" stopped";
+  stopEngine();
 }
 // get engine id
 EngineProxyId EngineProxy::id()const{
@@ -154,5 +138,34 @@ void EngineProxy::engineListenerHandler(boost::system::error_code const&ec,strin
 
   // start waiting for a new task
   waitForNewTask();
+}
+// helper to stopo an engine
+void EngineProxy::stopEngine(){
+  // if engine is running we must wait for it
+  if(state_!=EngineProxy::state_t::NOT_RUNNING){
+    BOOST_LOG_TRIVIAL(debug)<<"stopping engine with id: "<<id_<<", pid: "<<cpid_<<" ...";
+
+    // set state to not running
+    state_=EngineProxy::state_t::NOT_RUNNING;
+
+    // stop engine by closing pipe
+    ::close(qToEngine_->getfd());
+
+    // wait for engine to stop
+    int waitstat;
+    BOOST_LOG_TRIVIAL(debug)<<"waiting for child (pid: "<<cpid_<<") ...";
+    if(cpid_!=-1){
+      // NOTE! For some reason we cannot wait for a specific pid without killing it first.
+      // if I just close the pipe, then waitpid will hang
+
+      // kill process to be sure
+      kill(cpid_,SIGHUP);
+
+      // wait for it - make sure it won't become a zombie
+      while(waitpid(cpid_,&waitstat,0)!=-1);
+      BOOST_LOG_TRIVIAL(debug)<<"waited for pid: "<<cpid_;
+      cpid_=-1;
+    }
+  }
 }
 }

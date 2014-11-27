@@ -42,6 +42,9 @@ private:
   void newTaskHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task);
   void engineListenerHandler(boost::system::error_code const&ec,std::string const&msg,std::shared_ptr<TranslationTask>task);
 
+  // helper to stopo an engine
+  void stopEngine();
+
   // id of this engine
   EngineProxyId id_;
 

@@ -55,7 +55,7 @@ void usage(std::string const&msg){
 namespace{
 vector<string>files;               // files to translate
 size_t maxJobsInParallel{3};       // max #of segements to translate in parallel
-size_t maxEngines{1};             // max #of engines to start
+size_t maxEngines{10};             // max #of engines to start
 }
 // process command line params
 void processCmdLineParams(int argc,char**argv){
