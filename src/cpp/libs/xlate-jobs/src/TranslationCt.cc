@@ -7,6 +7,7 @@
 #include "xlate-jobs/TaskScheduler.h"
 #include "xlate-jobs/EngineProxy.h"
 #include "xlate-jobs/EngineEnv.h"
+#include <boost/log/trivial.hpp>
 using namespace std;
 namespace xlate{
 
@@ -40,11 +41,32 @@ void TranslationCt::run(){
 }
 // stop component
 void TranslationCt::stop(){
-  // NOTE! Testing
+  // stop engines
   for(auto e:engines_)e->stop();
 
-  // NOTE! Not yet done
-  // ...
+  // stop all queues - will send interup to all agent registered with queue
+  // (interup in each component should not re-register with asio)
+  BOOST_LOG_TRIVIAL(debug)<<"TranslationCt::stop - stopping qnewJob ...";
+  qnewJob_->disable_enq(true);
+  qnewJob_->disable_deq(true);
+
+  BOOST_LOG_TRIVIAL(debug)<<"TranslationCt::stop - stopping qschedJob ...";
+  qschedJob_->disable_enq(true);
+  qschedJob_->disable_deq(true);
+
+  BOOST_LOG_TRIVIAL(debug)<<"TranslationCt::stop - stopping qschedTask ...";
+  qschedTask_->disable_enq(true);
+  qschedTask_->disable_deq(true);
+
+  BOOST_LOG_TRIVIAL(debug)<<"TranslationCt::stop - stopping qtransTasks ...";
+  qtransTasks_->disable_enq(true);
+  qtransTasks_->disable_deq(true);
+
+  BOOST_LOG_TRIVIAL(debug)<<"TranslationCt::stop - stopping qtransJobs ...";
+  qtransJobs_->disable_enq(true);
+  qtransJobs_->disable_deq(true);
+
+  BOOST_LOG_TRIVIAL(debug)<<"TranslationCt::stop - all queues stopped";
 }
 // get #of jobs in system
 size_t TranslationCt::size()const{

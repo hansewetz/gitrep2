@@ -14,7 +14,7 @@ JobHandlerScreenPrinter::JobHandlerScreenPrinter(shared_ptr<TranslationJob>job):
 // virtual function call - print job to screen
 void JobHandlerScreenPrinter::operator()(){
   // print translated segments
-  cout<<endl<<"------------------------------------- job#: "<<job_->id()<<endl;
+  cout<<endl<<"------------------------------------- job#: "<<job_->id()<<" -------------------------------------"<<endl;
   list<shared_ptr<TranslationTask>>const&translated{job_->translated()};
   for(shared_ptr<TranslationTask>task:translated)cout<<"["<<task->srcSeg()<<"]-->["<<task->targetSeg()<<"][segno: "<<task->segno()<<"][id: "<<task->id()<<"][engine: "<<task->engineId()<<"]"<<endl;
   cout<<"------------------------------------------------------------------------------"<<endl;

@@ -51,6 +51,15 @@ void TranslationJobRepository::waitForTranslatedTask(){
 // handler for waiting for scheduler queue to be unblocked
 // (only place from which we send jobs to scheduler)
 void TranslationJobRepository::waitUnblockHandler(boost::system::error_code const&ec){
+  // check for aborted/error
+  if(ec==boost::asio::error::operation_aborted){
+    BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::waitUnblockHandler - unblocking of queue to scheduler aborted ...";
+    return;
+  }else
+  if(ec!= boost::system::error_code()){
+    BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::waitUnblockHandler - unblocking of queue to scheduler aborted, ec: "<<ec.message();
+    return;
+  }
   BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::waitUnblockHandler - got unblock event";
 
   // we are no longer waiting for unblock event
@@ -78,6 +87,17 @@ void TranslationJobRepository::waitUnblockHandler(boost::system::error_code cons
 // handler for new job queue
 // (only collects jobs and enables waiting for unblock event)
 void TranslationJobRepository::newJobHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationJob>job){
+  // check for aborted/errors
+  if(ec==boost::asio::error::operation_aborted){
+    // we'll stop listening
+    BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::newJobHandler - waiting for new job aborted ...";
+    return;
+  }
+  if(ec!=boost::system::error_code()){
+    // we'll stop listening
+    BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::newJobHandler - waiting for new job aborted, ec: "<<ec.message();
+    return;
+  }
   BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::newJobHandler - got job event: "<<*job;
 
   // save job and wait for new job
@@ -89,6 +109,17 @@ void TranslationJobRepository::newJobHandler(boost::system::error_code const&ec,
 }
 // handle received translated task 
 void TranslationJobRepository::translatedTaskHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task){
+  // check for aborted/errors
+  if(ec==boost::asio::error::operation_aborted){
+    // we'll stop listening
+    BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::translatedTaskHandler - reception of translated task aborted ...";
+    return;
+  }
+  if(ec!=boost::system::error_code()){
+    // we'll stop listening
+    BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::translatedTaskHandler -  reception of translated task aborted, ec: "<<ec.message();
+    return;
+  }
   BOOST_LOG_TRIVIAL(debug)<<"TranslationJobRepository::translatedTaskHandler - got task event: "<<*task;
 
   // lookup job for task in schedJobs_
@@ -101,7 +132,7 @@ void TranslationJobRepository::translatedTaskHandler(boost::system::error_code c
     // add translated task to job and check if job is done
     job->addTranslatedTask(task);
     if(job->done()){
-      // remove job form scheduled jobs and enq job on output queue
+      // remove job from scheduled jobs and enq job on output queue
       if(it!=schedJobs_.end())schedJobs_.erase(it);
       boost::system::error_code ec1;
       qtransSender_->sync_enq(job,ec1);

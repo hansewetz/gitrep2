@@ -22,12 +22,3 @@ Notes:
 	- currently the scheduler has a simple policy: process onoy one job at a time even if it holds multiple jobs. This could be changed to
 	  process - say 10 jobs- simultaneously taking tasks form the jobs in a round robin fashon
 	- the scheduler acts as a 'fosset' taking chings of segments in and spreading splitting them after which they are sent to engines
-
-TODO:
------
-	- add a TranslationCt which manages all the aspects of job repository, scheduler and engines
-	- add controll to the components so we can set various parameters
-	- scheduler should process all jobs simultaneously which it has received. I.e., the job-paralism in the scheduler shiould be controlled through it's input queue
-	- add synchrounous enq in asio queue_sender (we could use it instead of sending asyncrounously)
-	- handle error conditions from asio - right now they are not handled at all
-	- we are starting engines in TranslationCt ctor - should start in run() method

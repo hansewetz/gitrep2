@@ -35,6 +35,18 @@ void TaskScheduler::waitForNewJob(){
 // handle unblock event
 // (only place from which we send tasks)
 void TaskScheduler::waitUnblockHandler(boost::system::error_code const&ec){
+  // check for aborted/errors
+  if(ec==boost::asio::error::operation_aborted){
+    // we'll stop listening
+    BOOST_LOG_TRIVIAL(debug)<<"TaskScheduler::waitUnblockHandler - unbocking of queue to engine proxy aborted ...";
+    return;
+  }
+  if(ec!=boost::system::error_code()){
+    // we'll stop listening
+    BOOST_LOG_TRIVIAL(debug)<<"TaskScheduler::waitUnblockHandler - unblocking of queue to engine proxy error ...";
+    return;
+  }
+
   BOOST_LOG_TRIVIAL(debug)<<"TaskScheduler::waitUnblockHandler - got unblock event";
 
   // we are no longer waiting for unblock event
@@ -46,8 +58,16 @@ void TaskScheduler::waitUnblockHandler(boost::system::error_code const&ec){
     BOOST_LOG_TRIVIAL(debug)<<"TaskScheduler::waitUnblockHandler - enq into task queue";
     boost::system::error_code ec1;
     qtaskSender_->sync_enq(task,ec1);
-
-    // NOTE! Should check error code
+    if(ec1==boost::asio::error::operation_aborted){
+      // we'll stop listening
+      BOOST_LOG_TRIVIAL(debug)<<"TaskScheduler::waitUnblockHandler - sync enq into engine task queue aborted ...";
+      return;
+    }
+    if(ec1!=boost::system::error_code()){
+      // we'll stop listening
+      BOOST_LOG_TRIVIAL(debug)<<"TaskScheduler::waitUnblockHandler - sync enq into engine task queue error, ec: "<<ec1.message();
+      return;
+    }
   }
   // if we have a next task, then wait for task queue to unblock
   if(hasNextTask())waitForUnblock();
@@ -55,6 +75,17 @@ void TaskScheduler::waitUnblockHandler(boost::system::error_code const&ec){
 // handle a new job
 // (only collects jobs and enables waiting for unblock event)
 void TaskScheduler::newJobHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationJob>job){
+  // check for aborted/errors
+  if(ec==boost::asio::error::operation_aborted){
+    // we'll stop listening
+    BOOST_LOG_TRIVIAL(debug)<<"TaskScheduler::newJobHandler - receiption of new job into scheduler aborted ...";
+    return;
+  }
+  if(ec!=boost::system::error_code()){
+    // we'll stop listening
+    BOOST_LOG_TRIVIAL(debug)<<"TaskScheduler::newJobHandler - receiption of new job into scheduler error, ec: "<<ec.message();
+    return;
+  }
   BOOST_LOG_TRIVIAL(debug)<<"TaskScheduler::newJobHandler - got job event: "<<*job;
 
   // save job and wait for new job (only save job if it has tasks)

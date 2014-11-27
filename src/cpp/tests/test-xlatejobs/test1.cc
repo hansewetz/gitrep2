@@ -101,6 +101,15 @@ void processCmdLineParams(int argc,char**argv){
 // handler for jobs that have been translated
 // (output queue from job repository)
 void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationJob>job,std::shared_ptr<JobQueueListener>qtransjobreceiver,TranslationCt*tct){
+  // check error code
+  if(ec==boost::asio::error::operation_aborted){
+    BOOST_LOG_TRIVIAL(info)<<"::translatedJobHandler: operation interupted";
+    return;
+  }
+  if(ec!=boost::system::error_code()){
+    BOOST_LOG_TRIVIAL(info)<<"::translatedJobHandler: error, ec: "<<ec.message();
+    return;
+  }
   // print job to screen
   BOOST_LOG_TRIVIAL(info)<<">>>>translated job: "<<*job;
   shared_ptr<JobHandler>jobHandler=make_shared<JobHandlerScreenPrinter>(job);
@@ -149,7 +158,7 @@ int main(int argc,char**argv){
       // create request, then job and send job for translation
       std::shared_ptr<TranslateRequest>req{reqFact.requestFromSegmentedFile(make_lanpair("en","sv"),file)};
       std::shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};
-      BOOST_LOG_TRIVIAL(info)<<"adding file: \""<<file<<"\"<< for translation (jobid: "<<job->id()<<")";
+      BOOST_LOG_TRIVIAL(info)<<"adding file: \""<<file<<"\" for translation (jobid: "<<job->id()<<")";
       qnewjobsender->async_enq(job,[](boost::system::error_code const&ec){});
     }
     // (4) ------------ run asynchronous machinery
