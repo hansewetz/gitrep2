@@ -1,0 +1,43 @@
+XLATE:
+------
+- move stopping of queues (resources) into compnnets themsolfg
+- in TranslationJob, change map so that map is sorted by segment number (we'll then print out segments in correct order)
+- document how shutdown should be done + how it should be designed
+- ensure we can restart a component that have been stopped
+- go through logging in details to see what to log at what level
+- make sure we handle all errors
+- need tow tmos for engines - one when engines are starting, another when engines are running
+- add callback when a segment has been trasnlated so we can measure progress
+- need tmo for segments in repositpry - should be eneough with a single tmo and a list of tmos pointing to tasks (we don't need multiple deadline timers running)
+- add cmd line parameters for debug, #engines, tmos, etc.
+- add more JobHandlers (email, saving to file, paths, program to truse for translation etc.)
+- check that there are no bugs in repository with mismatch with adding tasks in wrong place
+- go through in detail how we start a translator (execvp etc.)
+
+
+
+OTHER COMPONENTS:
+-----------------
+- conversion/retro-conversion
+- segmenter
+
+
+
+INFRASTRUCTURE:
+---------------
+- implement socket_queue
+- add building in parallel - takes to long time to build now
+
+
+TRANSLATOR:
+-----------
+- install moses and use it directly
+
+
+DESIGN:
+-------
+- the job repository should probably send segments to scheduler so segments could be retried if timed out (should we handle timeout - failure?)
+- architecture should be re-visited 
+- how should engines be attached to system
+- how should resource allocation be handled
+
