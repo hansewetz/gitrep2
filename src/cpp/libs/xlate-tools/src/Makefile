@@ -1,7 +1,7 @@
 # To be built
 LOCAL_TARGET    =
 LOCAL_SOTARGET  = $(PROJECT_ROOT)/lib/libxlate-tools.so
-LOCAL_OBJS      = TranslationRequestFactory.o JobHandler.o JobHandlerScreenPrinter.o
+LOCAL_OBJS      = TranslationRequestFactory.o JobHandler.o JobHandlerScreenPrinter.o utils.o
 
 # Control.
 LOCAL_LIBS      = 

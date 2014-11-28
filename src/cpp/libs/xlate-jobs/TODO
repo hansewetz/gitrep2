@@ -1,7 +1,9 @@
 XLATE:
 ------
 - move stopping of queues (resources) into compnnets themsolfg
+	NOTE! Might not be a good idea since stopping a queue will impact other components
 - in TranslationJob, change map so that map is sorted by segment number (we'll then print out segments in correct order)
+	NOTE! Might nbot be a good idea since it's the translation task id which is the keye
 - document how shutdown should be done + how it should be designed
 - ensure we can restart a component that have been stopped
 - go through logging in details to see what to log at what level
@@ -27,6 +29,7 @@ INFRASTRUCTURE:
 ---------------
 - implement socket_queue
 - add building in parallel - takes to long time to build now
+- add method for geting queue pointer form queue_listere()/queue_sender()
 
 
 TRANSLATOR:
