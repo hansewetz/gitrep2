@@ -1,6 +1,13 @@
 XLATE:
 ------
-- add cmd line parameters for debug, #engines, tmos, etc.
+- add cmd line parameters for:
+	debug			DONE
+	#engines		DONE
+	tmos
+	language-pair
+	execution path
+	execution name
+	execution directory
 
 - move stopping of queues (resources) into compnnets themsolfg
 	NOTE! Might not be a good idea since stopping a queue will impact other components

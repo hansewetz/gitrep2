@@ -55,12 +55,23 @@ void usage(std::string const&msg){
 namespace{
 vector<string>files;               // files to translate
 size_t maxJobsInParallel{3};       // max #of segements to translate in parallel
-size_t maxEngines{10};             // max #of engines to start
+size_t maxEngines{1};              // max #of engines to start
+bool debug{false};                 // debuggging on/off
+}
+// print command line options
+void prinCmdLineOptions(){
+  cout<<"Command line options"<<endl;
+  cout<<"\tdebug: "<<boolalpha<<debug<<endl;
+  cout<<"\t#engines: "<<maxEngines<<endl;
+  cout<<"\tfiles to translate:"<<endl;
+  for(auto const&f:files)cout<<f<<endl;
 }
 // process command line params
 void processCmdLineParams(int argc,char**argv){
   // add help option
   options.add_options()("help,h","help");
+  options.add_options()("engines,e",po::value<size_t>(),"max #of engines (default 1)");
+  options.add_options()("debug,d","if set, debugging is turned on (default off)");
   options.add_options()("file,f","list of files to be translated");
 
   // --- setup for processing command line parametersprocess command line parameters
@@ -86,9 +97,16 @@ void processCmdLineParams(int argc,char**argv){
   if(vm.count("files")){
     trailing=vm["files"].as<vector<string>>();
   }
-  // --- check for help
+  // check for help
   if(vm.count("help"))usage();
 
+  // check for debug
+  if(vm.count("debug"))debug=true;
+
+  // check for #of engines
+  if(vm.count("engines")){
+    if((maxEngines=vm["engines"].as<size_t>())==0)usage();
+  }
   // get file to translate
   for(auto const&t:trailing){
     string const&file{t};
@@ -131,7 +149,7 @@ int main(int argc,char**argv){
 
   // set log level
   // (true: log debug info, false: do not log debug info)
-  utils::initBoostFileLogging(false);
+  utils::initBoostFileLogging(debug);
   try{
     // (0) setu engine environment 
     shared_ptr<EngineEnv>engineenv=make_shared<EngineEnv>(EXEDIR,PROGPATH,PROGNAME);
