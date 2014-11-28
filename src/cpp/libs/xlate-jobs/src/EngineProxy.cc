@@ -155,7 +155,7 @@ void EngineProxy::stopEngine(){
     int waitstat;
     BOOST_LOG_TRIVIAL(debug)<<"waiting for child (pid: "<<cpid_<<") ...";
     if(cpid_!=-1){
-      // NOTE! For some reason we cannot wait for a specific pid without killing it first.
+      // For some reason we cannot wait for a specific pid without killing it first.
       // if I just close the pipe, then waitpid will hang
 
       // kill process to be sure

@@ -1,9 +1,9 @@
 XLATE:
 ------
+- add cmd line parameters for debug, #engines, tmos, etc.
+
 - move stopping of queues (resources) into compnnets themsolfg
 	NOTE! Might not be a good idea since stopping a queue will impact other components
-- in TranslationJob, change map so that map is sorted by segment number (we'll then print out segments in correct order)
-	NOTE! Might nbot be a good idea since it's the translation task id which is the keye
 - document how shutdown should be done + how it should be designed
 - ensure we can restart a component that have been stopped
 - go through logging in details to see what to log at what level
@@ -11,7 +11,6 @@ XLATE:
 - need tow tmos for engines - one when engines are starting, another when engines are running
 - add callback when a segment has been trasnlated so we can measure progress
 - need tmo for segments in repositpry - should be eneough with a single tmo and a list of tmos pointing to tasks (we don't need multiple deadline timers running)
-- add cmd line parameters for debug, #engines, tmos, etc.
 - add more JobHandlers (email, saving to file, paths, program to truse for translation etc.)
 - check that there are no bugs in repository with mismatch with adding tasks in wrong place
 - go through in detail how we start a translator (execvp etc.)
