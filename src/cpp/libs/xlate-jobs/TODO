@@ -1,5 +1,12 @@
 XLATE:
 ------
+
+>>>> important <<<<
+- in EngineProxy, keep a count on #of tmos - if we get a segment from moses and tmocount!= 0, then trash it and decrement tmpcount, else add it to Task
+- after adding 'closed' on fd-queue, check for error code in EngineProxy
+>>>> important <<<<
+
+
 - add cmd line parameters for:
 	debug			DONE
 	#engines		DONE
@@ -33,6 +40,10 @@ OTHER COMPONENTS:
 
 INFRASTRUCTURE:
 ---------------
+>>>> important <<<<
+- when error on 'fd', return an error code 'closed' to caller so that asio can call handler
+>>>> important <<<<
+
 - implement socket_queue
 - add building in parallel - takes to long time to build now
 - add method for geting queue pointer form queue_listere()/queue_sender()
