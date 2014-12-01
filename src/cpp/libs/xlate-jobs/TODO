@@ -3,7 +3,6 @@ XLATE:
 
 >>>> important <<<<
 - in EngineProxy, keep a count on #of tmos - if we get a segment from moses and tmocount!= 0, then trash it and decrement tmpcount, else add it to Task
-- after adding 'closed' on fd-queue, check for error code in EngineProxy
 >>>> important <<<<
 
 
@@ -34,7 +33,7 @@ XLATE:
 OTHER COMPONENTS:
 -----------------
 - conversion/retro-conversion
-- segmenter
+- segmenter (simple)
 
 
 
@@ -44,9 +43,15 @@ INFRASTRUCTURE:
 - when error on 'fd', return an error code 'closed' to caller so that asio can call handler
 >>>> important <<<<
 
-- implement socket_queue
 - add building in parallel - takes to long time to build now
 - add method for geting queue pointer form queue_listere()/queue_sender()
+
+
+SOCKETQUEUE:
+------------
+- two queues: server/client queue
+- make it 1-1 for right now
+- see notes in notebook
 
 
 TRANSLATOR:
@@ -56,7 +61,7 @@ TRANSLATOR:
 
 DESIGN:
 -------
-- the job repository should probably send segments to scheduler so segments could be retried if timed out (should we handle timeout - failure?)
+- the job repository should keep a timer and a liist of future timeouts so that if a task doe snot come back it marks it as <EMPTY>
 - architecture should be re-visited 
 - how should engines be attached to system
 - how should resource allocation be handled

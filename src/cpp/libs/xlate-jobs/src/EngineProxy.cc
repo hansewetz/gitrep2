@@ -37,7 +37,7 @@ EngineProxy::EngineProxy(asio::io_service&ios,shared_ptr<TaskQueue>qin,shared_pt
     qtaskListener_(make_shared<TaskQueueListener>(ios_,qin.get())),
     qtaskSender_(make_shared<TaskQueueSender>(ios_,qout.get())),
     state_{state_t(EngineProxy::state_t::NOT_RUNNING)},
-    cpid_(-1),engineenv_(engineenv){
+    cpid_(-1),engineenv_(engineenv),ntmos_(0){
 }
 // dtor
 EngineProxy::~EngineProxy(){
@@ -122,15 +122,17 @@ void EngineProxy::engineListenerHandler(boost::system::error_code const&ec,strin
   }else
   if(ec==boost::asio::error::timed_out){
     task->setTargetSeg("<TIMEOUT>");
+    ++ntmos_;
   }else
   if(ec!=boost::system::error_code()){
     BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - sending of segment to engine failed, ec: "<<ec.message();
     stop();
     return;
   }else{
-    // set translated segment
+    // set translated segment unless we have outstanding timeoued out segments
     BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - got translated task: "<<*task;
-    task->setTargetSeg(msg);
+    if(ntmos_==0)task->setTargetSeg(msg);
+    else --ntmos_;
   }
   // send translated task
   boost::system::error_code ec1;
