@@ -7,18 +7,19 @@ namespace fs=boost::filesystem;
 namespace xlate{
 
 // ctot
-EngineEnv::EngineEnv(fs::path const&exedir,fs::path const&progpath,std::string const&ename):
-    exedir_(exedir),progpath_(progpath),ename_(ename){
+EngineEnv::EngineEnv(fs::path const&exedir,fs::path const&progpath,string const&ename,size_t tmoMs):
+    exedir_(exedir),progpath_(progpath),ename_(ename),tmoMs_(tmoMs){
 }
 
 // getters
 fs::path const&EngineEnv::exedir()const{return exedir_;}
 fs::path const&EngineEnv::progpath()const{return progpath_;}
-std::string const&EngineEnv::ename()const{return ename_;}
+string const&EngineEnv::ename()const{return ename_;}
+std::size_t EngineEnv::tmoMs()const{return tmoMs_;}
 
 // print operator
 ostream&operator<<(ostream&os,EngineEnv const&env){
-  return os<<"exedir: "<<env.exedir().string()<<", engine-name: "<<env.ename()<<", progpath: "<<env.progpath().string();
+  return os<<"exedir: "<<env.exedir().string()<<", engine-name: "<<env.ename()<<", progpath: "<<env.progpath().string()<<", tmp (ms): "<<env.tmoMs();
 }
 }
 

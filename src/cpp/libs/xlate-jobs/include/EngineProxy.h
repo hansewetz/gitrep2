@@ -54,9 +54,6 @@ private:
   // pid of engine child
   int cpid_;
 
-  // translation tmo ms
-  std::size_t xlateTmoMs_=120000; // NOTE! Hard coded
-
   // #of outstanding segments (i.e., we are have timed out on them)
   std::size_t ntmos_;
 

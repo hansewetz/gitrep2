@@ -1,10 +1,9 @@
 XLATE:
 ------
 
->>>> important <<<<
-- in EngineProxy, keep a count on #of tmos - if we get a segment from moses and tmocount!= 0, then trash it and decrement tmpcount, else add it to Task
->>>> important <<<<
-
+>>>> IMPORTANT
+- need two tmos for engines - one when engines are starting, another when engines are running
+>>>> IMPORTANT
 
 - add cmd line parameters for:
 	debug			DONE
@@ -21,7 +20,6 @@ XLATE:
 - ensure we can restart a component that have been stopped
 - go through logging in details to see what to log at what level
 - make sure we handle all errors
-- need tow tmos for engines - one when engines are starting, another when engines are running
 - add callback when a segment has been trasnlated so we can measure progress
 - need tmo for segments in repositpry - should be eneough with a single tmo and a list of tmos pointing to tasks (we don't need multiple deadline timers running)
 - add more JobHandlers (email, saving to file, paths, program to truse for translation etc.)

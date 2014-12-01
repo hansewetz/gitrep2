@@ -13,3 +13,5 @@ we need a better infrastructure in order to build a proper translation system
 we need a better infrastructure in order to build a proper translation system
 the xlate system performs well and is far better than the other systems
 people are not working smart and hard eneough
+we have many problems with messaging in the system
+the Danish people are not using IT translation tools

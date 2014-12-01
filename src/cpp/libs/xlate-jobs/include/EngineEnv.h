@@ -11,7 +11,7 @@ namespace xlate{
 class EngineEnv{
 public:
   // ctors,assign,dtor
-  EngineEnv(fs::path const&exedir,fs::path const&progpath,std::string const&ename);
+  EngineEnv(fs::path const&exedir,fs::path const&progpath,std::string const&ename,std::size_t tmoMs);
   EngineEnv(EngineEnv const&)=default;
   EngineEnv(EngineEnv&&)=default;
   EngineEnv&operator=(EngineEnv const&)=default;
@@ -22,10 +22,12 @@ public:
   fs::path const&exedir()const;
   fs::path const&progpath()const;
   std::string const&ename()const;
+  std::size_t tmoMs()const;
 private:
-  fs::path exedir_;          // directory t execute from
-  fs::path progpath_;        // path to directory under which language engines are stored
-  std::string ename_;        // name of engine executable
+  fs::path exedir_;               // directory t execute from
+  fs::path progpath_;             // path to directory under which language engines are stored
+  std::string ename_;             // name of engine executable
+  std::size_t tmoMs_;             // staeady state timeout for a segment
 };
 // print operator
 std::ostream&operator<<(std::ostream&os,EngineEnv const&);
