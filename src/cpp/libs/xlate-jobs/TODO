@@ -2,7 +2,7 @@ XLATE:
 ------
 
 >>>> IMPORTANT
-- need two tmos for engines - one when engines are starting, another when engines are running
+- add method for geting queue pointer form queue_listere()/queue_sender()
 >>>> IMPORTANT
 
 - add cmd line parameters for:
@@ -22,7 +22,7 @@ XLATE:
 - make sure we handle all errors
 - add callback when a segment has been trasnlated so we can measure progress
 - need tmo for segments in repositpry - should be eneough with a single tmo and a list of tmos pointing to tasks (we don't need multiple deadline timers running)
-- add more JobHandlers (email, saving to file, paths, program to truse for translation etc.)
+- add more JobHandlers (email, saving to file, paths, program to use for translation etc.)
 - check that there are no bugs in repository with mismatch with adding tasks in wrong place
 - go through in detail how we start a translator (execvp etc.)
 
@@ -49,7 +49,11 @@ INFRASTRUCTURE:
 >>>> important <<<<
 
 - add building in parallel - takes to long time to build now
-- add method for geting queue pointer form queue_listere()/queue_sender()
+
+
+DIRECTORY QUEUE
+---------------
+- build a more efficient directory queue (when adding an element to queue we must rebuild the entire queue each time in memory
 
 
 SOCKETQUEUE:
@@ -66,7 +70,7 @@ TRANSLATOR:
 
 DESIGN:
 -------
-- the job repository should keep a timer and a liist of future timeouts so that if a task doe snot come back it marks it as <EMPTY>
+- the job repository should keep a timer and a list of future timeouts so that if a task doe snot come back it marks it as <EMPTY>
 - architecture should be re-visited 
 - how should engines be attached to system
 - how should resource allocation be handled
