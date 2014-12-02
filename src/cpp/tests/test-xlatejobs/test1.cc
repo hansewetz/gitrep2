@@ -57,6 +57,7 @@ vector<string>files;               // files to translate
 size_t maxJobsInParallel{3};       // max #of segements to translate in parallel
 size_t maxEngines{1};              // max #of engines to start
 size_t segTmoMs{7000};             // timeout in ms for a segment
+size_t startTmoMs{120000};         // timeout in ms to start an engine
 bool debug{false};                 // debuggging on/off
 }
 // print command line options
@@ -65,6 +66,7 @@ void prinCmdLineOptions(){
   cout<<"\tdebug: "<<boolalpha<<debug<<endl;
   cout<<"\t#engines: "<<maxEngines<<endl;
   cout<<"\tsegment tmo(ms): "<<segTmoMs<<endl;
+  cout<<"\tengine startup time (ms): "<<startTmoMs<<endl;
   cout<<"\tfiles to translate:";
   for(auto const&f:files)cout<<' '<<f;
   cout<<endl;
@@ -76,6 +78,7 @@ void processCmdLineParams(int argc,char**argv){
   options.add_options()("debug,d","debug turned on");
   options.add_options()("engines,e",po::value<size_t>(),(string("max #of engines (default ")+boost::lexical_cast<string>(maxEngines)+")").c_str());
   options.add_options()("tmo,t",po::value<size_t>(),(string("segment timeout in ms (default ")+boost::lexical_cast<string>(segTmoMs)+")").c_str());
+  options.add_options()("tmostart,T",po::value<size_t>(),(string("timeout to start an engine (default ")+boost::lexical_cast<string>(startTmoMs)+")").c_str());
   options.add_options()("file,f","list of files to be translated");
 
   // --- setup for processing command line parametersprocess command line parameters
@@ -114,6 +117,10 @@ void processCmdLineParams(int argc,char**argv){
   // check for segment timeout
   if(vm.count("tmo")){
     if((segTmoMs=vm["tmo"].as<size_t>())==0)usage();
+  }
+  // check for segment timeout
+  if(vm.count("tmostart")){
+    if((startTmoMs=vm["tmostart"].as<size_t>())==0)usage();
   }
   // get file to translate
   for(auto const&t:trailing){
@@ -161,7 +168,7 @@ int main(int argc,char**argv){
   utils::initBoostFileLogging(debug);
   try{
     // (0) setu engine environment 
-    shared_ptr<EngineEnv>engineenv=make_shared<EngineEnv>(EXEDIR,PROGPATH,PROGNAME,segTmoMs);
+    shared_ptr<EngineEnv>engineenv=make_shared<EngineEnv>(EXEDIR,PROGPATH,PROGNAME,segTmoMs,startTmoMs);
     
     // (1) ------------ create a translation component and kick it off
     // (one translation component <--> one language pair)

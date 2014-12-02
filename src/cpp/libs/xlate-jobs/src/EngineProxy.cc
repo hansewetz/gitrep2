@@ -37,7 +37,7 @@ EngineProxy::EngineProxy(asio::io_service&ios,shared_ptr<TaskQueue>qin,shared_pt
     qtaskListener_(make_shared<TaskQueueListener>(ios_,qin.get())),
     qtaskSender_(make_shared<TaskQueueSender>(ios_,qout.get())),
     state_{state_t(EngineProxy::state_t::NOT_RUNNING)},
-    cpid_(-1),engineenv_(engineenv),ntmos_(0){
+    cpid_(-1),engineenv_(engineenv),ntmos_(0),realTmoMs_(engineenv->startTmoMs()){
 }
 // dtor
 EngineProxy::~EngineProxy(){
@@ -49,6 +49,11 @@ void EngineProxy::run(){
   if(state_!=EngineProxy::state_t::NOT_RUNNING)return;
 
   BOOST_LOG_TRIVIAL(debug)<<"starting new engine with id: "<<id_<<" ...";
+
+  // we are not running so reset some variables
+  realTmoMs_=engineenv_->startTmoMs();
+  ntmos_=0;
+  cpid_=-1;
 
   // start engine (we should never be her unless engine is not running)
   int fdToEngine;
@@ -110,7 +115,7 @@ void EngineProxy::newTaskHandler(boost::system::error_code const&ec,shared_ptr<T
   state_=EngineProxy::state_t::TRANSLATING;
 
   // start waiting for translated segment back from engine
-  qListenerFromEngine_->timed_async_deq(std::bind(&EngineProxy::engineListenerHandler,this,_1,_2,task),engineenv_->tmoMs());
+  qListenerFromEngine_->timed_async_deq(std::bind(&EngineProxy::engineListenerHandler,this,_1,_2,task),realTmoMs_);
 }
 // handler for segments arriving from engine
 void EngineProxy::engineListenerHandler(boost::system::error_code const&ec,string const&msg,shared_ptr<TranslationTask>task){
@@ -119,7 +124,7 @@ void EngineProxy::engineListenerHandler(boost::system::error_code const&ec,strin
     BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - sending of segment to engine aborted";
     stop();
     return;
-  }else
+  }
   if(ec==boost::asio::error::timed_out){
     BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - timeout";
     task->setTargetSeg("<TIMEOUT>");
@@ -129,27 +134,30 @@ void EngineProxy::engineListenerHandler(boost::system::error_code const&ec,strin
     boost::system::error_code ec1;
     qtaskSender_->sync_enq(task,ec1);
     waitForNewTask();
-  }else
+    return;
+  }
   if(ec!=boost::system::error_code()){
     BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - sending of segment to engine failed, ec: "<<ec.message();
     stop();
     return;
-  }else{
-    // set translated segment unless we have outstanding timeoued out segments
-    BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - got translated task: "<<*task;
-    if(ntmos_==0){
-      task->setTargetSeg(msg);
+  }
+  // we got a segment back so we can set tmo to the real segment tmo
+  realTmoMs_=engineenv_->tmoMs();
 
-      // send repsonse and wait for new task
-      boost::system::error_code ec1;
-      qtaskSender_->sync_enq(task,ec1);
-      waitForNewTask();
-    }
-    else{
-      // listen for new segment - there is nothing to send back since we have already sent a TIMEOUT
-      qListenerFromEngine_->timed_async_deq(std::bind(&EngineProxy::engineListenerHandler,this,_1,_2,task),engineenv_->tmoMs());
-       --ntmos_;
-    }
+  // set translated segment unless we have outstanding timeoued out segments
+  BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - got translated task: "<<*task;
+  if(ntmos_==0){
+    // send repsonse and wait for new task
+    task->setTargetSeg(msg);
+    boost::system::error_code ec1;
+    qtaskSender_->sync_enq(task,ec1);
+    waitForNewTask();
+  }
+  else{
+    // listen for new segment - there is nothing to send back since we have already sent a TIMEOUT
+    BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - got timedout translated task - trashing result ...";
+    qListenerFromEngine_->timed_async_deq(std::bind(&EngineProxy::engineListenerHandler,this,_1,_2,task),realTmoMs_);
+     --ntmos_;
   }
 }
 // helper to stopo an engine

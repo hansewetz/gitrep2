@@ -57,6 +57,9 @@ private:
   // #of outstanding segments (i.e., we are have timed out on them)
   std::size_t ntmos_;
 
+  // timeout (changes depdening on if engine has started or not
+  std::size_t realTmoMs_;
+
   // asio stuff
   boost::asio::io_service&ios_;
 
