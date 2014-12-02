@@ -32,6 +32,13 @@ OTHER COMPONENTS:
 -----------------
 - conversion/retro-conversion
 - segmenter (simple)
+	- based on period only
+		- simple implementation
+	- based on SRX xml - Markus R.: breaking rules + non-breaking rules
+		- apply breaking rules, mark breaks
+		- aply each non-breaking rule to text to see if it will remove the break
+			- example: there are 3. No there are no.
+			- here breaking ruloe would break at period, non breaking rule would remove break
 
 
 
