@@ -127,7 +127,7 @@ void EngineProxy::engineListenerHandler(boost::system::error_code const&ec,strin
   }
   if(ec==boost::asio::error::timed_out){
     BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - timeout";
-    task->setTargetSeg("<TIMEOUT>");
+    task->setTimeout(id_);
     ++ntmos_;
 
     // send repsonse and wait for new task
@@ -148,7 +148,7 @@ void EngineProxy::engineListenerHandler(boost::system::error_code const&ec,strin
   BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - got translated task: "<<*task;
   if(ntmos_==0){
     // send repsonse and wait for new task
-    task->setTargetSeg(msg);
+    task->setTargetSeg(msg,id_);
     boost::system::error_code ec1;
     qtaskSender_->sync_enq(task,ec1);
     waitForNewTask();

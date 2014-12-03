@@ -6,9 +6,12 @@
 using namespace std;
 namespace xlate{
 
+// static attr.
+const string TranslationTask::TIMEOUTSTRING{"<TIMEOUT>"};
+
 // ctor
 TranslationTask::TranslationTask(TranslationJobId const&jobid,LanguagePair const&lanpair,string const&seg,size_t segno):
-  jobid_(jobid),id_(TranslationTaskId()),lanpair_(lanpair),srcSeg_(seg),segno_(segno),hasTargetSeg_(false){
+  jobid_(jobid),id_(TranslationTaskId()),lanpair_(lanpair),srcSeg_(seg),segno_(segno),hasTargetSeg_(false),timeout_(false){
 }
 // get id of task
 TranslationTaskId  const&TranslationTask::id()const{
@@ -44,17 +47,22 @@ EngineProxyId const&TranslationTask::engineId()const{
   return engineId_;
 }
 // setters
-void TranslationTask::setTargetSeg(string const&seg){
+void TranslationTask::setTargetSeg(string const&seg,EngineProxyId const&engineId){
   hasTargetSeg_=true;
   targetSeg_=seg;
+  timeout_=false;
+  engineId_=engineId;
 }
-// set engine id
-void TranslationTask::setEngineId(EngineProxyId const&engineId){
+// setters
+void TranslationTask::setTimeout(EngineProxyId const&engineId){
+  hasTargetSeg_=true;
+  targetSeg_=TIMEOUTSTRING;
+  timeout_=true;
   engineId_=engineId;
 }
 // print function
 ostream&TranslationTask::print(ostream&os)const{
-  return os<<"id: "<<id_<<", jobid: "<<jobid_<<", segno: "<<segno_<<", source-lan: "<<lanpair_.first<<", target-lan: "<<lanpair_.second<<", srcSeg: \""<<srcSeg_<<"\""<<", has target: "<<boolalpha<<hasTargetSeg_<<", target-seg: \""<<targetSeg_<<"\", engineId: \""<<engineId_<<"\"";
+  return os<<"id: "<<id_<<", jobid: "<<jobid_<<", segno: "<<segno_<<", source-lan: "<<lanpair_.first<<", target-lan: "<<lanpair_.second<<", srcSeg: \""<<srcSeg_<<"\""<<", has target: "<<boolalpha<<hasTargetSeg_<<", target-seg: \""<<targetSeg_<<"\", engineId: \""<<engineId_<<"\", tmo: "<<timeout_;
 }
 // print operator
 ostream&operator<<(ostream&os,TranslationTask const&t){

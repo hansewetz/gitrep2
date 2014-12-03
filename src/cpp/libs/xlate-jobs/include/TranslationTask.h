@@ -30,8 +30,8 @@ public:
   EngineProxyId const&engineId()const;
 
   // setters
-  void setTargetSeg(std::string const&seg);
-  void setEngineId(EngineProxyId const&engineId);
+  void setTargetSeg(std::string const&seg,EngineProxyId const&engineId);
+  void setTimeout(EngineProxyId const&engineId);
 
   // print function
   std::ostream&print(std::ostream&os)const;
@@ -43,7 +43,9 @@ private:
   std::string targetSeg_;
   bool hasTargetSeg_;
   std::size_t segno_;
+  bool timeout_;
   EngineProxyId engineId_;
+  static const std::string TIMEOUTSTRING;
 };
 // print operator
 std::ostream&operator<<(std::ostream&os,TranslationTask const&t);

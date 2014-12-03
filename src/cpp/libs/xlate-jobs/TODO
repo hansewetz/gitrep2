@@ -3,6 +3,8 @@ XLATE:
 
 >>>> IMPORTANT
 - add method for geting queue pointer form queue_listere()/queue_sender()
+- need tmo for segments in repository - should be eneough with a single tmo and a list of tmos pointing to tasks (we don't need multiple deadline timers running)
+	- all non-translated segments will be filled in with JOB-TIMEOUT + other stuff so a job is always complete
 >>>> IMPORTANT
 
 - add cmd line parameters for:
@@ -21,7 +23,6 @@ XLATE:
 - go through logging in details to see what to log at what level
 - make sure we handle all errors
 - add callback when a segment has been trasnlated so we can measure progress
-- need tmo for segments in repositpry - should be eneough with a single tmo and a list of tmos pointing to tasks (we don't need multiple deadline timers running)
 - add more JobHandlers (email, saving to file, paths, program to use for translation etc.)
 - check that there are no bugs in repository with mismatch with adding tasks in wrong place
 - go through in detail how we start a translator (execvp etc.)
