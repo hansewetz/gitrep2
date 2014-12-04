@@ -41,9 +41,17 @@ public:
   // ctors,assign,dtor
   fddeq_queue(int fdread,DESER deser,bool closeOnExit=false,char sep=NEWLINE):fdread_(fdread),deser_(deser),sep_{sep},closeOnExit_(closeOnExit){}
   fddeq_queue(fddeq_queue const&)=delete;
-  fddeq_queue(fddeq_queue&&)=default;
+  fddeq_queue(fddeq_queue&&other):fdread_(other.fdread_),deser_(std::move(other.deser_)),sep_(other.sep_),closeOnExit_(other.closeOnExit_){
+    other.closeOnExit_=false; // make sure we don't close twice
+  }
   fddeq_queue&operator=(fddeq_queue const&)=delete;
-  fddeq_queue&operator=(fddeq_queue&&)=default;
+  fddeq_queue&operator=(fddeq_queue&&other){
+    fdread_=other.fdread_;
+    deser_=std::move(other.deser_);
+    sep_=other.sep_;
+    closeOnExit_=closeOnExit_;
+    other.closeOnExit_=false; // make sure we don't close twice
+  }
   ~fddeq_queue(){if(closeOnExit_)detail::queue_support::eclose(fdread_,false);}
   
   // dequeue a message (return.first == false if deq() was disabled)

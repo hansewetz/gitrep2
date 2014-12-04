@@ -41,9 +41,17 @@ public:
   // ctors,assign,dtor
   fdenq_queue(int fdwrite,SERIAL serial,bool closeOnExit=false,char sep=NEWLINE):fdwrite_(fdwrite),serial_(serial),sep_(sep),closeOnExit_(closeOnExit){}
   fdenq_queue(fdenq_queue const&)=delete;
-  fdenq_queue(fdenq_queue&&)=default;
+  fdenq_queue(fdenq_queue&&other):fdwrite_(other.fdwrite_),serial_(std::move(other.serial_)),sep_(other.sep_),closeOnExit_(other.closeOnExit_){
+    other.closeOnExit_=false; // make sure we don't close twice
+  }
   fdenq_queue&operator=(fdenq_queue const&)=delete;
-  fdenq_queue&operator=(fdenq_queue&&)=default;
+  fdenq_queue&operator=(fdenq_queue&&other){
+    fdwrite_=other.fdwrite_;
+    serial_=std::move(other.serial_);
+    sep_=other.sep_;
+    closeOnExit_=other.closeOnExit_;
+    other.closeOnExit_=false; // make sure we don't close twice
+  }
   ~fdenq_queue(){if(closeOnExit_)detail::queue_support::eclose(fdwrite_,false);}
   
   // enqueue a message (return.first == false if enq() was disabled)

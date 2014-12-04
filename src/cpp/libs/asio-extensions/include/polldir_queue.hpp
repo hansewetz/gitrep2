@@ -52,9 +52,29 @@ public:
     if(!fs::is_directory(dir_))throw std::logic_error(std::string("polldir_queue::polldir_queue: dir_: ")+dir.string()+" is not a directory");
   }
   polldir_queue(polldir_queue const&)=delete;
-  polldir_queue(polldir_queue&&)=default;
+  polldir_queue(polldir_queue&&other):
+      qname_(std::move(other.qname_)),maxsize_(other.maxsize_),dir_(other.dir_),removelocks_(other.removelocks_),
+      deser_(std::move(other.deser_)),serial_(std::move(other.serial_)),
+      deq_enabled_(other.deq_enabled_),enq_enabled_(other.enq_enabled_),
+      ipcmtx_(std::move(other.ipcmtx_)),ipcond_(std::move(other.ipcond_)),
+      cache_(std::move(other.cache_)){
+    other.removelocks_=false; // make sure we don't remove locks twice
+  }
   polldir_queue&operator=(polldir_queue const&)=delete;
-  polldir_queue&operator=(polldir_queue&&)=default;
+  polldir_queue&operator=(polldir_queue&&other){
+    qname_=std::move(other.qname_);
+    maxsize_=other.maxsize_;
+    dir_=std::move(other.dir_);
+    removelocks_=other.removelocks_;
+    deser_=std::move(other.deser_);
+    serial_=std::move(other.serial_);
+    deq_enabled_=other.deq_enabled_;
+    enq_enabled_=other.enq_enabled_;
+    ipcmtx_=std::move(other.ipcmtx_);
+    ipcond_=std::move(other.ipcond_);
+    cache_=std::move(other.cache_);
+    other.removelocks_=false; // make sure we don't remove locks twice
+  }
   ~polldir_queue(){
     if(removelocks_)removeLockVariables(qname_);
   }

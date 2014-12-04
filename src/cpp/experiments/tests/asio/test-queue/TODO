@@ -1,3 +1,8 @@
+>>>>>>>>>>>>>>>>>>>> WORKING ON <<<<<<<<<<<<<<<<<<<<<<<<
+- implement 'socket_queue' (can be used to talk across machines)
+>>>>>>>>>>>>>>>>>>>> WORKING ON <<<<<<<<<<<<<<<<<<<<<<<<
+
+
 === improvements ===
 
  - copy new fd queues to library ones they have been tested
@@ -12,6 +17,5 @@
 
 
 === new queues ===
-- implement 'socket_queue' (can be used to talk across machines)
 
 - implement 'shareddier_queue' for queues on shared dierctories
