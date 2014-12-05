@@ -1,0 +1,211 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<tmx version="1.4">
+  <header creationtool="SDL Language Platform" creationtoolversion="8.0" o-tmf="SDL TM8 Format" datatype="xml" segtype="sentence" adminlang="en-GB" srclang="en-GB" creationdate="20120821T083159Z" creationid="MFADIR\sd">
+    <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO,STANDARD-TXT-NNY</prop>
+    <prop type="x-Recognizers">RecognizeDates, RecognizeTimes, RecognizeNumbers, RecognizeMeasurements</prop>
+    <prop type="x-TMName">Standard-txt-bokmål_en-GB_nb-NO</prop>
+  </header>
+  <body>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NNY</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>The Commission shall be assisted by the committee set up pursuant to Article 5 of Directive 2011/84/EU.</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>Kommisjonen skal bistås av komiteen nedsatt ved artikkel 5 i direktiv 2011/84/EU.</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NNY</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>That committee shall be a committee within the meaning of Regulation (EU) No 182/2011.</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>Nevnte komité skal være en komité i henhold til forordning (EU) nr. 182/2011.</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NNY</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>The Commission shall be assisted by the Committee established by Regulation (EU) No 314/2011.</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>Kommisjonen skal bistås av komiteen nedsatt ved forordning (EU) nr. 314/2011.</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>This Regulation shall be binding in its entirety and directly applicable in all Member States in accordance with the Treaties.</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>Denne forordning er bindende i alle deler og kommer direkte til anvendelse i alle medlemsstater.</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>This Regulation shall enter into force on the 20th day following its publication in the Official Journal of the European Union.</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>Denne forordning trer i kraft den 20. dag etter at den er kunngjort i Den europeiske unions tidende.</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>Acting in accordance with the ordinary legislative procedure,</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>etter den ordinære regelverksprosessen,</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>After transmission of the draft legislative act to the national parliaments,</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>etter oversending av utkast til regelverksakt til de nasjonale parlamentene,</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>The obligation to transpose this Directive into national law should be confined to those provisions which represent a substantive change as compared with the earlier Directive(s).</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>Forpliktelsen til å innarbeide dette direktiv i nasjonal lovgivning bør begrenses til de bestemmelser som utgjør en vesentlig endring sammenlignet med det tidligere direktiv/de tidligere direktiver.</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>The obligation to transpose the provisions which are unchanged arises under the earlier Directive(s).</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>Forpliktelsen til å innarbeide de bestemmelser som er uendret, følger av det tidligere direktiv/de tidligere direktiver.</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>Exercise of the delegation</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>Utøvelse av delegert myndighet</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20140221T123517Z" changeid="MFADIR\SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>Transposition</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>Innarbeiding i nasjonal lovgivning</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>Member States shall bring into force the laws, regulations or administrative provisions necessary to comply with this Directive by not later than six months after its entry into force.</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>Innen seks måneder etter ikrafttredelsen av dette direktiv skal medlemsstatene sette i kraft de lover og forskrifter som er nødvendige for å etterkomme det.</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>Position of the European Parliament of [...] and position of the Council at first reading of [...].</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>Europaparlamentets holdning av [...] og Rådets holdning ved første behandling av [...].</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>Repealed Directive with its successive amendments</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>Opphevet direktiv med endringer</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>(referred to in Article ...)</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>(nevnt i artikkel …)</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20140620T071922Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>In accordance with the Joint Political Declaration of Member States and the Commission of 28 September 2011 on explanatory documents (1), Member States have undertaken to accompany, in justified cases, the notification of their transposition measures with one or more documents explaining the relationship between the components of a directive and the corresponding parts of national transposition instruments.</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>I samsvar med den felles politiske erklæringen fra medlemsstatene og Kommisjonen av 28. september 2011 om forklarende dokumenter(1) har medlemsstatene forpliktet seg til at underretningen om innarbeidingstiltakene i berettigede tilfeller skal følges av ett eller flere dokumenter som forklarer sammenhengen mellom et direktivs bestanddeler og de tilsvarende deler av de nasjonale innarbeidingsdokumentene.</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20120626T104753Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>With regard to this Directive, the legislator considers the transmission of such documents to be justified.</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>Med hensyn til dette direktiv anser regelgiveren at oversendingen av slike dokumenter er berettiget.</seg>
+      </tuv>
+    </tu>
+    <tu creationdate="20120626T104753Z" creationid="SD" changedate="20120626T104753Z" changeid="SD" lastusagedate="20120626T104753Z">
+      <prop type="x-Origin">TM</prop>
+      <prop type="x-OriginalFormat">TradosTranslatorsWorkbench</prop>
+      <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
+      <tuv xml:lang="en-GB">
+        <seg>Entry into force and date of application</seg>
+      </tuv>
+      <tuv xml:lang="nb-NO">
+        <seg>Ikrafttredelse og anvendelsesdato</seg>
+      </tuv>
+    </tu>
+  </body>
+</tmx>

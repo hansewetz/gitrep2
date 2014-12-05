@@ -8,13 +8,17 @@ using namespace std;
 
 
 // states used to track where we should be
-enum states{IDLE=0,HEADER=1,TU=2,TUV=3,SEG=4};
-static states state=IDLE;
+enum states{NOT_STARTED=0,HEADER=1,TU=2,TUV=3,SEG=4};
+static states state=NOT_STARTED;
+
+// some other state related variables
+static string currlan;
 
 // We assume the file is correctly formatted so we can rely on our state
 // (if we receive a tag we should not receive in the current state, then we toss an exception)
 static void processNode(xmlTextReaderPtr reader){
   const xmlChar*name,*value;
+  bool opening;
 
   // tags to look for.
   const xmlChar*header_tag=(unsigned char*)"header";
@@ -24,45 +28,62 @@ static void processNode(xmlTextReaderPtr reader){
   const xmlChar*seg_tag=(unsigned char*)"seg";
   const xmlChar*text_tag=(unsigned char*)"#text";
 
-  // get name of target together with value
+  // various property text strings
+  const xmlChar*dbid_attr=(unsigned char*)"x-TMName";
+
+  // get name of target together with value, and open/close tag
   name = xmlTextReaderConstName(reader);
   value=xmlTextReaderConstValue(reader);
+  opening=xmlTextReaderNodeType(reader)==1;
 
-  // check what state we are in, and print source/target or target/source separator or new line
+  // hget current node
+  xmlNodePtr node=xmlTextReaderCurrentNode(reader);
+
+  // process state transitions and get segments
   switch(state){
-    case IDLE:
-      if(!xmlStrcmp(name,header_tag)){
+    case NOT_STARTED:
+      if(opening&&!xmlStrcmp(name,header_tag)){
         state=HEADER;
       }
       break;
     case HEADER:
-      if(!xmlStrcmp(name,tu_tag)){
+      if(opening&&!xmlStrcmp(name,tu_tag)){
         state=TU;
+      }else
+      if(opening&&!xmlStrcmp(name,prop_tag)){
+        for(xmlAttrPtr attr=node->properties;NULL!=attr;attr=attr->next){
+          xmlChar*attrname=xmlNodeListGetString(node->doc,attr->children,1);
+          // check if we have property for DBID
+          if(!xmlStrcmp(dbid_attr,attrname)){
+            printf("%s --> %s\n",attrname,value);
+            xmlFree(attrname);
+            break;
+          }
+        }
       }
       break;
     case TU:
-      if(!xmlStrcmp(name,tuv_tag)){
+      if(opening&&!xmlStrcmp(name,tuv_tag)){
         state=TUV;
-      if(!xmlStrcmp(name,text_tag))printf("%s",value);
      }
      break;
     case TUV:
-      if(!xmlStrcmp(name,seg_tag)){
+      if(opening&&!xmlStrcmp(name,seg_tag)){
         state=SEG;
       }else
-      if(!xmlStrcmp(name,tu_tag)){
+      if(!opening&&!xmlStrcmp(name,tu_tag)){
         state=TU;
       }
       break;
     case SEG:
-      if(!xmlStrcmp(name,tu_tag)){
+      if(!opening&&!xmlStrcmp(name,tu_tag)){
         state=TU;
       }else
-      if(!xmlStrcmp(name,tuv_tag)){
+      if(!opening&&!xmlStrcmp(name,tuv_tag)){
         state=TUV;
       }else
       if(!xmlStrcmp(name,text_tag)){
-        printf("%s",value);
+// NOTE!        printf("%s",value);
       }
       break;
   }
@@ -96,3 +117,17 @@ int main(int argc, char **argv) {
   streamFile(argv[1]);
   return(0);
 }
+
+/*
+
+  // NOTE! property
+  xmlNodePtr node=xmlTextReaderCurrentNode(reader);
+  for(xmlAttrPtr attr=node->properties;NULL!=attr;attr=attr->next){
+    xmlChar*v=xmlNodeListGetString(node->doc,attr->children,1);
+    printf("%s\n",v);
+    xmlFree(v);
+  }
+return;
+*/
+
+
