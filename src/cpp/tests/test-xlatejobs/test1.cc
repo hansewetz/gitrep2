@@ -131,7 +131,7 @@ void processCmdLineParams(int argc,char**argv){
   // make sure we have files to translate
   if(files.empty())usage("must specify at least one file to translate");
 }
-// handler for jobs that have been translated
+// handler for jobs that have been translated - also stops the system when no more jobs in repository
 // (output queue from job repository)
 void translatedJobHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationJob>job,std::shared_ptr<JobQueueListener>qtransjobreceiver,TranslationCt*tct){
   // check error code
@@ -187,7 +187,7 @@ int main(int argc,char**argv){
     // create sender to translation repository
     std::shared_ptr<JobQueueSender>qnewjobsender{make_shared<JobQueueSender>(::ios,tct.getNewJobQueue().get())};
 
-    // create request from file
+    // create request from files
     for(auto file:files){
       // create request, then job and send job for translation
       std::shared_ptr<TranslateRequest>req{reqFact.requestFromSegmentedFile(make_lanpair("en","sv"),file)};

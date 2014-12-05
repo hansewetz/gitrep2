@@ -15,3 +15,5 @@ the xlate system performs well and is far better than the other systems
 people are not working smart and hard eneough
 we have many problems with messaging in the system
 the Danish people are not using IT translation tools
+hello world again
+the bird sings again
