@@ -12,12 +12,6 @@ int main(int argc, char **argv) {
   // create NorwegianTmxExtractor object
   NorwegianTmxExtractor norExtract{argv[1]};
 
-// NOTE!
-//cout<<"DONE"<<endl;
-  // NOTE! Not yet done
-  // ...
-
-
-// NOTE!
-//cout<<"EXITING"<<endl;
+  // print some data
+  cout<<"dbid: \""<<norExtract.dbid()<<"\""<<endl;
 }
