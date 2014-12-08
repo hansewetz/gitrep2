@@ -23,7 +23,14 @@ string const&NorwegianTmxExtractor::Segment::targetseg()const{return targetseg_;
 ostream&operator<<(ostream&os,NorwegianTmxExtractor::Segment const&s){
   return os<<"["<<s.srclan()<<"]["<<s.targetlan()<<"]["<<s.srcseg()<<"]["<<s.targetseg()<<"]";
 }
-
+// check that a segment is OK
+void NorwegianTmxExtractor::Segment::checkSeg()const{
+  // check languages
+  if(srclan_!="en")throw runtime_error(string("invalid source language: \"")+srclan_+"\"");
+  if(targetlan_!="nb"&&targetlan_!="nn")throw runtime_error(string("invalid target language: \"")+targetlan_+"\"");
+  if(srcseg_=="")throw runtime_error(string("invalid source segment: \"")+srcseg_+"\"");
+  if(targetseg_=="")throw runtime_error(string("invalid target segment: \"")+targetseg_+"\"");
+}
 // static data and functions
 namespace{
   // tags to look for.
@@ -141,6 +148,7 @@ void NorwegianTmxExtractor::processNode(xmlTextReaderPtr reader){
       }else
       if(!opening&&!xmlStrcmp(name,tu_tag)){
         // save segment
+        seg_.checkSeg();
         segs_.push_back(seg_);
         seg_=Segment();
         state_=TU;

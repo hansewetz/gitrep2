@@ -26,6 +26,8 @@ public:
     std::string const&targetseg()const;
   private:
     Segment()=default;
+    void checkSeg()const;
+
     std::string srclan_;
     std::string targetlan_;
     std::string srcseg_;
