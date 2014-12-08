@@ -12,7 +12,7 @@
       <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NNY</prop>
       <prop type="x-BRK:MultiplePicklist">STANDARD-TXT-NBO</prop>
       <tuv xml:lang="en-GB">
-        <seg>The Commission <b>shall be assisted by the committee</b> set up pursuant to Article 5 of Directive 2011/84/EU.</seg>
+        <seg>The Commission shall <a> be assisted by the committee set </a>up pursuant to Article 5 of Directive 2011/84/EU.</seg>
       </tuv>
       <tuv xml:lang="nb-NO">
         <seg>Kommisjonen skal bistås av komiteen nedsatt ved artikkel 5 i direktiv 2011/84/EU.</seg>
