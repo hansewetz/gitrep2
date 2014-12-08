@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <libxml/xmlreader.h>
+#include <boost/algorithm/string.hpp>
 using namespace std;
 
 // tags to look for.
@@ -28,6 +29,7 @@ enum states{NOT_STARTED=0,HEADER=1,TU=2,TUV=3,SEG=4};
 static states state=NOT_STARTED;
 static bool getdbidFromHeader{false};
 static string currLan;
+static string currseg;
 
 // check if tag contains a specific attribute
 bool tagHasDbid(xmlNodePtr node){
@@ -114,8 +116,16 @@ static void processNode(xmlTextReaderPtr reader){
       if(!opening&&!xmlStrcmp(name,tuv_tag)){
         state=TUV;
       }else
+      if(!opening&&!xmlStrcmp(name,seg_tag)){
+        // we now have the complete segment
+        boost::algorithm::trim(currseg);
+        boost::algorithm::trim_right(currseg);
+        printf("LAN: %s, SEG: %s\n",currLan.c_str(),currseg.c_str());
+        currseg="";
+      }else
       if(!xmlStrcmp(name,text_tag)){
-        printf("LAN: %s, SEG: %s",currLan.c_str(),value);
+        // we might get tags inside the segment - append text as long as we are inside the seg tag
+        currseg+=string((char*)value);
       }
       break;
   }
