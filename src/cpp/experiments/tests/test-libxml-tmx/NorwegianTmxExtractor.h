@@ -11,6 +11,7 @@ namespace mtdata{
 // class for parsing a Norwegian TMX file
 // (note: this class works with the tmx files provided by the Norwegian Ministry of Foreign Affairs)
 // (this class should not be used with any other data)
+// (the constructor reads the entire file and extracts relevant data - the data can later be queried using getter methods)
 class NorwegianTmxExtractor{
 public:
   class Segment{
@@ -25,6 +26,7 @@ public:
     std::string const&srcseg()const;
     std::string const&targetseg()const;
   private:
+    // only used by NorwegianTmxExtractor class to build segments
     Segment()=default;
     void checkSeg()const;
 
