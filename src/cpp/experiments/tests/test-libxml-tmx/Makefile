@@ -4,9 +4,9 @@ LOCAL_SOTARGET  =
 LOCAL_OBJS      = test1.o NorwegianTmxExtractor.o
 
 # Control.
-LOCAL_LIBS      = -lxml2 -lboost_filesystem
-LOCAL_LIBPATH   = -L$(INSTALL_EXTRA_HOME)/lib
-LOCAL_INCPATH   = -I$(INSTALL_EXTRA_HOME)/include/libxml2
+LOCAL_LIBS      = -lxml2 -lboost_filesystem 
+LOCAL_LIBPATH   = -L$(INSTALL_EXTRA_HOME)/lib 
+LOCAL_INCPATH   = -I$(INSTALL_EXTRA_HOME)/include/libxml2 
 LOCAL_DEFINES   = -DBOOST_ALL_DYN_LINK -DBOOST_IOSTREAMS_NO_LIB
 LOCAL_CXXFLAGS  =
 LOCAL_CPPFLAGS  = 
