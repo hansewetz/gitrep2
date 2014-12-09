@@ -152,3 +152,12 @@ Fri Jun 13 14:56:45 CEST 2014
 	../configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs
 	make
 	make install
+
+Tue Dec  9 17:44:21 CET 2014
+	install libxml2-2.8.0.tar
+	tar xvf libxml2-2.8.0.tar
+	cd libxml2-2.8.0
+	mkdir build;cd build
+	../configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs  --with-pic 
+	make
+	make install

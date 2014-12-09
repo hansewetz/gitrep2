@@ -1,5 +1,6 @@
 #include "NorwegianTmxExtractor.h"
 #include <iostream>
+#include <boost/log/trivial.hpp>
 
 using namespace std;
 using namespace mtdata;
@@ -11,6 +12,7 @@ int main(int argc, char **argv) {
     return(1);
   }
   // create NorwegianTmxExtractor object
+  BOOST_LOG_TRIVIAL(debug)<<"Starting ...";
   NorwegianTmxExtractor norExtract{argv[1]};
 
   // print dbid
