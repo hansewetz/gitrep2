@@ -37,14 +37,12 @@ int main(){
     asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qserv(listenPort,deserialiser,serialiser);
 
     // listen for a message
-/*
     boost::system::error_code ec;
-    qval_t=qserv.deq(ec);
+    auto ret{qserv.timed_deq(10000,ec)};
     if(ec!=boost::system::error_code()){
       BOOST_LOG_TRIVIAL(error)<<"deque() failed: "<<ec.message();
       exit(1);
     }
-*/
     // NOTE! Not yet done
     // ...
 

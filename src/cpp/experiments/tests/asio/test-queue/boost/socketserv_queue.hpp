@@ -17,10 +17,12 @@ TESTING:
 
 #ifndef __SOCK_SERV_QUEUE_H__
 #define __SOCK_SERV_QUEUE_H__
+#include "detail/queue_support.hpp"
 #include <string>
 #include <utility>
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include <unistd.h>
 #include <string.h>
 
@@ -83,13 +85,60 @@ public:
       // ...
     }
   }
+  // dequeue a message (return.first == false if deq() was disabled)
+  std::pair<bool,T>deq(boost::system::error_code&ec){
+    return deqAux(0,ec);
+  }
+  // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
+  std::pair<bool,T>timed_deq(std::size_t ms,boost::system::error_code&ec){
+    return deqAux(ms,ec);
+  }
 
   // NOTE! Not yet done
   // ...
   
 private:
+  // --------------------------------- state management functions
+  // (all state is managed here)
+
+  // dequeue a message (return.first == false if deq() was disabled)
+  std::pair<bool,T>deqAux(std::size_t ms,boost::system::error_code&ec){
+    boost::system::error_code ec1;
+
+    // wait for client connection if needed
+    if(state_==IDLE){
+      waitForClientConnect(ms,ec1);
+      if(ec1!=boost::system::error_code()){
+        detail::queue_support::eclose(servsocket_,false);
+        ec=ec1;
+        return std::make_pair(false,T{});
+      }
+      state_=CONNECTED;
+    }
+    // client connected - read message
+    if(state_==CONNECTED){
+      state_=READING;
+      T ret{recvwait(0,ec1,true)};
+      if(ec1!=boost::system::error_code()){
+        detail::queue_support::eclose(servsocket_,false);
+        state_=IDLE;
+        ec=ec1;
+        return std::make_pair(false,T{});
+      }
+      state_=CONNECTED;
+      return make_pair(true,ret);
+    }
+  }
+
+
+  // --------------------------------- helper functions
+  // (no state is managed here)
+
   // create listen socket (throws exception if failure)
   void createListenSocket(){
+    // we must be in state IDLE to be here
+    assert(state_==IDLE);
+
     // get socket to listen on
     if((servsocket_=socket(AF_INET,SOCK_STREAM,0))==-1){
       throw std::runtime_error(std::string("sockserv_queue::createListenSocket: failed creating listening socket, errno: ")+boost::lexical_cast<std::string>(errno));
@@ -114,11 +163,60 @@ private:
   // wait until a client connects and acept connection
   // (if ms == 0, no timeout, we must be in state IDLE when being called0
   void waitForClientConnect(std::size_t ms,boost::system::error_code&ec){
+    // we must be in state IDLE to be here
+    assert(state_==IDLE);
+
+    // setup to listen on fd descriptor
+    fd_set input;
+    FD_ZERO(&input);
+    FD_SET(servsocket_,&input);
+    int maxfd=servsocket_;
+
+    // setup for timeout (ones we get a message we don't timeout)
+    struct timeval tmo;
+    tmo.tv_sec=ms/1000;
+     tmo.tv_usec=(ms%1000)*1000;
+      
+    // block on select - timeout if configured
+    assert(maxfd!=-1);
+    int n=::select(++maxfd,&input,NULL,NULL,ms>0?&tmo:NULL);
+
+    // error
+    if(n<0){
+      ec=boost::system::error_code(errno,boost::system::get_posix_category());
+      return;
+    }
+    // tmo
+    if(n==0){
+      ec=boost::asio::error::timed_out;
+      return;
+    }
+    // client connected
+    unsigned int addrlen;
+    if((clientsocket_=::accept(servsocket_,(struct sockaddr*)&clientaddr_,&addrlen)) == -1){
+      ec=boost::system::error_code(errno,boost::system::get_posix_category());
+      return;
+    }
+    // no errors - client is now connected
+    ec=boost::system::error_code();
+  }
+  // read a message from client socket
+  // or wait until there is a message to read - in this case, a default cibstructed object is returned
+  T recvwait(std::size_t ms,boost::system::error_code&ec,bool getMsg){
+    T ret;                            // return value from this function (default ctor if no error)
+    std::stringstream strstrm;        // collect read chars in a stringstream
+
+    // we must be in state CONNECTED to be here
+    assert(state_==CONNECTED);
+
+    // loop until we have a message (or until we timeout)
+    while(true){
       // setup to listen on fd descriptor
       fd_set input;
       FD_ZERO(&input);
       FD_SET(servsocket_,&input);
-      int maxfd=servsocket_;
+      FD_SET(clientsocket_,&input);
+      int maxfd=std::max(servsocket_,clientsocket_);
 
       // setup for timeout (ones we get a message we don't timeout)
       struct timeval tmo;
@@ -129,32 +227,55 @@ private:
       assert(maxfd!=-1);
       int n=::select(++maxfd,&input,NULL,NULL,ms>0?&tmo:NULL);
 
-      // error
+      // check for error
       if(n<0){
         ec=boost::system::error_code(errno,boost::system::get_posix_category());
-        return;
+        return T{};
       }
-      // tmo
+      // check for tmo
       if(n==0){
         ec=boost::asio::error::timed_out;
-        return;
+        return T{};
       }
+      // check if we got some data
+      if(FD_ISSET(clientsocket_,&input)){
+        // if we are only checking if we have a message we are done here
+        if(!getMsg){
+          ec= boost::system::error_code{};
+          return T{};
+        }
+        // read up to '\n' inclusive
+        ssize_t count{0};
+        while(true){
+          // read next character in message
+          char c;
+          ssize_t stat;
+          while((stat=::read(clientsocket_,&c,1))==EINTR){}
+          if(stat!=1){
+            // create a boost::system::error_code from errno
+            ec=boost::system::error_code(errno,boost::system::get_posix_category());
+            return T{};
+          }
+          // save character just read
+          strstrm<<c;
 
-      // client connected
-      int addrlen;
-      if((clientsocket_=::accept(servsocket_,(struct sockaddr*)&clientaddr_,&addrlen)) == -1){
-        ec=boost::system::error_code(errno,boost::system::get_posix_category());
-        return;
+          // if we reached newline, send message including newline)
+          if(c==sep_)return deser_(strstrm);
+        }
+        // check if we read all available characters
+        // (if there are no more chars to read, then restart select() statement)
+        if(++count==n)break;
       }
-      // no errors - client is now connected
-      state_=CONNECTED;
-      ec=boost::system::error_code();
+      // restet tmo 0 zero ms since we don't timeout ones we start reading a message
+      ms=0;
+    }
   }
 
 
 
+  // --------------------------------- private attributes
   // state object is in
-  enum state_t{IDLE=0,CONNECTED=1,READING=2,WRITING=3,ERROR=4};
+  enum state_t{IDLE=0,CONNECTED=1,READING=2,WRITING=3};
   state_t state_=IDLE;
 
   // state of queue
