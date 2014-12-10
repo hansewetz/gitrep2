@@ -38,7 +38,7 @@ int main(){
 
     // listen for a message
     boost::system::error_code ec;
-    auto ret{qserv.timed_deq(10000,ec)};
+    auto ret{qserv.timed_wait_deq(3000,ec)};
     if(ec!=boost::system::error_code()){
       BOOST_LOG_TRIVIAL(error)<<"deque() failed: "<<ec.message();
       exit(1);
