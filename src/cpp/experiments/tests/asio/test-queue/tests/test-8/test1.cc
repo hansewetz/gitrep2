@@ -28,15 +28,23 @@ std::function<qval_t(istream&)>deserialiser=[](istream&is){
 
 // global variables
 constexpr int listenPort=7787;
-constexpr size_t maxclients{2};
 
 // test program
 int main(){
   try{
     // create queue
     // (after creation, the queue will accept client connections and act as a full duplex queue with each client)
-    asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qserv(listenPort,deserialiser,serialiser,maxclients);
+    asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qserv(listenPort,deserialiser,serialiser);
 
+    // listen for a message
+/*
+    boost::system::error_code ec;
+    qval_t=qserv.deq(ec);
+    if(ec!=boost::system::error_code()){
+      BOOST_LOG_TRIVIAL(error)<<"deque() failed: "<<ec.message();
+      exit(1);
+    }
+*/
     // NOTE! Not yet done
     // ...
 
