@@ -81,8 +81,10 @@ public:
   }
   ~sockserv_queue(){
     if(closeOnExit_){
-      // NOTE! Not yet done yet
-      // ...
+      if(state_!=IDLE){
+        if(state_==CONNECTED)detail::queue_support::eclose(clientsocket_,false);
+        detail::queue_support::eclose(servsocket_,false);
+      }
     }
   }
   // dequeue a message (return.first == false if deq() was disabled)
