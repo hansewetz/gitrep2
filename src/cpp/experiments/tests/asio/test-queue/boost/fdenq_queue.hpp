@@ -17,9 +17,11 @@ TESTING:
 #ifndef __FDENQ_QUEUE_H__
 #define __FDENQ_QUEUE_H__
 #include "detail/queue_support.hpp"
+#include "detail/fdqueue_support.hpp"
 #include <string>
 #include <utility>
 #include <unistd.h>
+#include <boost/asio/error.hpp>
 
 namespace boost{
 namespace asio{
@@ -56,97 +58,25 @@ public:
   
   // enqueue a message (return.first == false if enq() was disabled)
   bool enq(T t,boost::system::error_code&ec){
-    return this->sendwait(&t,0,ec,true);
+    return detail::queue_support::sendwait<T,SERIAL>(fdwrite_,&t,0,ec,true,sep_,serial_);
   }
   // enqueue a message (return.first == false if enq() was disabled) - timeout if waiting too long
   bool timed_enq(T t,std::size_t ms,boost::system::error_code&ec){
-    return this->sendwait(&t,ms,ec,true);
+    return detail::queue_support::sendwait<T,SERIAL>(fdwrite_,&t,ms,ec,true,sep_,serial_);
   }
   // wait until we can retrieve a message from queue
   bool wait_enq(boost::system::error_code&ec){
-    return this->sendwait(nullptr,0,ec,false);
+    return detail::queue_support::sendwait<T,SERIAL>(fdwrite_,nullptr,0,ec,false,sep_,serial_);
   }
   // wait until we can retrieve a message from queue -  timeout if waiting too long
   bool timed_wait_enq(std::size_t ms,boost::system::error_code&ec){
-    return this->sendwait(nullptr,ms,ec,false);
+    return detail::queue_support::sendwait<T,SERIAL>(fdwrite_,nullptr,ms,ec,false,sep_,serial_);
   }
   // get underlying file descriptor
   int getfd()const{
     return fdwrite_;
   }
 private:
-  // serialise an object from an fd stream or wait until we timeout
-  // (returns true we we could serialise object, false otherwise - error code will be non-zero if false)
-  bool sendwait(T const*t,std::size_t ms,boost::system::error_code&ec,bool sendMsg){
-    std::stringstream strstrm;        // serialised object
-
-    // serialise object and get it as a string
-    // (no need if we don't need to send object)
-    std::string str;
-    if(sendMsg){
-      serial_(strstrm,*t);
-      strstrm<<sep_;
-      str=strstrm.str();
-    }
-    std::string::iterator sbegin{str.begin()};
-    std::string::iterator send{str.end()};
-
-    // loop until we have written message or timed out
-    while(true){
-      // setup to listen on fd descriptor
-      fd_set output;
-      FD_ZERO(&output);
-      FD_SET(fdwrite_,&output);
-      int maxfd=fdwrite_;
-
-      // setup for timeout (ones we start writing a message we won't timeout)
-      struct timeval tmo;
-      tmo.tv_sec=ms/1000;
-      tmo.tv_usec=(ms%1000)*1000;
-      
-      // block on select - timeout if configured
-      assert(maxfd!=-1);
-      int n=::select(++maxfd,NULL,&output,NULL,ms>0?&tmo:NULL);
-
-      // check for error
-      if(n<0){
-        ec=boost::system::error_code(errno,boost::system::get_posix_category());
-        return false;
-      }
-      // check for tmo
-      if(n==0){
-        ec=boost::asio::error::timed_out;
-        return false;
-      }
-      // check if we wrote some data
-      if(FD_ISSET(fdwrite_,&output)){
-        // if we are only checking if we can send a message
-        if(!sendMsg){
-          ec= boost::system::error_code{};
-          return true;
-        }
-        // write as much as we can
-        ssize_t count{0};
-        while(sbegin!=send&&count!=n){
-          // write next character in message
-          char c{*sbegin++};
-          ssize_t stat;
-          while((stat=::write(fdwrite_,&c,1))==EINTR){}
-          if(stat!=1){
-            // create a boost::system::error_code from errno
-            ec=boost::system::error_code(errno,boost::system::get_posix_category());
-            return false;
-          }
-          ++count;
-        }
-      }
-      // check if we are done
-      if(sbegin==send)return true;
-
-      // restet tmo 0 zero ms since we don't timeout ones we start reading a message
-      ms=0;
-    }
-  }
   // state of queue
   int fdwrite_;                          // file descriptors serialize object tpo
   SERIAL serial_;                        // serialise
