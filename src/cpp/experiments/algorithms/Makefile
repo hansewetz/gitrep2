@@ -1,10 +1,15 @@
 SUBDIRS =  \
-	sorting \
-	heap \
-	tree \
-	lists \
+	backtracking \
 	bits \
+	graph \
+	heap \
+	junk \
+	lists \
+	problems \
+	search \
 	selection \
-	search
+	sorting \
+	strings \
+	tree
 
 include $(PROJECT_ROOT)/env/makerules/subdirs.rules

@@ -17,7 +17,10 @@ test-utf test-variadic-count test-variadic-printf test1_db \
 test-libxml c-strange-index  rvalue-function-qualifiers boost-fd-stream test-func-wrapper test-boost-process \
 ibm-task \
 test-boost-regexp \
-test-xml-beans
+test-xml-beans \
+test-libxml-tmx \
+asio \
+junk
 
 
 # test-c++1y
