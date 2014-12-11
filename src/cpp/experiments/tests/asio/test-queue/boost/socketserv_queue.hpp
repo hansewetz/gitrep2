@@ -18,6 +18,7 @@ TESTING:
 #ifndef __SOCK_SERV_QUEUE_H__
 #define __SOCK_SERV_QUEUE_H__
 #include "detail/queue_support.hpp"
+#include "detail/fdqueue_support.hpp"
 #include <string>
 #include <utility>
 #include <iostream>
@@ -133,7 +134,7 @@ private:
     // client connected - read message
     if(state_==CONNECTED){
       state_=READING;
-      T ret{recvwait(0,ec1,getMsg)};
+      T ret{detail::queue_support::recvwait<T,DESER>(clientsocket_,0,ec1,getMsg,sep_,deser_)};
       if(ec1!=boost::system::error_code()){
         detail::queue_support::eclose(servsocket_,false);
         state_=IDLE;
@@ -215,77 +216,6 @@ private:
     // no errors - client is now connected
     ec=boost::system::error_code();
   }
-  // read a message from client socket
-  // or wait until there is a message to read - in this case, a default cibstructed object is returned
-  T recvwait(std::size_t ms,boost::system::error_code&ec,bool getMsg){
-    T ret;                            // return value from this function (default ctor if no error)
-    std::stringstream strstrm;        // collect read chars in a stringstream
-
-    // we must be in state CONNECTED to be here
-    assert(state_==CONNECTED);
-
-    // loop until we have a message (or until we timeout)
-    while(true){
-      // setup to listen on fd descriptor
-      fd_set input;
-      FD_ZERO(&input);
-      FD_SET(servsocket_,&input);
-      FD_SET(clientsocket_,&input);
-      int maxfd=std::max(servsocket_,clientsocket_);
-
-      // setup for timeout (ones we get a message we don't timeout)
-      struct timeval tmo;
-      tmo.tv_sec=ms/1000;
-      tmo.tv_usec=(ms%1000)*1000;
-      
-      // block on select - timeout if configured
-      assert(maxfd!=-1);
-      int n=::select(++maxfd,&input,NULL,NULL,ms>0?&tmo:NULL);
-
-      // check for error
-      if(n<0){
-        ec=boost::system::error_code(errno,boost::system::get_posix_category());
-        return T{};
-      }
-      // check for tmo
-      if(n==0){
-        ec=boost::asio::error::timed_out;
-        return T{};
-      }
-      // check if we got some data
-      if(FD_ISSET(clientsocket_,&input)){
-        // if we are only checking if we have a message we are done here
-        if(!getMsg){
-          ec= boost::system::error_code{};
-          return T{};
-        }
-        // read up to '\n' inclusive
-        ssize_t count{0};
-        while(true){
-          // read next character in message
-          char c;
-          ssize_t stat;
-          while((stat=::read(clientsocket_,&c,1))==EINTR){}
-          if(stat!=1){
-            // create a boost::system::error_code from errno
-            ec=boost::system::error_code(errno,boost::system::get_posix_category());
-            return T{};
-          }
-          // save character just read
-          strstrm<<c;
-
-          // if we reached newline, send message including newline)
-          if(c==sep_)return deser_(strstrm);
-        }
-        // check if we read all available characters
-        // (if there are no more chars to read, then restart select() statement)
-        if(++count==n)break;
-      }
-      // restet tmo 0 zero ms since we don't timeout ones we start reading a message
-      ms=0;
-    }
-  }
-
 
   // --------------------------------- private attributes
   // state object is in
