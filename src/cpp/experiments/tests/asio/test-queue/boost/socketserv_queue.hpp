@@ -135,7 +135,8 @@ private:
     if(state_==CONNECTED){
       state_=READING;
       T ret{detail::queue_support::recvwait<T,DESER>(clientsocket_,0,ec1,getMsg,sep_,deser_)};
-      if(ec1!=boost::system::error_code()){
+// NOTE! Should we disconnect on timeout?
+      if(ec1!=boost::system::error_code()&&ec1!=boost::asio::error::timed_out){
         detail::queue_support::eclose(servsocket_,false);
         state_=IDLE;
         ec=ec1;
