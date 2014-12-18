@@ -38,14 +38,14 @@ int main(){
 
     // listen for a message
     boost::system::error_code ec;
-    auto ret{qserv.timed_wait_deq(3000,ec)};
+    pair<bool,qval_t>ret{qserv.timed_deq(100000,ec)};
     if(ec!=boost::system::error_code()){
       BOOST_LOG_TRIVIAL(error)<<"deque() failed: "<<ec.message();
       exit(1);
     }
+    BOOST_LOG_TRIVIAL(info)<<"got message: \""<<ret.second<<"\"";
     // NOTE! Not yet done
     // ...
-
   }
   catch(exception const&e){
     BOOST_LOG_TRIVIAL(error)<<"cought exception: "<<e.what();

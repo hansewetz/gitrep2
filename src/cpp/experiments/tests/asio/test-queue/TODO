@@ -11,6 +11,9 @@
 
  - change std::size_t ms --> chrono time
 
+- time for waiting for a message is not done correctly in socket queues. We time to get a connection 
+  then start timing again when connection is established
+
 - is it possible to support any 'pointer type' for queue
 
 - add filter to all queues (accept/reject - default is to accept all messages)

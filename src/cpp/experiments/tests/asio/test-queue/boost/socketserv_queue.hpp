@@ -27,6 +27,9 @@ TESTING:
 #include <unistd.h>
 #include <string.h>
 
+// NOTE! 
+#include <iostream>
+
 // socket stuff
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -94,6 +97,8 @@ public:
   }
   // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
   std::pair<bool,T>timed_deq(std::size_t ms,boost::system::error_code&ec){
+// NOTE!
+std::cerr<<"state: "<<state_<<std::endl;
     return deqAux(ms,ec,true);
   }
   // wait until we can retrieve a message from queue

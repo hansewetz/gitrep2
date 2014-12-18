@@ -201,3 +201,13 @@ Tue Apr  8 10:08:36 CEST 2014
 
 Sat Aug  9 15:24:50 CEST 2014
 	#installed boost_1_55
+
+------------------------
+
+installed boost 1.57
+  	./bootstrap.sh –prefix <install-dir> 
+	./b2 --build-type=complete --with-thread --layout=versioned
+
+------------------------
+
+
