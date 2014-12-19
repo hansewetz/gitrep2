@@ -24,13 +24,10 @@ TESTING:
 #include <iostream>
 #include <string>
 #include <algorithm>
-#include <unistd.h>
 #include <string.h>
 
-// NOTE! 
-#include <iostream>
-
 // socket stuff
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -97,8 +94,6 @@ public:
   }
   // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
   std::pair<bool,T>timed_deq(std::size_t ms,boost::system::error_code&ec){
-// NOTE!
-std::cerr<<"state: "<<state_<<std::endl;
     return deqAux(ms,ec,true);
   }
   // wait until we can retrieve a message from queue
@@ -115,9 +110,25 @@ std::cerr<<"state: "<<state_<<std::endl;
     return true;
   }
 
-  // NOTE! Not yet done
+  // NOTE! Not yet done - must implement timed_enq, wait_enq, timed_wait_enq
   // ...
-  
+
+  // put a message into queue
+  bool enq(T t,boost::system::error_code&ec){
+    return enqAux(&t,0,ec,true);
+  }
+  // put a message into queue - timeout if waiting too long
+  bool timed_enq(T t,std::size_t ms,boost::system::error_code&ec){
+    return enqAux(&t,ms,ec,true);
+  }
+  // wait until we can put a message in queue
+  bool wait_enq(boost::system::error_code&ec){
+    return enqAux(nullptr,0,ec,false);
+  }
+  // wait until we can put a message in queue - timeout if waiting too long
+  bool timed_wait_enq(std::size_t ms,boost::system::error_code&ec){
+    return enqAux(nullptr,ms,ec,false);
+  }
 private:
   // --------------------------------- state management functions
   // (all state is managed here)
@@ -140,7 +151,6 @@ private:
     if(state_==CONNECTED){
       state_=READING;
       T ret{detail::queue_support::recvwait<T,DESER>(clientsocket_,0,ec1,getMsg,sep_,deser_)};
-// NOTE! Should we disconnect on timeout?
       if(ec1!=boost::system::error_code()&&ec1!=boost::asio::error::timed_out){
         detail::queue_support::eclose(servsocket_,false);
         state_=IDLE;
@@ -151,7 +161,34 @@ private:
       return make_pair(true,ret);
     }
   }
+  // enq a message - return false if enq failed
+  bool enqAux(T const*t,std::size_t ms,boost::system::error_code&ec,bool sendMsg){
+    boost::system::error_code ec1;
 
+    // wait for client connection if needed
+    if(state_==IDLE){
+      waitForClientConnect(ms,ec1);
+      if(ec1!=boost::system::error_code()){
+        detail::queue_support::eclose(servsocket_,false);
+        ec=ec1;
+        return false;
+      }
+      state_=CONNECTED;
+    }
+    // client connected - write message
+    if(state_==CONNECTED){
+      state_=WRITING;
+      T ret{detail::queue_support::sendwait<T,SERIAL>(clientsocket_,t,0,ec1,sendMsg,sep_,serial_)};
+      if(ec1!=boost::system::error_code()&&ec1!=boost::asio::error::timed_out){
+        detail::queue_support::eclose(servsocket_,false);
+        state_=IDLE;
+        ec=ec1;
+        return false;
+      }
+      state_=CONNECTED;
+      return true;
+    }
+  }
 
   // --------------------------------- helper functions
   // (no state is managed here)
