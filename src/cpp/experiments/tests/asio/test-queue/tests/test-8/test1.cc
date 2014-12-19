@@ -32,10 +32,12 @@ constexpr int listenPort=7787;
 // test program
 int main(){
   try{
-    // create queue
+    // create queues
     // (after creation, the queue will accept client connections and act as a full duplex queue with each client)
     asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qserv(listenPort,deserialiser,serialiser);
+//    asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qserv(listenPort,deserialiser,serialiser);
 
+/*
     // send a message
     boost::system::error_code ec1;
     bool ret1{qserv.timed_wait_enq(10000,ec1)};
@@ -45,7 +47,6 @@ int main(){
     }
     BOOST_LOG_TRIVIAL(info)<<"can send message";
 
-/*
     // listen for a message
     boost::system::error_code ec2;
     pair<bool,qval_t>ret2{qserv.timed_deq(100000,ec2)};

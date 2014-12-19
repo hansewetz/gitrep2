@@ -8,5 +8,6 @@
 #include "polldir_queue.hpp"
 #include "fddeq_queue.hpp"
 #include "fdenq_queue.hpp"
-#include "socketserv_queue.hpp"
+#include "sockserv_queue.hpp"
+//#include "socketclient_queue.hpp"
 #endif
