@@ -210,7 +210,7 @@ private:
     if(bind(servsocket_,(struct sockaddr*)&serveraddr_,sizeof(serveraddr_))==-1){
       throw std::runtime_error(std::string("sockserv_queue::createListenSocket: failed binding socket to address, errno: ")+boost::lexical_cast<std::string>(errno));
     }
-    // start listening on soclet
+    // start listening on socket
     if(listen(servsocket_,maxclients_)==-1){
       throw std::runtime_error(std::string("sockserv_queue::createListenSocket: failed listening on socket, errno: ")+boost::lexical_cast<std::string>(errno));
     }

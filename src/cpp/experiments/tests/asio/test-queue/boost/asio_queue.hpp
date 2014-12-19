@@ -9,5 +9,5 @@
 #include "fddeq_queue.hpp"
 #include "fdenq_queue.hpp"
 #include "sockserv_queue.hpp"
-//#include "socketclient_queue.hpp"
+#include "sockclient_queue.hpp"
 #endif

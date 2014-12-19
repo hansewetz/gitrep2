@@ -6,9 +6,11 @@ This program tests that 'socketserv_queue' works
 
 #include <boost/asio_queue.hpp>
 #include <boost/log/trivial.hpp>
+#include <functional>
 #include <string>
 #include <functional>
 #include <iostream>
+#include <thread>
 using namespace std;
 namespace asio=boost::asio;
 
@@ -25,40 +27,56 @@ std::function<qval_t(istream&)>deserialiser=[](istream&is){
   getline(is,line);
   return line;
 };
-
-// global variables
-constexpr int listenPort=7787;
+// send message on queue
+template<typename Q>
+void sendMsg(Q&q,qval_t const&msg){
+  boost::system::error_code ec1;
+  bool ret1{q.enq(msg,ec1)};
+  if(ec1!=boost::system::error_code()){
+    BOOST_LOG_TRIVIAL(error)<<"enq() failed: "<<ec1.message();
+    exit(1);
+ }
+}
+// receive a message on a queue
+template<typename Q>
+qval_t recvMsg(Q*q){
+  boost::system::error_code ec1;
+  pair<bool,qval_t>ret1{q->deq(ec1)};
+  if(ec1!=boost::system::error_code()){
+    BOOST_LOG_TRIVIAL(error)<<"deque() failed: "<<ec1.message();
+    exit(1);
+  }
+  return ret1.second;
+}
+// server info
+constexpr int listenport=7787;
+string const server{"localhost"};
 
 // test program
 int main(){
   try{
     // create queues
     // (after creation, the queue will accept client connections and act as a full duplex queue with each client)
-    asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qserv(listenPort,deserialiser,serialiser);
-//    asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qserv(listenPort,deserialiser,serialiser);
+    asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qserv(listenport,deserialiser,serialiser);
+    BOOST_LOG_TRIVIAL(info)<<"server queue created ...";
+    asio::sockclient_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qclient(server,listenport,deserialiser,serialiser);
+    BOOST_LOG_TRIVIAL(info)<<"client queue created ...";
 
-/*
     // send a message
-    boost::system::error_code ec1;
-    bool ret1{qserv.timed_wait_enq(10000,ec1)};
-    if(ec1!=boost::system::error_code()){
-      BOOST_LOG_TRIVIAL(error)<<"timed_wait_enq() failed: "<<ec1.message();
-      exit(1);
-    }
-    BOOST_LOG_TRIVIAL(info)<<"can send message";
+    string msg{"A message"};
+    BOOST_LOG_TRIVIAL(info)<<"sending message: \""<<msg<<"\" through server queue";
+    std::function<void(decltype(qserv),string const&)>fsend{sendMsg<decltype(qserv)>};
+    std::thread tsend{fsend,&qserv,msg};
+    BOOST_LOG_TRIVIAL(info)<<"message sent on server queue";
 
     // listen for a message
-    boost::system::error_code ec2;
-    pair<bool,qval_t>ret2{qserv.timed_deq(100000,ec2)};
-    if(ec2!=boost::system::error_code()){
-      BOOST_LOG_TRIVIAL(error)<<"deque() failed: "<<ec2.message();
-      exit(1);
-    }
-    BOOST_LOG_TRIVIAL(info)<<"got message: \""<<ret2.second<<"\"";
-*/
+    BOOST_LOG_TRIVIAL(info)<<"listening to message on client queue";
+  //  std::thread trecv{qclient};
+//    BOOST_LOG_TRIVIAL(info)<<"got message: \""<<d<<"\" on client queue";
 
-    // NOTE! Not yet done
-    // ...
+    // join threads
+//    trecv.join();
+    tsend.join();
   }
   catch(exception const&e){
     BOOST_LOG_TRIVIAL(error)<<"cought exception: "<<e.what();
