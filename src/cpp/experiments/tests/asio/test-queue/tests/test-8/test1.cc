@@ -66,14 +66,15 @@ int main(){
     // send a message
     string msg{"A message"};
     BOOST_LOG_TRIVIAL(info)<<"sending message: \""<<msg<<"\" through server queue";
-    std::function<void(decltype(qserv)*,string const&)>fsend=[](decltype(qserv)*q,string const&msg){sendMsg<decltype(qserv)>(q,msg);};
+    using qsend_t=decltype(qserv);
+    std::function<void(qsend_t*,string const&)>fsend=[](qsend_t*q,string const&msg){sendMsg<qsend_t>(q,msg);};
     std::thread tsend{fsend,&qserv,msg};
     BOOST_LOG_TRIVIAL(info)<<"message sent on server queue";
 
     // listen for a message
     BOOST_LOG_TRIVIAL(info)<<"listening to message on client queue";
-    using q_t=decltype(qclient);
-    std::packaged_task<qval_t(q_t*)>task([](q_t*q){return recvMsg(q);});
+    using qrecv_t=decltype(qclient);
+    std::packaged_task<qval_t(qrecv_t*)>task([](qrecv_t*q){return recvMsg(q);});
     std::future<qval_t>fut=task.get_future();
     std::thread trecv(std::move(task),&qclient);
     BOOST_LOG_TRIVIAL(info)<<"got message: \""<<fut.get()<<"\" on client queue";
