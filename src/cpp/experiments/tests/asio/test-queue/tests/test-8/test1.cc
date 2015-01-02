@@ -42,9 +42,19 @@ void sendMsg(Q*q,qval_t const&msg){
 template<typename Q>
 qval_t recvMsg(Q*q){
   boost::system::error_code ec1;
+
+  // wait until we can deq
+  BOOST_LOG_TRIVIAL(info)<<"waiting until deq() possible ...";
+  bool ret0{q->timed_wait_deq(100,ec1)};
+  if(ec1!=boost::system::error_code()){
+    BOOST_LOG_TRIVIAL(error)<<"wait_deq() failed: "<<ec1.message();
+    exit(1);
+  }
+  // deq item
+  BOOST_LOG_TRIVIAL(info)<<"can now deq()";
   pair<bool,qval_t>ret1{q->deq(ec1)};
   if(ec1!=boost::system::error_code()){
-    BOOST_LOG_TRIVIAL(error)<<"deque() failed: "<<ec1.message();
+    BOOST_LOG_TRIVIAL(error)<<"deq() failed: "<<ec1.message();
     exit(1);
   }
   return ret1.second;
@@ -58,10 +68,11 @@ int main(){
   try{
     // create queues
     // (after creation, the queue will accept client connections and act as a full duplex queue with each client)
-    asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qserv(listenport,deserialiser,serialiser);
-    BOOST_LOG_TRIVIAL(info)<<"server queue created ...";
+    // (notice that we can create client first since it will not connect until an enq/deq method is invoked on it)
     asio::sockclient_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qclient(server,listenport,deserialiser,serialiser);
     BOOST_LOG_TRIVIAL(info)<<"client queue created ...";
+    asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qserv(listenport,deserialiser,serialiser);
+    BOOST_LOG_TRIVIAL(info)<<"server queue created ...";
 
     // send a message
     string msg{"A message"};

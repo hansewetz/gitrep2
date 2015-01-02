@@ -96,30 +96,23 @@ public:
   std::pair<bool,T>deq(boost::system::error_code&ec){
     return deqAux(0,ec,true);
   }
-
-// ---------------------------------------
-// NOTE! implement rest of deq() functions
-// ---------------------------------------
-
-/*
   // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
   std::pair<bool,T>timed_deq(std::size_t ms,boost::system::error_code&ec){
     return deqAux(ms,ec,true);
   }
   // wait until we can retrieve a message from queue
   bool wait_deq(boost::system::error_code&ec){
-    deqAux(0,ec,true);
+    deqAux(0,ec,false);
     if(ec.value()!=0)return false;
     return true;
   }
   // wait until we can retrieve a message from queue -  timeout if waiting too long
   bool timed_wait_deq(std::size_t ms,boost::system::error_code&ec){
-    deqAux(ms,ec,true);
+    deqAux(ms,ec,false);
     if(ec==boost::asio::error::timed_out)return false;
     if(ec.value()!=0)return false;
     return true;
   }
-*/
 
   // NOTE! Need enq() functions also
   // ...
@@ -144,8 +137,8 @@ private:
     // client connected - read message
     if(state_==CONNECTED){
       state_=READING;
-      T ret{detail::queue_support::recvwait<T,DESER>(servsocket_,0,ec1,getMsg,sep_,deser_)};
-      if(ec1!=boost::system::error_code()&&ec1!=boost::asio::error::timed_out){
+      T ret{detail::queue_support::recvwait<T,DESER>(servsocket_,ms,ec1,getMsg,sep_,deser_)};
+      if(ec1!=boost::system::error_code()){
         detail::queue_support::eclose(servsocket_,false);
         state_=IDLE;
         ec=ec1;
