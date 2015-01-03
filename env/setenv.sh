@@ -27,7 +27,7 @@ export PROJECT_ROOT=${ENV_ROOT}/..
 # flags controlling some aspects of compilation--------
 # --------------------------------------
 export STDFLAG='-std=c++14'		# C++14
-#export GCCWARNERROR='-Werror'		# turns warnings into errors
+export GCCWARNERROR='-Werror'		# turns warnings into errors
 
 # must include boost stuff
 if [[ ${DEV_ENV} == 'WORK' ]]; then

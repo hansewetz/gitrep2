@@ -13,6 +13,11 @@
 #include <type_traits>
 
 namespace occi_utils{
+
+// This is a temporary patch until I have time to fix re-orderning problems in the OCCI code
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreorder"
+
 // forward decl
 template<typename Bind>class occi_output_iterator;
 
@@ -202,5 +207,6 @@ private:
   bool terminateEnv_;
   commit_t commit_;
 };
+#pragma GCC diagnostic push
 }
 #endif

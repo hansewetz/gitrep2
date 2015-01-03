@@ -12,6 +12,10 @@
 #include <stdexcept>
 namespace mtdata{
 
+// This is a temporary patch until I have time to fix re-orderning problems in the OCCI code
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreorder"
+
 // input iterator
 template<typename Row,typename Bind=std::tuple<>>
 class occi_input_iterator:public boost::iterator_facade<occi_input_iterator<Row,Bind>,Row const,boost::single_pass_traversal_tag>{
@@ -55,14 +59,14 @@ private:
     else end_=true;
   }
   // state
-  const std::string sql_;
-  const Bind bind_;
   oracle::occi::Connection*conn_;    
-  std::shared_ptr<oracle::occi::Statement>stmt_;
-  occi_data_fetcher fetcher_;         
-  Row currentRow_;           
-  bool end_;
+  const std::string sql_;
   std::size_t prefetchcount_;
+  const Bind bind_;
+  occi_data_fetcher fetcher_;         
+  std::shared_ptr<oracle::occi::Statement>stmt_;
+  bool end_;
+  Row currentRow_;           
 };
 // source (can be viewed as a 'collection')
 template<typename Row,typename Bind=std::tuple<>>
@@ -156,5 +160,6 @@ private:
   bool terminateEnv_;
   std::size_t prefetchcount_;
 };
+#pragma GCC diagnostic pop
 }
 #endif

@@ -12,6 +12,11 @@
 #include <stdexcept>
 namespace occi_utils{
 
+// This is a temporary patch until I have time to fix re-orderning problems in the OCCI code
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreorder"
+
+
 // input iterator
 template<typename Row,typename Bind=std::tuple<>,typename ILBind=typename utils::make_indlist_from_tuple<Bind>::type>
 class occi_input_iterator:public boost::iterator_facade<occi_input_iterator<Row,Bind>,Row const,boost::single_pass_traversal_tag>{
@@ -157,5 +162,6 @@ private:
   bool terminateEnv_;
   std::size_t prefetchcount_;
 };
+#pragma GCC diagnostic pop
 }
 #endif
