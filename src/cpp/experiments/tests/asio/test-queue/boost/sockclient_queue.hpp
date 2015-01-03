@@ -114,8 +114,24 @@ public:
     return true;
   }
 
-  // NOTE! Need enq() functions also
-  // ...
+ // NOTE! Not yet implkemented
+  // enqueue a message (return.first == false if enq() was disabled)
+  bool enq(T t,boost::system::error_code&ec){
+    // NOTE! Not yet implemented
+  }
+  // enqueue a message (return.first == false if enq() was disabled) - timeout if waiting too long
+  bool timed_enq(T t,std::size_t ms,boost::system::error_code&ec){
+    // NOTE! Not yet implemented
+  }
+  // wait until we can retrieve a message from queue
+  bool wait_enq(boost::system::error_code&ec){
+    // NOTE! Not yet implemented
+  }
+  // wait until we can retrieve a message from queue -  timeout if waiting too long
+  bool timed_wait_enq(std::size_t ms,boost::system::error_code&ec){
+    // NOTE! Not yet implemented
+  }
+ // NOTE! Not yet implkemented
   
 private:
   // --------------------------------- state management functions
