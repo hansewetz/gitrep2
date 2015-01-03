@@ -12,8 +12,8 @@ struct Foo{
   Foo(string const&str){cout<<"string ctor"<<endl;}
   Foo(Foo const&f){cout<<"copy ctor"<<endl;}
   Foo(Foo&&f){cout<<"move ctor"<<endl;}
-  Foo&operator=(Foo const&f){cout<<"copy assignment"<<endl;}
-  Foo&operator=(Foo&&f){cout<<"move assign"<<endl;}
+  Foo&operator=(Foo const&f){cout<<"copy assignment"<<endl;return*this;}
+  Foo&operator=(Foo&&f){cout<<"move assign"<<endl;return*this;}
   ~Foo(){cout<<"dtor"<<endl;}
 };
 ostream&operator<<(ostream&os,Foo const&foo){return cout<<"foo ";}

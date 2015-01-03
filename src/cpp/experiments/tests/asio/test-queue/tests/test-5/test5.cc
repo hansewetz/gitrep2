@@ -17,7 +17,7 @@ namespace fs=boost::filesystem;
 // sender
 template<typename Q>
 void sender(Q&q,size_t maxmsg){
-  for(int i=0;i<maxmsg;++i){
+  for(std::size_t i=0;i<maxmsg;++i){
     boost::system::error_code ec;
     q.enq(i,ec);
     std::chrono::milliseconds tmo(1000);

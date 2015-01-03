@@ -331,15 +331,18 @@ private:
     cache_.pop_front();
     return ret;
   }
+
   // user specified characteristics of queue
   std::string qname_;
   std::size_t maxsize_;
   fs::path dir_;
-  bool removelocks_;
 
   // serialization/deserialization functions
   DESER deser_;
   SERIAL serial_;
+
+  // should locks be removed
+  bool removelocks_;
 
   // state of queue
   bool deq_enabled_=true;

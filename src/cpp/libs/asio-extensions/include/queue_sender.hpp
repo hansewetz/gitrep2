@@ -177,9 +177,8 @@ private:
       // if valid, go ahead and do (potentially) blocking call on queue, otherwise post aborted message
       boost::system::error_code ec;
       if(impl){
-        bool ret;
-        if(timed_)ret=q_->timed_enq(val_,ms_,ec);
-        else ret=q_->enq(val_,ec);
+        if(timed_)q_->timed_enq(val_,ms_,ec);
+        else q_->enq(val_,ec);
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,ec));
       }else{
         this->io_service_.post(boost::asio::detail::bind_handler(handler_,boost::asio::error::operation_aborted));

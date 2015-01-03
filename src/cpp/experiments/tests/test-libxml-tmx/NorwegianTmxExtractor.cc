@@ -62,7 +62,7 @@ namespace{
   string getLanAttr(xmlNodePtr node){
     for(xmlAttrPtr attr=node->properties;NULL!=attr;attr=attr->next){
       xmlChar*attrname=xmlNodeListGetString(node->doc,attr->children,1);
-      for(int i=0;i<lans.size();++i){
+      for(std::size_t i=0;i<lans.size();++i){
         if(!xmlStrcmp(lans[i],attrname)){
           string ret{string((char*)lans[i])};
           ret=ret.substr(0,2);

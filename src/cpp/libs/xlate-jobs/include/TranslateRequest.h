@@ -29,9 +29,9 @@ public:
   // print function
   std::ostream&print(std::ostream&os)const;
 private:
+  LanguagePair lanpair_;
   TranslateRequestId id_;
   std::vector<std::string>segs_;
-  LanguagePair lanpair_;
 };
 // print function
 std::ostream&operator<<(std::ostream&os,TranslateRequest const&);

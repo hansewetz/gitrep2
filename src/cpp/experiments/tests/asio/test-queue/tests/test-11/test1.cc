@@ -28,14 +28,14 @@ constexpr size_t maxmsg{10};
 
 // sender function
 void sender(){
-  for(int i=0;i<maxmsg;++i){
+  for(std::size_t i=0;i<maxmsg;++i){
     boost::system::error_code ec;
     qsender.sync_enq(i,ec);
   }
 }
 // receiver function
 void receiver(){
-  for(int i=0;i<maxmsg;++i){
+  for(std::size_t i=0;i<maxmsg;++i){
     boost::system::error_code ec;
     auto p=qlistener.sync_deq(ec) ;
     cerr<<"received: ["<<boolalpha<<p.first<<", "<<p.second<<"]"<<", ec: "<<ec.message()<<endl;

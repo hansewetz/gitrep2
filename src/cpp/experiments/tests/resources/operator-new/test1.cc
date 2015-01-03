@@ -16,6 +16,6 @@ void*operator new(size_t s,T*t){
 struct Buf{};
 
 int main(){
-  Buf*buf;
-  Junk*j=new(buf)Junk;
+  Buf buf;
+  new(&buf)Junk;
 }

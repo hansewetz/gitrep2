@@ -29,7 +29,7 @@ using namespace std;
 char digit2char(int digit,int ind){
   return 'A'+(digit-2)*3+ind;
 }
-void printTelNoPermsAux(string const&telNo,string&res,int startInd){
+void printTelNoPermsAux(string const&telNo,string&res,std::size_t startInd){
   // if start index of remainder of telNo == length of telNo then we are done
   if(startInd==telNo.length()){
     cout<<res<<endl;

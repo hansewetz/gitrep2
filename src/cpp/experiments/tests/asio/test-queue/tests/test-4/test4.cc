@@ -36,7 +36,7 @@ void qlistener_handler(boost::system::error_code const&ec,T item){
 }
 // thread function sending maxmsg messages
 void thr_send_sync_messages(){
-  for(int i=0;i<maxmsg;++i){
+  for(std::size_t i=0;i<maxmsg;++i){
     int item{boost::lexical_cast<int>(i)};
     BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
     boost::system::error_code ec;

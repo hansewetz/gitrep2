@@ -43,7 +43,7 @@ int main(){
   cout<<"c1 is fallback: "<<boolalpha<<is_callable<c1>::value<<endl;
 
   // test function
-  function<int(double)>d2i=[](double d)->int{static_cast<int>(d);};
+  function<int(double)>d2i=[](double d)->int{return static_cast<int>(d);};
   cout<<"lambda is "<<boolalpha<<is_callable<decltype(d2i)>::value<<endl;
 }
 

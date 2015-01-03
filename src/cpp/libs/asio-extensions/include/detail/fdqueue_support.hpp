@@ -87,6 +87,8 @@ T recvwait(int fdread,std::size_t ms,boost::system::error_code&ec,bool getMsg,ch
     // restet tmo 0 zero ms since we don't timeout ones we start reading a message
     ms=0;
   }
+  // dummy return value - will nver get here
+  return T{};
 }
 // serialise an object from an fd stream or wait until we timeout
 // (returns true we we could serialise object, false otherwise - error code will be non-zero if false)

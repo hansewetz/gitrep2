@@ -35,7 +35,7 @@ static size_t utf8_cp_encode_length(cp_t cp){
 // Check if cp is overlong.
 template<typename Difference_type>
 static bool utf8_cp_is_overlong(b2::cp_t cp,Difference_type len){
-  if(utf8_cp_encode_length(cp)==len)return false;
+  if(utf8_cp_encode_length(cp)==static_cast<size_t>(len))return false;
   return true;
 }
 // Get length of code units by checking leading byte.
@@ -71,31 +71,31 @@ static b2::uni_error::error_code utf8_decode(InputIt&it,b2::cp_t&cp,typename boo
       break;
     case 2:
       ++it;
-      if(!check_range_error(it,*end))b2::uni_error::error_range;
+      if(!check_range_error(it,*end))return b2::uni_error::error_range;
       if(!utf8_cu_is_trail_byte(*it))return b2::uni_error::error_invalid_trail_byte;
       cp=((cp<<6)&0x07FF)+((*it)&0x3F);
       break;
     case 3:
       ++it;
-      if(!check_range_error(it,*end))b2::uni_error::error_range;
+      if(!check_range_error(it,*end))return b2::uni_error::error_range;
       if(!utf8_cu_is_trail_byte(*it))return b2::uni_error::error_invalid_trail_byte;
       cp=((cp<<12)&0xFFFF)+((static_cast<b2::cp_t>(*it)<<6)&0xFFF);
       ++it;
-      if(!check_range_error(it,*end))b2::uni_error::error_range;
+      if(!check_range_error(it,*end))return b2::uni_error::error_range;
       if(!utf8_cu_is_trail_byte(*it))return b2::uni_error::error_invalid_trail_byte;
       cp+=(*it)&0x3F;
       break;
     case 4:
       ++it;
-      if(!check_range_error(it,*end))b2::uni_error::error_range;
+      if(!check_range_error(it,*end))return b2::uni_error::error_range;
       if(!utf8_cu_is_trail_byte(*it))return b2::uni_error::error_invalid_trail_byte;
       cp=((cp<<18)&0x1FFFFF)+((static_cast<b2::cp_t>(*it)<<12)&0x3FFFF);
       ++it;
-      if(!check_range_error(it,*end))b2::uni_error::error_range;
+      if(!check_range_error(it,*end))return b2::uni_error::error_range;
       if(!utf8_cu_is_trail_byte(*it))return b2::uni_error::error_invalid_trail_byte;
       cp+=((static_cast<b2::cp_t>(*it))<<6)&0xFFF;
       ++it;
-      if(!check_range_error(it,*end))b2::uni_error::error_range;
+      if(!check_range_error(it,*end))return b2::uni_error::error_range;
       if(!utf8_cu_is_trail_byte(*it))return b2::uni_error::error_invalid_trail_byte;
       cp+=static_cast<utf8_cu_t>(*it)&0x3F;
       break;

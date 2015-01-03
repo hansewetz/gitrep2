@@ -30,9 +30,9 @@ using namespace std;
 void reverse(char*start,char*end){
   while(start<end)swap(*start++,*end--);
 }
-void rotate(char*str,int k){
+void rotate(char*str,std::size_t k){
   if(str==0||k==0||k==strlen(str))return;
-  int n=strlen(str);
+  std::size_t n=strlen(str);
   k%=n;
   reverse(str,str+k-1);
   reverse(str+k,str+n-1);

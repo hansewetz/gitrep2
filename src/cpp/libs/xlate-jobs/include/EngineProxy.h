@@ -48,24 +48,27 @@ private:
   // id of this engine
   EngineProxyId id_;
 
-  // state of proxy
-  state_t state_;
-
-  // pid of engine child
-  int cpid_;
-
-  // #of outstanding segments (i.e., we are have timed out on them)
-  std::size_t ntmos_;
-
-  // timeout (changes depdening on if engine has started or not
-  std::size_t realTmoMs_;
-
   // asio stuff
   boost::asio::io_service&ios_;
 
   // queues taking in tasks and sending translated tasks
   std::shared_ptr<TaskQueueListener>qtaskListener_;
   std::shared_ptr<TaskQueueSender>qtaskSender_;
+
+  // state of proxy
+  state_t state_;
+
+  // pid of engine child
+  int cpid_;
+
+  // engine environment
+  std::shared_ptr<EngineEnv>engineenv_;
+
+  // #of outstanding segments (i.e., we are have timed out on them)
+  std::size_t ntmos_;
+
+  // timeout (changes depdening on if engine has started or not
+  std::size_t realTmoMs_;
 
   // queues talking to engines
   std::shared_ptr<qToEngine_t>qToEngine_;
@@ -74,9 +77,6 @@ private:
   // sender/listener talking to engines
   std::shared_ptr<boost::asio::queue_sender<qToEngine_t>>qsenderToEngine_;
   std::shared_ptr<boost::asio::queue_listener<qFromEngine_t>>qListenerFromEngine_;
-
-  // engine environment
-  std::shared_ptr<EngineEnv>engineenv_;
 };
 }
 #endif

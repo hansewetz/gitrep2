@@ -60,7 +60,7 @@ int main(){
       //cerr<<"Total #results: "<<hits->length()<<endl;
       for (size_t i=0; i < hits->length() && i<10; i++) {
         Document* d = &hits->doc(i);
-        printf("[%d-score: %f] %ls\n", i, d->get(_T("contents")), hits->score(i));
+        printf("[%i-score: %f] %ls\n", static_cast<int>(i), d->get(_T("contents")), hits->score(i));
       }
     }
   } catch (CLuceneError& e) {

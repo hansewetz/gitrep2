@@ -31,7 +31,7 @@ int char2digit(char c){
 }
 string word2telno(string const&word){
   string telno;
-  for(int i=0;i<word.length();++i){
+  for(std::size_t i=0;i<word.length();++i){
     telno.push_back('0'+char2digit(word[i]));
   }
   return telno;

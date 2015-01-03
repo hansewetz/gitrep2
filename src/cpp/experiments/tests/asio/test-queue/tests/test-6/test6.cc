@@ -26,10 +26,10 @@ namespace fs=boost::filesystem;
 class Message{
 public:
   friend ostream&operator<<(ostream&os,Message const&junk){
-    os<<junk.s_<<" "<<junk.i_;
+    return os<<junk.s_<<" "<<junk.i_;
   }
   friend istream&operator>>(istream&is,Message&junk){
-    is>>junk.s_>>junk.i_;
+    return is>>junk.s_>>junk.i_;
   }
   Message()=default;
   Message(string const&s,int i):s_(s),i_(i){}
@@ -76,7 +76,7 @@ void qlistener_handler(boost::system::error_code const&ec,qval_t const&item){
 }
 // thread function sending maxmsg messages
 void thr_send_sync_messages(){
-  for(int i=0;i<maxmsg;++i){
+  for(int i=0;i<static_cast<int>(maxmsg);++i){
     qval_t item{Message{string("Hello")+boost::lexical_cast<string>(i),i}};
     BOOST_LOG_TRIVIAL(debug)<<"sending item: "<<item;
     boost::system::error_code ec;

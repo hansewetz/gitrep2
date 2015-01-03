@@ -32,7 +32,7 @@ public:
   // add a number
   void add(int val){
     q_.push(val);
-    if(q_.size()>m_)q_.pop();
+    if(static_cast<int>(q_.size())>m_)q_.pop();
   }
   // get reference to vector containing smallest numbers so far
   vector<int>get()const{

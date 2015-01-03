@@ -37,7 +37,7 @@ constexpr size_t maxmsg{10};
 
 // handler for queue listener
 template<typename T>
-void qlistener_handler(boost::system::error_code const&ec,T item, int nreceived){
+void qlistener_handler(boost::system::error_code const&ec,T item, std::size_t nreceived){
   // print item if error code is OK
   if(ec)BOOST_LOG_TRIVIAL(debug)<<"queue listener interupted (via asio): ignoring callback queue item, ec: "<<ec;
   else{
@@ -47,7 +47,7 @@ void qlistener_handler(boost::system::error_code const&ec,T item, int nreceived)
 }
 // handler for queue sender
 template<typename T>
-void qsender_handler(boost::system::error_code const&ec,int item,int nsent){
+void qsender_handler(boost::system::error_code const&ec,int item,std::size_t nsent){
   // print item if error code is OK
   if(ec)BOOST_LOG_TRIVIAL(debug)<<"queue sender interupted (via asio): ignoring callback, ec: "<<ec;
   else{

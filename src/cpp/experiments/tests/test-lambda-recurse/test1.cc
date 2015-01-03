@@ -8,7 +8,6 @@ using namespace std;
 
 // main.
 int main(int argc,char**argv){
-  using F=int(int);
   function<int(int)>fact=[&](int i){return i==0?1:i*fact(i-1);};
   cout<<"fact(5): "<<fact(5)<<endl;
 }

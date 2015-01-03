@@ -25,7 +25,7 @@ int main(){
     BOOST_LOG_TRIVIAL(debug)<<"enq(): "<<boolalpha<<stat1<<", ec: "<<ec.message();
 
     // kick off thread popping an element afetr 2 second
-    std:;function<void(void)>ft=[&](){
+    std::function<void(void)>ft=[&](){
         // sleep 2 seconds before deq()
         std::this_thread::sleep_for(std::chrono::milliseconds(6000));
         boost::system::error_code ec;

@@ -40,7 +40,7 @@ void FdAsyncLineReader::read_handler(boost::system::error_code const&err,size_t 
 // process read data
 // (break it into lines and dump each line as we find them)
 void FdAsyncLineReader::process_data(size_t nbytes){
-  for(int i=0;i<nbytes;++i){
+  for(std::size_t i=0;i<nbytes;++i){
     char c{buf_[i]};
     if(c=='\n'){
       linecb_(line_);

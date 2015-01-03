@@ -86,7 +86,7 @@ int main(int argc,char**argv){
   cout<<"5!="<<foldl_tuple(std::multiplies<int>(),e)<<endl;
 
   // check predicates
-  using IL1=indlist<0,1,2>;
+  //using IL1=indlist<0,1,2>;
   auto f=make_tuple(1);
   cout<<IL()<<" is an indlist: "<<boolalpha<<is_indlist<IL>::value<<endl;
   cout<<f<<" is an indlist: "<<boolalpha<<is_indlist<decltype(e)>::value<<endl;

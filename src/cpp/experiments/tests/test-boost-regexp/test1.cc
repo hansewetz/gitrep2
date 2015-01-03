@@ -10,7 +10,7 @@ using namespace std;
 
 bool match(string::const_iterator sit,string::const_iterator send,string const&p){
   string::const_iterator pit{p.begin()};
-  if(distance(sit,send)<p.length())return false;
+  if(distance(sit,send)<static_cast<int>(p.length()))return false;
   while(pit!=p.end()){
     if(*sit++!=*pit++)return false;
   }

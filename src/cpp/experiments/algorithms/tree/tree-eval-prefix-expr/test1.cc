@@ -45,6 +45,8 @@ int evalPrefix(string const&expr,int&ind){
   else{
     return tok-'0';
   }
+  // dummy return - never reach this point
+  return -1;
 }
 // test program
 int main(){

@@ -37,7 +37,7 @@ void printStrPermAux(ostream&os,string&str,string&res){
     os<<res<<endl;
     return;
   }
-  for(int i=0;i<str.length();++i){
+  for(std::size_t i=0;i<str.length();++i){
     if(marked(str[i]))continue;
     res.push_back(str[i]);
     mark(str[i]);

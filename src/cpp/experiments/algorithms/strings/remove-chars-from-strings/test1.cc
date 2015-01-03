@@ -31,7 +31,7 @@ char*remove(char*str,char const*rstr){
   // setup array so we can lookup if a charactre should be deleted ornot
   bool brem[128];
   fill(brem,brem+128,false);
-  for(int i=0;i<strlen(rstr);++i)brem[static_cast<int>(rstr[i])]=true;
+  for(std::size_t i=0;i<strlen(rstr);++i)brem[static_cast<int>(rstr[i])]=true;
 
   if(strlen(rstr)==0)return str;
   char*dest=str;

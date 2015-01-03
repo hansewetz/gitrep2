@@ -14,15 +14,17 @@ namespace xlate{
 // ctor
 TranslationCt::TranslationCt(boost::asio::io_service&ios,size_t maxScheduledJobs,size_t maxEngines,shared_ptr<EngineEnv>enngineenv):
     ios_(ios),
-    qschedTaskSize_(maxEngines),qschedJobSize_(maxScheduledJobs),
     maxEngines_(maxEngines),
+    enngineenv_(enngineenv),
+    qschedTaskSize_(maxEngines),
+    qschedJobSize_(maxScheduledJobs),
     qnewJob_{make_shared<JobQueue>(qnewJobSize_)},
     qschedJob_{make_shared<JobQueue>(qschedJobSize_)},
     qschedTask_{make_shared<TaskQueue>(qschedTaskSize_)},
     qtransTasks_{make_shared<TaskQueue>(qtransTasksSize_)},
     qtransJobs_{make_shared<JobQueue>(qtransJobSize_)},
     jobrep_{make_shared<TranslationJobRepository>(ios_,qnewJob_,qschedJob_,qtransTasks_,qtransJobs_)},
-    scheduler_{make_shared<TaskScheduler>(ios_,qschedJob_,qschedTask_)},enngineenv_(enngineenv){
+    scheduler_{make_shared<TaskScheduler>(ios_,qschedJob_,qschedTask_)}{
 
   // create engines and start running each engine in a separate thread
   for(size_t i=0;i<maxEngines_;++i){

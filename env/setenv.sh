@@ -23,12 +23,11 @@ export ENV_ROOT=`pwd`
 # this variable is for backwards compatibility in Makefiles
 export PROJECT_ROOT=${ENV_ROOT}/..
 
+# ----------------------------------------------
+# flags controlling some aspects of compilation--------
 # --------------------------------------
-# flags for which standard of C++ to run
-# --------------------------------------
-#export STDFLAG='-std=gnu++1y'		# C++1y
-#export STDFLAG='-std=c++1y'		# C++1y + gnu extension
-export STDFLAG='-std=c++11'		# C++11
+export STDFLAG='-std=c++14'		# C++14
+#export GCCWARNERROR='-Werror'		# turns warnings into errors
 
 # must include boost stuff
 if [[ ${DEV_ENV} == 'WORK' ]]; then

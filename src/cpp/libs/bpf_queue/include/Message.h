@@ -40,8 +40,8 @@ public:
   msgtype_t msgtype()const;
   MessageId const&id()const;
 private:
-  MessageId id_;
   msgtype_t msgtype_;
+  MessageId id_;
 
   // serialization stuff
   Message()=default;

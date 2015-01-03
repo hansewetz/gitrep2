@@ -42,10 +42,14 @@ private:
   // asio service
   boost::asio::io_service&ios_;
 
+  // other configuration parameters
+  std::size_t maxEngines_;
+  std::shared_ptr<EngineEnv>enngineenv_;
+
   // queue configuration parameters
   std::size_t qnewJobSize_=std::mega::num;                   // new jobs into repository - can be very large
-  std::size_t qschedJobSize_;                                // queue size between job repository and scheduler
   std::size_t qschedTaskSize_;                               // queue size from scheduler to engines (should be same size as #of engines)
+  std::size_t qschedJobSize_;                                // queue size between job repository and scheduler
   std::size_t qtransTasksSize_=std::mega::num;               // translated queue size - can be very large
   std::size_t qtransJobSize_=std::mega::num;                 // translated job size - can be very large
 
@@ -55,10 +59,6 @@ private:
   std::shared_ptr<TaskQueue>qschedTask_;
   std::shared_ptr<TaskQueue>qtransTasks_;
   std::shared_ptr<JobQueue>qtransJobs_;
-
-  // other configuration parameters
-  std::size_t maxEngines_;
-  std::shared_ptr<EngineEnv>enngineenv_;
 
   // components
   std::shared_ptr<TranslationJobRepository>jobrep_;

@@ -20,7 +20,7 @@ void testfunc()noexcept(is_pod<T>::value){
 // new terminate function
 void my_terminate(){
   cerr<<"TERMINATING"<<endl;
-  abort;
+  abort();
 }
 // main.
 int main(int argc,char**argv){

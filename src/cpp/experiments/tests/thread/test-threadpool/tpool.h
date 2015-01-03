@@ -81,7 +81,7 @@ private:
     auto&fu1=std::get<0>(futs);
     auto r1=std::make_tuple(get_fut(static_cast<R1*>(nullptr),fu1));
     auto t2=tutils::popn_front_tuple<1>(futs);
-    std::tuple<R2...>*dummy;
+    std::tuple<R2...>*dummy=nullptr;
     auto r2=waitForFutures(dummy,std::move(t2));
     return std::tuple_cat(std::move(r1),std::move(r2));
   }
@@ -149,7 +149,7 @@ private:
       task()=default;
       template<typename F>task(F&&f):impl_(new derived<F>(std::move(f))){}
       task(task&&other):impl_(std::move(other.impl_)){}
-      task&operator=(task&&tsk){impl_=std::move(tsk.impl_);}
+      task&operator=(task&&tsk){impl_=std::move(tsk.impl_);return*this;}
 
       // call
       void operator()(){impl_->call();}

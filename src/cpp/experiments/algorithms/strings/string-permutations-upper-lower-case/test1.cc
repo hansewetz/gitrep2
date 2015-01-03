@@ -45,20 +45,20 @@ void printStrPermAux(ostream&os,string&str,string&res){
     return;
   }
   // (1) get index of last character in result
-  int resind=res.length()-1;
+  std::size_t resind=res.length()-1;
   
   // (2) check if there are no valid permutations
-  int nu{0},nl{0};
+  std::size_t nu{0},nl{0};
   if(resind<0){
     // we only get here ones
-    for(int i=0;i<str.length();++i){
+    for(std::size_t i=0;i<str.length();++i){
       if(isupper(str[i]))++nu;
       else ++nl;
     }
     if(abs(nl-nu)>1)return;  // return if there are no permutations
   }
   // (3) loop over remaining characters
-  for(int i=0;i<str.length();++i){
+  for(std::size_t i=0;i<str.length();++i){
     if(marked(str[i]))continue;
 
     // check if we can prune

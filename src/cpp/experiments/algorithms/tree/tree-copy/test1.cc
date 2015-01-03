@@ -37,12 +37,12 @@ struct node{
   node*right;
 };
 // create a tree from a packed array
-node*createTree(vector<int>&v){
+node*createTree(vector<std::size_t>&v){
   if(v.size()==0)return nullptr;
 
   // create tree using BFS
   queue<node*>q;
-  int ind=0;
+  std::size_t ind=0;
   node*root=new node(v[ind++]);
   q.push(root);
   while(!q.empty()){
@@ -116,7 +116,7 @@ node*deepCopyIter(node*n){
 }
 // test program
 int main(){
-  vector<int>v{1,2,3,4,5,6,7,8,9,10,11};
+  vector<std::size_t>v{1,2,3,4,5,6,7,8,9,10,11};
   node*root=createTree(v);
   printLevelOrder(root);
   cerr<<endl;

@@ -74,7 +74,7 @@ private:
   // process read data
   // (break it into lines and dump each line as we find them)
   void process_data(size_t nbytes){
-    for(int i=0;i<nbytes;++i){
+    for(std::size_t i=0;i<nbytes;++i){
       char c{buf_[i]};
       if(c=='\n'){
         linecb_(line_);
@@ -169,7 +169,7 @@ int spawnPipeChild(string const&file,vector<string>args,int&fdRead,int&fdWrite,b
       THROW_RUNTIME("spawnPipeChild: failed call to malloc(...): "<<err);
     }
     char**ptmpargs=const_cast<char**>(tmpargs);
-    for(int i=0;i<args.size();++i)ptmpargs[i]=const_cast<char*>(args[i].c_str());
+    for(std::size_t i=0;i<args.size();++i)ptmpargs[i]=const_cast<char*>(args[i].c_str());
     ptmpargs[args.size()]=0;
 
     // execute cat program
@@ -206,7 +206,7 @@ int main(){
     int fdRead1,fdWrite1;
     string execFile{"/bin/cat"};
     vector<string>execArgs{"cat"};
-    int cpid1=spawnPipeChild(execFile,execArgs,fdRead1,fdWrite1,true,".");
+    spawnPipeChild(execFile,execArgs,fdRead1,fdWrite1,true,".");
 
     // setup reading from child asynchronously and capture each read line in a callback function
     // (will invoke callback function with a string after stripping it form newline)

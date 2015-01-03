@@ -36,7 +36,7 @@ vector<int>mergeStreams(vector<int>*va[],int m){
 
   // insert first element from from all streams in qmin
   for(int i=0;i<m;++i){
-    if(ind[i]<va[i]->size()){
+    if(ind[i]<static_cast<int>(va[i]->size())){
       qmin.push((*va[i])[ind[i]]);
       ind[i]=ind[i]+1;
     }
@@ -46,7 +46,7 @@ vector<int>mergeStreams(vector<int>*va[],int m){
     vret.push_back(qmin.top());
     qmin.pop();
     for(int i=0;i<m;++i){
-      if(ind[i]<va[i]->size()){
+      if(ind[i]<static_cast<int>(va[i]->size())){
         qmin.push((*va[i])[ind[i]]);
         ind[i]=ind[i]+1;
       }

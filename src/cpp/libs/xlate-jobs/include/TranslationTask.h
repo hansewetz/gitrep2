@@ -36,13 +36,13 @@ public:
   // print function
   std::ostream&print(std::ostream&os)const;
 private:
-  TranslationTaskId id_;
   TranslationJobId jobid_;
+  TranslationTaskId id_;
   LanguagePair lanpair_;
   std::string srcSeg_;
+  std::size_t segno_;
   std::string targetSeg_;
   bool hasTargetSeg_;
-  std::size_t segno_;
   bool timeout_;
   EngineProxyId engineId_;
   static const std::string TIMEOUTSTRING;

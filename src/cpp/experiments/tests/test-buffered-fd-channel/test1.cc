@@ -159,9 +159,9 @@ private:
   }
   // state of channel
   // (circular buffer + read/write file descriptors)
-  boost::circular_buffer<T>buf_;
   int fdin_;
   int fdout_;
+  boost::circular_buffer<T>buf_;
   std::size_t heartbeatSec_;
 };
 // typedef for most likely type of channel we'll use

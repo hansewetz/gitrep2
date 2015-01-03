@@ -32,7 +32,7 @@ std::function<qval_t(istream&)>deserialiser=[](istream&is){
 template<typename Q>
 void sendMsg(Q*q,qval_t const&msg){
   boost::system::error_code ec1;
-  bool ret1{q->enq(msg,ec1)};
+  q->enq(msg,ec1);
   if(ec1!=boost::system::error_code()){
     BOOST_LOG_TRIVIAL(error)<<"enq() failed: "<<ec1.message();
     exit(1);
@@ -45,7 +45,7 @@ qval_t recvMsg(Q*q){
 
   // wait until we can deq
   BOOST_LOG_TRIVIAL(info)<<"waiting until deq() possible ...";
-  bool ret0{q->timed_wait_deq(100,ec1)};
+  q->timed_wait_deq(100,ec1);
   if(ec1!=boost::system::error_code()){
     BOOST_LOG_TRIVIAL(error)<<"wait_deq() failed: "<<ec1.message();
     exit(1);

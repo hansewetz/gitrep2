@@ -38,7 +38,7 @@ int partition(vector<int>&v,int l,int u){
 }
 int kthsmallest(vector<int>&v,int k){
   k-=1;
-  if(k<0||k>=v.size())throw runtime_error("kth element outside range of vector");
+  if(k<0||k>=static_cast<int>(v.size()))throw runtime_error("kth element outside range of vector");
   int l=0;
   int u=v.size()-1;
   while(l<=u){
@@ -47,11 +47,13 @@ int kthsmallest(vector<int>&v,int k){
     if(k<p)u=p-1;
     else   l=p+1;
   }
+  // will never reach here
+  return -1;
 }
 
 int main(){
   vector<int>v{5,2,8,9,1,3};
-  for(int k=1;k<=v.size();++k){
+  for(int k=1;k<=static_cast<int>(v.size());++k){
     cerr<<k<<"th smallest number (counting from 1): "<<kthsmallest(v,k)<<endl;
   }
   sort(v.begin(),v.end());

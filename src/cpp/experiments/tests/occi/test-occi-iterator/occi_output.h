@@ -184,22 +184,23 @@ private:
     s.closeConn_=false;s.releaseConn_=false;s.terminateEnv_=false;
     s.auth_=occi_auth{};s.sql="";s.batchsize_=0;s.size_=Size{};s.commit_=false;
   }
-  // occi resources
-  oracle::occi::Connection*conn_;    
-  oracle::occi::StatelessConnectionPool*connpool_;    
-  oracle::occi::Environment*env_;
-
   // authentication + sql statement
-  occi_auth auth_;
+  oracle::occi::Connection*conn_;    
   std::string sql;
   std::size_t batchsize_;
   Size size_;
+  commit_t commit_;
+
+  // occi resources
+  oracle::occi::StatelessConnectionPool*connpool_;    
+  oracle::occi::Environment*env_;
+  occi_auth auth_;
 
   // controll of what to do with occi resources
   bool closeConn_;
   bool releaseConn_;
   bool terminateEnv_;
-  commit_t commit_;
+
 };
 }
 #endif

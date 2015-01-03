@@ -78,7 +78,7 @@ int spawnPipeChild(string const&file,vector<string>args,int&fdRead,int&fdWrite,b
       THROW_RUNTIME("spawnPipeChild: failed call to malloc(...): "<<err);
     }
     char**ptmpargs=const_cast<char**>(tmpargs);
-    for(int i=0;i<args.size();++i)ptmpargs[i]=const_cast<char*>(args[i].c_str());
+    for(std::size_t i=0;i<args.size();++i)ptmpargs[i]=const_cast<char*>(args[i].c_str());
     ptmpargs[args.size()]=0;
 
     // execute child process

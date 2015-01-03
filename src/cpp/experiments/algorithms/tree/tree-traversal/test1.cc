@@ -31,18 +31,18 @@ using namespace std;
 
 // tree node
 struct node{
-  node(int v):val(v),left(nullptr),right(nullptr){}
-  int val;
+  node(size_t v):val(v),left(nullptr),right(nullptr){}
+  size_t val;
   node*left;
   node*right;
 };
 // create a tree from a packed array
-node*createTree(vector<int>&v){
+node*createTree(vector<size_t>&v){
   if(v.size()==0)return nullptr;
 
   // create tree using BFS
   queue<node*>q;
-  int ind=0;
+  size_t ind=0;
   node*root=new node(v[ind++]);
   q.push(root);
   while(!q.empty()){
@@ -122,7 +122,7 @@ void printLevelOrder(node*n){
 }
 // test program
 int main(){
-  vector<int>v{1,2,3,4,5,6,7,8,9,10,11};
+  vector<size_t>v{1,2,3,4,5,6,7,8,9,10,11};
   node*root=createTree(v);
   cout<<"preorder (recurse): ";
   printPreOrder(root);

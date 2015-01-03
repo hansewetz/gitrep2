@@ -21,9 +21,9 @@ public:
     TestIter&operator++(){++count_;currVal_=t_->getRand();return*this;}
     int operator*()const{return currVal_;}
   private:
+    Test const*t_;
     int count_;
     int currVal_;
-    Test const*t_;
   };
   // ctors, assign, dtor
   Test(int maxCount):maxCount_(maxCount){}
