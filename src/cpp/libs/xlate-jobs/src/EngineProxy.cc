@@ -95,26 +95,46 @@ void EngineProxy::waitForNewTask(){
 void EngineProxy::newTaskHandler(boost::system::error_code const&ec,shared_ptr<TranslationTask>task){
   // if operation was aborted we stop engine
   if(ec==boost::asio::error::operation_aborted){
-    BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - sending of segment to engine aborted";
+    BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - deq() of task aborted";
     stop();
     return;
   }else
   if(ec!= boost::system::error_code()){
-    BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - sending of segment to engine failed, ec: "<<ec.message();
+    BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::engineListenerHandler - deq() of task failed, ec: "<<ec.message();
     stop();
     return;
   }
   BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::newTaskHandler - got task event: "<<*task;
 
-  // start translation synchrounosly (send segment to qtaskSender_)
-  // (notice: we send segment synchrounously)
+  // wait to send segment to engine assynchrounosly (send segment to qtaskSender_)
+  BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::newTaskHandler - waiting to send segment to engine (id: "<<id_<<") ...";
+  qsenderToEngine_->timed_async_wait_enq(std::bind(&EngineProxy::waitToTranslateHandler,this,_1,task),realTmoMs_);
+  state_=EngineProxy::state_t::WAITING2TRANSLATE;
+}
+// callback for waiting to send to translation engine
+void EngineProxy::waitToTranslateHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task){
+  // if operation was aborted we stop engine
+  if(ec==boost::asio::error::operation_aborted){
+    BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::waitToTranslateHandler - waiting to send segment to engine aborted ...";
+    stop();
+    return;
+  }else
+  if(ec!= boost::system::error_code()){
+    BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::waitToTranslateHandler - waiting to send segment to engine failed, ec: "<<ec.message();
+    stop();
+    return;
+  }
+  // send segment to engine
+  BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::waitToTranslateHandler - sending segment to engine";
   boost::system::error_code ec1;
   qsenderToEngine_->sync_enq(task->srcSeg(),ec1);
-
-  // we are now translating
   state_=EngineProxy::state_t::TRANSLATING;
-
-  // start waiting for translated segment back from engine
+  if(ec!= boost::system::error_code()){
+    BOOST_LOG_TRIVIAL(debug)<<"EngineProxy::waitToTranslateHandler - sync send failed to engine, ec: "<<ec.message();
+    stop();
+    return;
+  }
+  // setup fro listening on reply from engine
   qListenerFromEngine_->timed_async_deq(std::bind(&EngineProxy::engineListenerHandler,this,_1,_2,task),realTmoMs_);
 }
 // handler for segments arriving from engine

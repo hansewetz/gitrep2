@@ -63,26 +63,21 @@ T recvwait(int fdread,std::size_t ms,boost::system::error_code&ec,bool getMsg,ch
         return T{};
       }
       // read up to '\n' inclusive
-      ssize_t count{0};
       while(true){
         // read next character in message
         char c;
         ssize_t stat;
         while((stat=::read(fdread,&c,1))==EINTR){}
-        if(stat!=1){
-          // create a boost::system::error_code from errno
-          ec=boost::system::error_code(errno,boost::system::get_posix_category());
-          return T{};
-        }
+
+        // if we could not read a char, then do a select again
+        if(stat!=1)break;
+
         // save character just read
         strstrm<<c;
 
         // if we reached newline, send message including newline)
         if(c==sep)return deser(strstrm);
       }
-      // check if we read all available characters
-      // (if there are no more chars to read, then restart select() statement)
-      if(++count==n)break;
     }
     // restet tmo 0 zero ms since we don't timeout ones we start reading a message
     ms=0;
@@ -142,18 +137,13 @@ bool sendwait(int fdwrite,T const*t,std::size_t ms,boost::system::error_code&ec,
         return true;
       }
       // write as much as we can
-      ssize_t count{0};
-      while(sbegin!=send&&count!=n){
+      while(sbegin!=send){
         // write next character in message
-        char c{*sbegin++};
+        char c{*sbegin};
         ssize_t stat;
         while((stat=::write(fdwrite,&c,1))==EINTR){}
-        if(stat!=1){
-          // create a boost::system::error_code from errno
-          ec=boost::system::error_code(errno,boost::system::get_posix_category());
-          return false;
-        }
-        ++count;
+        if(stat!=1)break;
+        ++sbegin;
       }
     }
     // check if we are done

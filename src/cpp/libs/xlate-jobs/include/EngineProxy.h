@@ -16,7 +16,7 @@ class EngineEnv;
 class EngineProxy{
 public:
   // state of this engine proxy
-  enum class state_t{NOT_RUNNING=0,WAITING4TASK=1,TRANSLATING=2};
+  enum class state_t{NOT_RUNNING=0,WAITING4TASK=1,TRANSLATING=2,WAITING2TRANSLATE=3};
 
   // typedefs for queue types talking to engine
   using qToEngine_t=boost::asio::fdenq_queue<std::string,std::function<void(std::ostream&,std::string const&)>>;
@@ -41,6 +41,7 @@ private:
   void waitForNewTask();
   void newTaskHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task);
   void engineListenerHandler(boost::system::error_code const&ec,std::string const&msg,std::shared_ptr<TranslationTask>task);
+  void waitToTranslateHandler(boost::system::error_code const&ec,std::shared_ptr<TranslationTask>task);
 
   // helper to stopo an engine
   void stopEngine();

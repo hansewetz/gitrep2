@@ -24,9 +24,14 @@
 #include <thread>
 
 // NOTE! Hard codeded - should be taken from command line parameters and having default
+/*
 constexpr static char const*EXEDIR="/ec/prod/exodus/dgt/local/exodus/user/potocva/OPERATINGHOME/ensv-all";
 constexpr static char const*PROGPATH="/ec/prod/exodus/dgt/local/exodus/user/potocva/OPERATINGHOME/ensv-all/translate";
 constexpr static char const*PROGNAME="translate";
+*/
+constexpr static char const*EXEDIR="/bin";
+constexpr static char const*PROGPATH="/bin/cat";
+constexpr static char const*PROGNAME="cat";
 
 // namespace stuff
 using namespace std;
