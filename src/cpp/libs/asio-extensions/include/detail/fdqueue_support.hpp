@@ -68,10 +68,14 @@ T recvwait(int fdread,std::size_t ms,boost::system::error_code&ec,bool getMsg,ch
         char c;
         ssize_t stat;
         while((stat=::read(fdread,&c,1))==EINTR){}
+        if(stat!=1){
+          // check if we have a valid read error or simply that there are no more bytes in fd
+          if(errno==EWOULDBLOCK)break;
 
-        // if we could not read a char, then do a select again
-        if(stat!=1)break;
-
+          // we have a real read error
+          ec=boost::system::error_code(errno,boost::system::get_posix_category());
+          return T{};
+        }
         // save character just read
         strstrm<<c;
 
@@ -142,7 +146,15 @@ bool sendwait(int fdwrite,T const*t,std::size_t ms,boost::system::error_code&ec,
         char c{*sbegin};
         ssize_t stat;
         while((stat=::write(fdwrite,&c,1))==EINTR){}
-        if(stat!=1)break;
+        if(stat!=1){
+          // check if we have a valid write error or simply that there isnot eneough capacity in fd
+          if(errno==EWOULDBLOCK)break;
+
+          // we have a real write error
+          ec=boost::system::error_code(errno,boost::system::get_posix_category());
+          return false;
+        }
+        // we wrote one byte
         ++sbegin;
       }
     }
