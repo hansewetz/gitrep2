@@ -188,10 +188,10 @@ int main(int argc,char**argv){
     // create a request factory
     TranslationRequestFactory reqFact;
 
-    // create sender to translation repository
+    // (4) create sender to translation repository
     std::shared_ptr<JobQueueSender>qnewjobsender{make_shared<JobQueueSender>(::ios,tct.getNewJobQueue().get())};
 
-    // create request from files
+    // (5) create request from files and send them to translation component
     for(auto file:files){
       // create request, then job and send job for translation
       std::shared_ptr<TranslateRequest>req{reqFact.requestFromSegmentedFile(make_lanpair("en","sv"),file)};
@@ -199,7 +199,7 @@ int main(int argc,char**argv){
       BOOST_LOG_TRIVIAL(info)<<"adding file: \""<<file<<"\" for translation (jobid: "<<job->id()<<")";
       qnewjobsender->async_enq(job,[](boost::system::error_code const&ec){});
     }
-    // (4) ------------ run asynchronous machinery
+    // (6) ------------ run asio machinery
     // (everything runs under asio with the exception of the actual engines which runs as separate processes)
     BOOST_LOG_TRIVIAL(info)<<"starting asio ...";
     ::ios.run();
