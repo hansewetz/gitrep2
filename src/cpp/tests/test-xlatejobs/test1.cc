@@ -171,7 +171,7 @@ int main(int argc,char**argv){
   // (true: log debug info, false: do not log debug info)
   utils::initBoostFileLogging(debug);
   try{
-    // (0) setu engine environment 
+    // (0) ------------ setup engine environment 
     shared_ptr<EngineEnv>engineenv=make_shared<EngineEnv>(EXEDIR,PROGPATH,PROGNAME,segTmoMs,startTmoMs);
     
     // (1) ------------ create a translation component and kick it off
@@ -192,7 +192,7 @@ int main(int argc,char**argv){
     std::shared_ptr<JobQueueSender>qnewjobsender{make_shared<JobQueueSender>(::ios,tct.getNewJobQueue().get())};
 
     // (5) create request from files and send them to translation component
-    for(auto file:files){
+    for(auto const&file:files){
       // create request, then job and send job for translation
       std::shared_ptr<TranslateRequest>req{reqFact.requestFromSegmentedFile(make_lanpair("en","sv"),file)};
       std::shared_ptr<TranslationJob>job{make_shared<TranslationJob>(req)};

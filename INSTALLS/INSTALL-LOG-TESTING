@@ -161,3 +161,9 @@ Tue Dec  9 17:44:21 CET 2014
 	../configure --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs  --with-pic 
 	make
 	make install
+
+Wed Jan  7 16:49:22 CET 2015
+	compiling moses:
+
+	# static linking
+	./bjam --static --with-boost=<location of boost libs> --prefix=<some install directory>/moses/  -q install -j10
