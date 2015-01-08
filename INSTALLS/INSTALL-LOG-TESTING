@@ -165,5 +165,18 @@ Tue Dec  9 17:44:21 CET 2014
 Wed Jan  7 16:49:22 CET 2015
 	compiling moses:
 
-	# static linking
+	# static linking (works OK)
 	./bjam --static --with-boost=<location of boost libs> --prefix=<some install directory>/moses/  -q install -j10
+
+	# dynamic compilation (works OK)
+	./bjam --with-boost=/ec/dgt/shared/exodus/local/CppEnv-V1.0 --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/moses/moses-dynamic/  -q install -j10
+
+	# dynamic compilation specifying 'link=shared'(does not work)
+./bjam --with-boost=/ec/dgt/shared/exodus/local/CppEnv-V1.0 --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/moses/moses-dynamic-shared/  -q link=shared install -j10
+	
+Thu Jan  8 09:08:15 CET 2015
+	compiling QuantLib
+
+	# static compilation
+	$.././configure --with-boost-include=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs --with-boost-lib=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs --enable-examples --prefix=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/quantlib/
+
