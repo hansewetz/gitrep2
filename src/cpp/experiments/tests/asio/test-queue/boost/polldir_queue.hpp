@@ -20,6 +20,7 @@
 #include <string>
 #include <utility>
 #include <list>
+#include <memory>
 #include <boost/thread/thread_time.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
@@ -47,17 +48,18 @@ public:
   // (if maxsize == 0 checking for max numbert of queue elements is ignored)
   polldir_queue(std::string const&qname,std::size_t maxsize,fs::path const&dir,DESER deser,SERIAL serial,bool removelocks):
       qname_(qname),maxsize_(maxsize),dir_(dir),deser_(deser),serial_(serial),removelocks_(removelocks),
-      ipcmtx_(ipc::open_or_create,qname.c_str()),ipcond_(ipc::open_or_create,qname.c_str()){
+      ipcmtx_(std::make_shared<boost::interprocess::named_mutex>(ipc::open_or_create,qname.c_str())),
+      ipcond_(std::make_shared<boost::interprocess::named_condition>(ipc::open_or_create,qname.c_str())){
     // make sure path is a directory
     if(!fs::is_directory(dir_))throw std::logic_error(std::string("polldir_queue::polldir_queue: dir_: ")+dir.string()+" is not a directory");
   }
   polldir_queue(polldir_queue const&)=delete;
   polldir_queue(polldir_queue&&other):
-      qname_(std::move(other.qname_)),maxsize_(other.maxsize_),dir_(other.dir_),removelocks_(other.removelocks_),
-      deser_(std::move(other.deser_)),serial_(std::move(other.serial_)),
-      deq_enabled_(other.deq_enabled_),enq_enabled_(other.enq_enabled_),
-      ipcmtx_(std::move(other.ipcmtx_)),ipcond_(std::move(other.ipcond_)),
-      cache_(std::move(other.cache_)){
+      qname_(std::move(other.qname_)),maxsize_(other.maxsize_),dir_(other.dir_),deser_(std::move(other.deser_)),serial_(std::move(other.serial_)),
+      removelocks_(other.removelocks_),deq_enabled_(other.deq_enabled_),enq_enabled_(other.enq_enabled_),
+      ipcmtx_(other.ipcmtx_),ipcond_(other.ipcond_),cache_(std::move(other.cache_)){
+    other.ipcmtx_=nullptr;
+    other.ipcond_=nullptr;
     other.removelocks_=false; // make sure we don't remove locks twice
   }
   polldir_queue&operator=(polldir_queue const&)=delete;
@@ -70,8 +72,10 @@ public:
     serial_=std::move(other.serial_);
     deq_enabled_=other.deq_enabled_;
     enq_enabled_=other.enq_enabled_;
-    ipcmtx_=std::move(other.ipcmtx_);
-    ipcond_=std::move(other.ipcond_);
+    ipcmtx_=other.ipcmtx_;
+    ipcond_=other.ipcond_;
+    other.ipcmtx_=nullptr;
+    other.ipcond_=nullptr;
     cache_=std::move(other.cache_);
     other.removelocks_=false; // make sure we don't remove locks twice
     return*this;
@@ -83,8 +87,8 @@ public:
   // (returns true if message was enqueued, false if enqueing was disabled)
   bool enq(T t,boost::system::error_code&ec){
     // wait for state of queue is such that we can enque an element
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    ipcond_.wait(lock,[&](){return !enq_enabled_||!fullNolock();});
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
+    ipcond_->wait(lock,[&](){return !enq_enabled_||!fullNolock();});
 
     // if enq is disabled we'll return
     if(!enq_enabled_){
@@ -93,16 +97,16 @@ public:
     }
     // we know we can now write message
     detail::queue_support::write(t,dir_,serial_);
-    ipcond_.notify_all();
+    ipcond_->notify_all();
     return true;
   }
   // put a message into queue - timeout if waiting too lo
   // (returns true if message was enqueued, false if enqueing was disabled)
   bool timed_enq(T t,std::size_t ms,boost::system::error_code&ec){
     // wait for state of queue is such that we can enque an element
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
     boost::system_time const tmo_ms=boost::get_system_time()+boost::posix_time::milliseconds(ms);
-    bool tmo=!ipcond_.timed_wait(lock,tmo_ms,[&](){return !enq_enabled_||!fullNolock();});
+    bool tmo=!ipcond_->timed_wait(lock,tmo_ms,[&](){return !enq_enabled_||!fullNolock();});
 
     if(tmo){
       ec=boost::asio::error::timed_out;
@@ -114,7 +118,7 @@ public:
     }
     // we know we can now write message
     detail::queue_support::write(t,dir_,serial_);
-    ipcond_.notify_all();
+    ipcond_->notify_all();
     ec=boost::system::error_code();
     return true;
   }
@@ -122,8 +126,8 @@ public:
   // (returns false if enqueing was disabled, else true)
   bool wait_enq(boost::system::error_code&ec){
     // wait for the state of queue is such that we can return something
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    ipcond_.wait(lock,[&](){return !enq_enabled_||!fullNolock();});
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
+    ipcond_->wait(lock,[&](){return !enq_enabled_||!fullNolock();});
 
     // if enq is disabled we'll return
     if(!enq_enabled_){
@@ -131,16 +135,16 @@ public:
       return false;
     }
     // we know queue is not full
-    ipcond_.notify_all();
+    ipcond_->notify_all();
     ec=boost::system::error_code();
     return true;
   }
   // wait until we can put a message in queue - timeout if waiting too long
   bool timed_wait_enq(std::size_t ms,boost::system::error_code&ec){
     // wait for the state of queue is such that we can return something
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
     boost::system_time const tmo_ms=boost::get_system_time()+boost::posix_time::milliseconds(ms);
-    bool tmo=!ipcond_.timed_wait(lock,tmo_ms,[&](){return !enq_enabled_||!fullNolock();});
+    bool tmo=!ipcond_->timed_wait(lock,tmo_ms,[&](){return !enq_enabled_||!fullNolock();});
     if(tmo){
       ec=boost::asio::error::timed_out;
       return false;
@@ -149,15 +153,15 @@ public:
       ec=boost::asio::error::operation_aborted;
       return false;
     }
-    ipcond_.notify_all();
+    ipcond_->notify_all();
     ec=boost::system::error_code();
     return true;
   }
   // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(boost::system::error_code&ec){
     // wait for the state of queue is such that we can return something
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    ipcond_.wait(lock,[&](){return !deq_enabled_||!emptyNolock();});
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
+    ipcond_->wait(lock,[&](){return !deq_enabled_||!emptyNolock();});
 
     // if deq is disabled or timeout
     if(!enq_enabled_){
@@ -168,16 +172,16 @@ public:
     fs::path file{cache_.front()};
     cache_.pop_front();
     T ret{detail::queue_support::read<T>(file,deser_)};
-    ipcond_.notify_all();
+    ipcond_->notify_all();
     ec=boost::system::error_code();
     return std::make_pair(true,ret);
   }
   // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
   std::pair<bool,T>timed_deq(std::size_t ms,boost::system::error_code&ec){
     // wait for the state of queue is such that we can return something
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
     boost::system_time const tmo_ms=boost::get_system_time()+boost::posix_time::milliseconds(ms);
-    bool tmo=!ipcond_.timed_wait(lock,tmo_ms,[&](){return !deq_enabled_||!emptyNolock();});
+    bool tmo=!ipcond_->timed_wait(lock,tmo_ms,[&](){return !deq_enabled_||!emptyNolock();});
 
     // if deq is disabled or queue is empty return or timeout
     if(tmo){
@@ -192,15 +196,15 @@ public:
     fs::path file{cache_.front()};
     cache_.pop_front();
     T ret{detail::queue_support::read<T>(file,deser_)};
-    ipcond_.notify_all();
+    ipcond_->notify_all();
     ec=boost::system::error_code();
     return std::make_pair(true,ret);
   }
   // wait until we can retrieve a message from queue
   bool wait_deq(boost::system::error_code&ec){
     // wait for the state of queue is such that we can return something
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
-    ipcond_.wait(lock,[&](){return !deq_enabled_||!emptyNolock();});
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
+    ipcond_->wait(lock,[&](){return !deq_enabled_||!emptyNolock();});
 
     // check if dequeue was disabled
     if(!deq_enabled_){
@@ -209,16 +213,16 @@ public:
     }
     // we know the cache is not empty now so no need to check
     fs::path file{cache_.front()};
-    ipcond_.notify_all();
+    ipcond_->notify_all();
     ec=boost::system::error_code();
     return true;
   }
   // wait until we can retrieve a message from queue -  timeout if waiting too long
   bool timed_wait_deq(std::size_t ms,boost::system::error_code&ec){
     // wait for the state of queue is such that we can return something
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
     boost::system_time const tmo_ms=boost::get_system_time()+boost::posix_time::milliseconds(ms);
-    bool tmo=!ipcond_.timed_wait(lock,tmo_ms,[&](){return !deq_enabled_||!emptyNolock();});
+    bool tmo=!ipcond_->timed_wait(lock,tmo_ms,[&](){return !deq_enabled_||!emptyNolock();});
     if(tmo){
       ec=boost::asio::error::timed_out;
       return false;
@@ -229,45 +233,45 @@ public:
     }
     // we know the cache is not empty now so no need to check
     fs::path file{cache_.front()};
-    ipcond_.notify_all();
+    ipcond_->notify_all();
     ec=boost::system::error_code();
     return true;
   }
   // cancel deq operations (will also release blocking threads)
   void disable_deq(bool disable){
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
     deq_enabled_=!disable;
-    ipcond_.notify_all();
+    ipcond_->notify_all();
   }
   // cancel enq operations (will also release blocking threads)
   void disable_enq(bool disable){
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
     enq_enabled_=!disable;
-    ipcond_.notify_all();
+    ipcond_->notify_all();
   }
   // set max size of queue
   void set_maxsize(std::size_t maxsize){
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
     return maxsize_;
   }
   // check if queue is empty
   bool empty()const{
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
     return emptyNolock();
   }
   // check if queue is full
   bool full()const{
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
     return fullNolock();
   }
   // get #of items in queue
   std::size_t size()const{
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
     return sizeNolock();
   }
   // get max items in queue
   std::size_t maxsize()const{
-    ipc::scoped_lock<ipc::named_mutex>lock(ipcmtx_);
+    ipc::scoped_lock<ipc::named_mutex>lock(*ipcmtx_);
     return maxsize_;
   }
   // get name of queue
@@ -350,8 +354,9 @@ private:
   bool enq_enabled_=true;
 
   // mutex/condition variables
-  mutable boost::interprocess::named_mutex ipcmtx_;
-  mutable boost::interprocess::named_condition ipcond_;
+  // (note: must have pointers since no move ctor/assifn for these types)
+  mutable std::shared_ptr<boost::interprocess::named_mutex>ipcmtx_;
+  mutable std::shared_ptr<boost::interprocess::named_condition>ipcond_;
 
   // cache of message
   mutable std::list<fs::path>cache_;

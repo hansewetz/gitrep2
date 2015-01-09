@@ -46,6 +46,12 @@ int main(int argc,char*argv[]){
     function<void(ostream&,int)>writer=[](ostream&os,int i){os<<i;};
     asio::polldir_queue<int,decltype(reader),decltype(writer)>q1{qname,10,qdir,reader,writer,true};
 
+    // make sure move ctor works
+    asio::polldir_queue<int,decltype(reader),decltype(writer)>q2{std::move(q1)};
+
+    // make sure move assignment works
+    q1=std::move(q2);
+
     // remove locks if they exist
     q1.removeLockVariables(q1.qname());
 
