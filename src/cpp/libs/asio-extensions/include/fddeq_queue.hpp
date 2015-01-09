@@ -54,6 +54,7 @@ public:
     sep_=other.sep_;
     closeOnExit_=closeOnExit_;
     other.closeOnExit_=false; // make sure we don't close twice
+    return*this;
   }
   ~fddeq_queue(){if(closeOnExit_)detail::queue_support::eclose(fdread_,false);}
   

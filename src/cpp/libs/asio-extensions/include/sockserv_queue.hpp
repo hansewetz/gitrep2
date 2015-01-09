@@ -1,14 +1,12 @@
 // (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
 
-// NOTE! See site: http://www.tenouk.com/Module41.html
-
 /* TODO
 
 CANCELLATION: it's not clear how cancellation would be implemented - for right now I'll skip it
 
 IMPROVEMENTS:
 	- we should have two timeouts, message timeout, byte timeout
-	- read more than one character at a time ... must then buffer what we have read
+	- read/write more than one character at a time ... must then buffer what we have read
 
 TESTING:
 	- test with serializing real object and base64 encode them
@@ -51,35 +49,44 @@ public:
   // default message separaor
   constexpr static char NEWLINE='\n';
 
-  // ctors,assign,dtor
+  // ctor
   sockserv_queue(int port,DESER deser,SERIAL serial,char sep=NEWLINE):
       port_(port),deser_(deser),serial_(serial),sep_{sep},closeOnExit_(true){
     // start listening on socket
     createListenSocket();
   }
+  // copy ctor
   sockserv_queue(sockserv_queue const&)=delete;
-  sockserv_queue(sockserv_queue&&other):
-      deser_(std::move(other.deser_)),serial_(std::move(other.serial)),sep_(other.sep_),closeOnExit_(true),
 
-      // server socket stuff
-      port_(other.port_),servsocket_(other.servsocket_),yes_(other.yes_)
+  // move ctor
+  sockserv_queue(sockserv_queue&&other):
+      port_(other.port_), deser_(std::move(other.deser_)),serial_(std::move(other.serial_)),sep_(other.sep_),closeOnExit_(other.closeOnExit_),
+      servsocket_(other.servsocket_),yes_(other.yes_)
   {
     other.closeOnExit_=false; // make sure we don't close twice
     memcpy(static_cast<void*>(&serveraddr_),static_cast<void*>(&other.serveraddr_),sizeof(serveraddr_));
+    memcpy(static_cast<void*>(&clientaddr_),static_cast<void*>(&other.clientaddr_),sizeof(clientaddr_));
   }
+  // assign
   sockserv_queue&operator=(sockserv_queue const&)=delete;
+
+  // move assign
   sockserv_queue&operator=(sockserv_queue&&other){
+    port_=other.port_;
     deser_=std::move(other.deser_);
+    serial_=std::move(other.serial_);
     sep_=other.sep_;
-    closeOnExit_=closeOnExit_;
+    closeOnExit_=other.closeOnExit_;
     other.closeOnExit_=false; // make sure we don't close twice
 
     // server socket stuff
-    port_=other.port_;
     servsocket_=other.servsocket_;
-    memcpy(static_cast<void*>(&serveraddr_),static_cast<void*>(&other.serveraddr_),sizeof(serveraddr_));
     yes_=other.yes_;
+    memcpy(static_cast<void*>(&serveraddr_),static_cast<void*>(&other.serveraddr_),sizeof(serveraddr_));
+    memcpy(static_cast<void*>(&clientaddr_),static_cast<void*>(&other.clientaddr_),sizeof(clientaddr_));
+    return*this;
   }
+  // ctor
   ~sockserv_queue(){
     if(closeOnExit_){
       if(state_!=IDLE){
