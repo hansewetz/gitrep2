@@ -29,7 +29,11 @@ boost::asio::io_service ios;
 // asio stuff
 int maxmsg{3};
 using queue_t=boost::asio::simple_queue<string>;
-shared_ptr<queue_t>q{new queue_t(maxmsg)};
+shared_ptr<queue_t>q1{new queue_t(maxmsg)};
+
+// make sure move ctor works
+shared_ptr<queue_t>q{make_shared<queue_t>(std::move(*q1))};
+
 boost::asio::queue_listener<queue_t>qlistener(::ios,q.get());
 boost::asio::queue_sender<queue_t>qsender(::ios,q.get());
 boost::asio::deadline_timer timer(::ios,boost::posix_time::milliseconds(1));

@@ -57,7 +57,7 @@ public:
   polldir_queue(polldir_queue&&other):
       qname_(std::move(other.qname_)),maxsize_(other.maxsize_),dir_(other.dir_),deser_(std::move(other.deser_)),serial_(std::move(other.serial_)),
       removelocks_(other.removelocks_),deq_enabled_(other.deq_enabled_),enq_enabled_(other.enq_enabled_),
-      ipcmtx_(other.ipcmtx_),ipcond_(other.ipcond_),cache_(std::move(other.cache_)){
+      ipcmtx_(std::move(other.ipcmtx_)),ipcond_(std::move(other.ipcond_)),cache_(std::move(other.cache_)){
     other.ipcmtx_=nullptr;
     other.ipcond_=nullptr;
     other.removelocks_=false; // make sure we don't remove locks twice
@@ -72,8 +72,8 @@ public:
     serial_=std::move(other.serial_);
     deq_enabled_=other.deq_enabled_;
     enq_enabled_=other.enq_enabled_;
-    ipcmtx_=other.ipcmtx_;
-    ipcond_=other.ipcond_;
+    ipcmtx_=std::move(other.ipcmtx_);
+    ipcond_=std::move(other.ipcond_);
     other.ipcmtx_=nullptr;
     other.ipcond_=nullptr;
     cache_=std::move(other.cache_);
