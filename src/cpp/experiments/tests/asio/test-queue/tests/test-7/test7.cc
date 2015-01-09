@@ -116,6 +116,14 @@ int main(){
     enq_t qin{fdwrite,serialiser,closeFdsOnExit};
     deq_t qout{fdread,deserialiser,closeFdsOnExit};
 
+    // make sure move ctor works
+    enq_t qin1{std::move(qin)};
+    deq_t qout1{std::move(qout)};
+
+    // make sure move assign works
+    qin=std::move(qin1);
+    qout=std::move(qout1);
+
     // setup asio object
     asio::queue_sender<enq_t>qsender(::ios,&qin);
     asio::queue_listener<deq_t>qlistener(::ios,&qout);
