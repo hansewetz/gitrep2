@@ -60,29 +60,31 @@ public:
 
   // move ctor
   sockserv_queue(sockserv_queue&&other):
-      deser_(std::move(other.deser_)),serial_(std::move(other.serial)),sep_(other.sep_),closeOnExit_(other.closeOnExit_),
-
-      // server socket stuff
-      port_(other.port_),servsocket_(other.servsocket_),yes_(other.yes_)
+      port_(other.port_), deser_(std::move(other.deser_)),serial_(std::move(other.serial_)),sep_(other.sep_),closeOnExit_(other.closeOnExit_),
+      servsocket_(other.servsocket_),yes_(other.yes_)
   {
     other.closeOnExit_=false; // make sure we don't close twice
     memcpy(static_cast<void*>(&serveraddr_),static_cast<void*>(&other.serveraddr_),sizeof(serveraddr_));
+    memcpy(static_cast<void*>(&clientaddr_),static_cast<void*>(&other.clientaddr_),sizeof(clientaddr_));
   }
   // assign
   sockserv_queue&operator=(sockserv_queue const&)=delete;
 
   // move assign
   sockserv_queue&operator=(sockserv_queue&&other){
+    port_=other.port_;
     deser_=std::move(other.deser_);
+    serial_=std::move(other.serial_);
     sep_=other.sep_;
     closeOnExit_=other.closeOnExit_;
     other.closeOnExit_=false; // make sure we don't close twice
 
     // server socket stuff
-    port_=other.port_;
     servsocket_=other.servsocket_;
-    memcpy(static_cast<void*>(&serveraddr_),static_cast<void*>(&other.serveraddr_),sizeof(serveraddr_));
     yes_=other.yes_;
+    memcpy(static_cast<void*>(&serveraddr_),static_cast<void*>(&other.serveraddr_),sizeof(serveraddr_));
+    memcpy(static_cast<void*>(&clientaddr_),static_cast<void*>(&other.clientaddr_),sizeof(clientaddr_));
+    return*this;
   }
   // ctor
   ~sockserv_queue(){

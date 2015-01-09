@@ -82,6 +82,7 @@ public:
     server_=other.server_;
     other.closeOnExit_=false; // make sure we don't close twice
     memcpy(static_cast<void*>(&servaddr_),static_cast<void*>(&other.servaddr_),sizeof(servaddr_));
+    return*this;
   }
   // dtor
   ~sockclient_queue(){

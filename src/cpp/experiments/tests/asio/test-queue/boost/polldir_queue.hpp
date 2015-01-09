@@ -74,6 +74,7 @@ public:
     ipcond_=std::move(other.ipcond_);
     cache_=std::move(other.cache_);
     other.removelocks_=false; // make sure we don't remove locks twice
+    return*this;
   }
   ~polldir_queue(){
     if(removelocks_)removeLockVariables(qname_);

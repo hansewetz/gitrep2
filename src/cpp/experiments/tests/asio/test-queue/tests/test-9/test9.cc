@@ -14,7 +14,7 @@ using namespace std::placeholders;
 namespace asio=boost::asio;
 
 // controll if client or server is sender/receiver
-#define SERVER_SENDER true
+#define SERVER_SENDER false
 
 // ----- some constants -----
 namespace {
@@ -112,6 +112,14 @@ int main(){
     BOOST_LOG_TRIVIAL(debug)<<"client queue created ...";
     asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qserv(listenport,deserialiser,serialiser);
     BOOST_LOG_TRIVIAL(debug)<<"server queue created ...";
+
+    // make sure move ctor works
+    asio::sockclient_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qclient1(std::move(qclient));
+    asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qserv1(std::move(qserv));
+
+    // make sure move assignment works
+    qclient=std::move(qclient1);
+    qserv=std::move(qserv1);
 
     // setup asio object
 #ifdef SERVER_SENDER
