@@ -19,7 +19,7 @@ The code is somehat complicated:
 #include <boost/asio/posix/basic_descriptor.hpp>
 #include <boost/log/trivial.hpp>
 #include <string>
-#include <memory>
+#include <utility>
 using namespace std;
 using namespace std::placeholders;
 
@@ -27,19 +27,19 @@ using namespace std::placeholders;
 boost::asio::io_service ios;
 
 // asio stuff
-int maxmsg{3};
+std::size_t maxmsg{3};
 using queue_t=boost::asio::simple_queue<string>;
-shared_ptr<queue_t>q1{new queue_t(maxmsg)};
+queue_t q1{maxmsg};
 
 // make sure move ctor works
-shared_ptr<queue_t>q{make_shared<queue_t>(std::move(*q1))};
+queue_t q{std::move(q1)};
 
-boost::asio::queue_listener<queue_t>qlistener(::ios,q.get());
-boost::asio::queue_sender<queue_t>qsender(::ios,q.get());
+boost::asio::queue_listener<queue_t>qlistener(::ios,&q);
+boost::asio::queue_sender<queue_t>qsender(::ios,&q);
 boost::asio::deadline_timer timer(::ios,boost::posix_time::milliseconds(1));
 
 // count #of outstanding messages
-int nmsg{0};
+std::size_t nmsg{0};
 
 // handler for queue listener
 void flisten(boost::system::error_code const&ec,string s){
@@ -54,9 +54,9 @@ void flisten(boost::system::error_code const&ec,string s){
     qlistener.async_deq(flisten);
   }else{
     BOOST_LOG_TRIVIAL(debug)<<"disabling enq";
-    q->disable_enq(true);
+    q.disable_enq(true);
     BOOST_LOG_TRIVIAL(debug)<<"disabling deq";
-    q->disable_deq(true);
+    q.disable_deq(true);
   }
 }
 // wait handler
@@ -72,13 +72,15 @@ void ftimer(boost::system::error_code const&ec){
 // sender handler
 void fsender(boost::system::error_code const&ec){
   // if queue is full, then wait
-  if(q->full()){
+  if(q.full()){
     BOOST_LOG_TRIVIAL(debug)<<"starting async_wait_enq() ..., ec: "<<ec.message();
     qsender.async_wait_enq(fwait);
   }
 }
 // test program
 int main(){
+// NOTE!
+queue_t q3{std::move(q1)};
   try{
     // kick off a batch of async message enques
     string item{"Hello"};

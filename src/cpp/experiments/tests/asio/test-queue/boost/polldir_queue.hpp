@@ -16,6 +16,7 @@
 */
 #ifndef __POLLDIR_QUEUE_H__
 #define __POLLDIR_QUEUE_H__
+#include "detail/queue_empty_base.hpp"
 #include "detail/queue_support.hpp"
 #include <string>
 #include <utility>
@@ -37,13 +38,9 @@ namespace pt=boost::posix_time;
 // a simple threadsafe/interprocess-safe queue using directory as queue and files as storage media for queue items
 // (mutex/condition variable names are derived from the queue name)
 // (enq/deq have locks around them so that we cannot read partial messages)
-template<typename T,typename DESER,typename SERIAL>
-class polldir_queue{
+template<typename T,typename DESER,typename SERIAL,typename Base=detail::base::queue_empty_base<T>,typename Container=std::queue<T>>
+class polldir_queue:public Base{
 public:
-  // typedef for value stored in queue
-  // (need this so we can create an item with default ctor)
-  using value_type=T;
-
   // ctors,assign,dtor
   // (if maxsize == 0 checking for max numbert of queue elements is ignored)
   polldir_queue(std::string const&qname,std::size_t maxsize,fs::path const&dir,DESER deser,SERIAL serial,bool removelocks):

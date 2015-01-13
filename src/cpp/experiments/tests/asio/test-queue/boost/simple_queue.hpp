@@ -2,6 +2,7 @@
 
 #ifndef __SIMPLE_QUEUE_H__
 #define __SIMPLE_QUEUE_H__
+#include "detail/queue_empty_base.hpp"
 #include <utility>
 #include <queue>
 #include <mutex>
@@ -11,18 +12,14 @@ namespace boost{
 namespace asio{
 
 // a simple thread safe queue used as default queue in boost::asio::queue_listener
-template<typename T,typename Container=std::queue<T>>
-class simple_queue{
+template<typename T,typename Base=detail::base::queue_empty_base<T>,typename Container=std::queue<T>>
+class simple_queue:public Base{
 public:
-  // typedef for value stored in queue
-  // (need this so we can create an item with default ctor)
-  using value_type=T;
-
   // ctors,assign,dtor
   simple_queue(std::size_t maxsize):
       maxsize_(maxsize),
-      mtx_{std::make_shared<std::mutex>()},
-      cond_{std::make_shared<std::condition_variable>()},
+      mtx_{std::make_unique<std::mutex>()},
+      cond_{std::make_unique<std::condition_variable>()},
       q_{}{
   }
   // copy ctor
@@ -213,8 +210,8 @@ public:
   }
 private:
   std::size_t maxsize_;
-  mutable std::shared_ptr<std::mutex>mtx_;                  // must be pointer since not movable
-  mutable std::shared_ptr<std::condition_variable>cond_;    // must be pointer since not movable
+  mutable std::unique_ptr<std::mutex>mtx_;                  // must be pointer since not movable
+  mutable std::unique_ptr<std::condition_variable>cond_;    // must be pointer since not movable
   bool deq_enabled_=true;
   bool enq_enabled_=true;
   Container q_;

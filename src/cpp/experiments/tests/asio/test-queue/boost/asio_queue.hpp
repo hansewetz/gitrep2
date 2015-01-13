@@ -2,6 +2,7 @@
 
 #ifndef __ASIO_QUEUE_H__
 #define __ASIO_QUEUE_H__
+#include "detail/queue_interface_base.hpp"
 #include "queue_listener.hpp"
 #include "queue_sender.hpp"
 #include "simple_queue.hpp"

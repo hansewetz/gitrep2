@@ -16,6 +16,7 @@ TESTING:
 
 #ifndef __FDENQ_QUEUE_H__
 #define __FDENQ_QUEUE_H__
+#include "detail/queue_empty_base.hpp"
 #include "detail/queue_support.hpp"
 #include "detail/fdqueue_support.hpp"
 #include <string>
@@ -31,12 +32,9 @@ namespace asio{
 // (the tmo in ms is based on message timeout - if no message starts arriving within timeout, the function times out)
 // (ones we have started to send a message, the message will never timeout)
 // (the class is meant to be used in singele threaded mode and is not thread safe)
-template<typename T,typename SERIAL>
-class fdenq_queue{
+template<typename T,typename SERIAL,typename Base=detail::base::queue_empty_base<T>,typename Container=std::queue<T>>
+class fdenq_queue:public Base{
 public:
-  // typedef for value stored in queue
-  using value_type=T;
-
   // default message separaor
   constexpr static char NEWLINE='\n';
 

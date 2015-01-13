@@ -15,6 +15,7 @@ TESTING:
 
 #ifndef __SOCK_CLIENT_QUEUE_H__
 #define __SOCK_CLIENT_QUEUE_H__
+#include "detail/queue_empty_base.hpp"
 #include "detail/queue_support.hpp"
 #include "detail/fdqueue_support.hpp"
 #include <string>
@@ -40,12 +41,9 @@ namespace asio{
 // (the tmo in ms is based on message timeout - if no message starts arriving within timeout, the function times out)
 // (ones we have started to read a message, the message will never timeout)
 // (the class is meant to be used in singele threaded mode and is not thread safe)
-template<typename T,typename DESER,typename SERIAL>
-class sockclient_queue{
+template<typename T,typename DESER,typename SERIAL,typename Base=detail::base::queue_empty_base<T>,typename Container=std::queue<T>>
+class sockclient_queue:public Base{
 public:
-  // typedef for value stored in queue
-  using value_type=T;
-
   // default message separaor
   constexpr static char NEWLINE='\n';
 
@@ -180,8 +178,6 @@ private:
     // client connected - write message
     if(state_==CONNECTED){
       state_=WRITING;
-      bool ret{detail::queue_support::sendwait<T,SERIAL>(clientsocket_,t,0,ec1,sendMsg,sep_,serial_)};
-
       if(ec1!=boost::system::error_code()&&ec1!=boost::asio::error::timed_out){
         detail::queue_support::eclose(clientsocket_,false);
         state_=IDLE;

@@ -14,7 +14,7 @@ using namespace std::placeholders;
 namespace asio=boost::asio;
 
 // controll if client or server is sender/receiver
-#define SERVER_SENDER false
+#define SERVER_SENDER 
 
 // ----- some constants -----
 namespace {
@@ -47,18 +47,12 @@ std::function<qval_t(istream&)>deserialiser=[](istream&is){
   return line;
 };
 // queue types
-#ifdef SERVER_SENDER
-using enq_t=asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>;
-using deq_t=asio::sockclient_queue<qval_t,decltype(deserialiser),decltype(serialiser)>;
-#else
-using deq_t=asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>;
-using enq_t=asio::sockclient_queue<qval_t,decltype(deserialiser),decltype(serialiser)>;
-#endif
+using qbase_t=boost::asio::detail::base::queue_interface_base<qval_t>;
 
 //  ------ asio objects, sender, callback handler etc. ---
 // handler for queue listener
 template<typename T>
-void qlistener_handler(boost::system::error_code const&ec,T msg,asio::queue_listener<deq_t>*ql){
+void qlistener_handler(boost::system::error_code const&ec,T msg,asio::queue_listener<qbase_t>*ql){
   if(ec!=0){
     BOOST_LOG_TRIVIAL(debug)<<"deque() aborted (via asio), ec: "<<ec.message();
   }else{
@@ -68,7 +62,7 @@ void qlistener_handler(boost::system::error_code const&ec,T msg,asio::queue_list
 }
 // handler for waiting for starting to listen to messages
 template<typename T>
-void qlistener_waiter_handler(boost::system::error_code const&ec,asio::queue_listener<deq_t>*ql){
+void qlistener_waiter_handler(boost::system::error_code const&ec,asio::queue_listener<qbase_t>*ql){
   if(ec!=0){
     BOOST_LOG_TRIVIAL(debug)<<"deque-wait() aborted (via asio), ec: "<<ec.message();
   }else{
@@ -77,7 +71,7 @@ void qlistener_waiter_handler(boost::system::error_code const&ec,asio::queue_lis
   }
 }
 // handler for queue sender
-void qsender_handler(boost::system::error_code const&ec,asio::queue_sender<enq_t>*qs){
+void qsender_handler(boost::system::error_code const&ec,asio::queue_sender<qbase_t>*qs){
   // print item if error code is OK
   if(ec)BOOST_LOG_TRIVIAL(debug)<<"queue sender interupted (via asio): ignoring callback, ec: "<<ec;
   else{
@@ -92,7 +86,7 @@ void qsender_handler(boost::system::error_code const&ec,asio::queue_sender<enq_t
   }
 }
 // handler for waiting for starting sending messages
-void qsender_waiter_handler(boost::system::error_code const&ec,asio::queue_sender<enq_t>*qs){
+void qsender_waiter_handler(boost::system::error_code const&ec,asio::queue_sender<qbase_t>*qs){
   if(ec!=0){
     BOOST_LOG_TRIVIAL(debug)<<"enq-wait() aborted (via asio), ec: "<<ec.message();
   }else{
@@ -108,26 +102,22 @@ void qsender_waiter_handler(boost::system::error_code const&ec,asio::queue_sende
 int main(){
   try{
     // create queues
-    asio::sockclient_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qclient(server,listenport,deserialiser,serialiser);
+    asio::sockclient_queue<qval_t,decltype(deserialiser),decltype(serialiser),qbase_t>qclient0(server,listenport,deserialiser,serialiser);
     BOOST_LOG_TRIVIAL(debug)<<"client queue created ...";
-    asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qserv(listenport,deserialiser,serialiser);
+    asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser),qbase_t>qserv0(listenport,deserialiser,serialiser);
     BOOST_LOG_TRIVIAL(debug)<<"server queue created ...";
 
-    // make sure move ctor works
-    asio::sockclient_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qclient1(std::move(qclient));
-    asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser)>qserv1(std::move(qserv));
-
-    // make sure move assignment works
-    qclient=std::move(qclient1);
-    qserv=std::move(qserv1);
+    // test using base classes
+    qbase_t*qclient=&qclient0;
+    qbase_t*qserv=&qserv0;
 
     // setup asio object
 #ifdef SERVER_SENDER
-    asio::queue_sender<enq_t>qsender(::ios,&qserv);
-    asio::queue_listener<deq_t>qlistener(::ios,&qclient);
+    asio::queue_sender<qbase_t>qsender(::ios,qserv);
+    asio::queue_listener<qbase_t>qlistener(::ios,qclient);
 #else
-    asio::queue_listener<deq_t>qlistener(::ios,&qserv);
-    asio::queue_sender<enq_t>qsender(::ios,&qclient);
+    asio::queue_listener<qbase_t>qlistener(::ios,qserv);
+    asio::queue_sender<qbase_t>qsender(::ios,qclient);
 #endif
     // wait tmo_enq_ms ms until we can send a message
     qval_t msg{boost::lexical_cast<string>(msgcount++)};
