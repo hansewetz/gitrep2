@@ -14,14 +14,14 @@ using namespace std::placeholders;
 namespace asio=boost::asio;
 
 // controll if client or server is sender/receiver
-#define SERVER_SENDER 
+//#define SERVER_SENDER 
 
 // ----- some constants -----
 namespace {
 size_t msgcount{0};
 constexpr size_t maxmsg{10};
 constexpr size_t tmo_deq_ms{2000};
-constexpr size_t tmo_enq_ms{1000};
+constexpr size_t tmo_enq_ms{100};
 constexpr size_t tmo_between_send{10};
 }
 // server debug
