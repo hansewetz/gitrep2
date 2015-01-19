@@ -3,7 +3,7 @@ SUBDIRS:=$(SUBDIRS:./%=%)
 .PHONY: all clean $(SUBDIRS)
 .SILENT: all clean $(SUBDIRS)
 
-.NOTPARALLEL:
+#.NOTPARALLEL:
 
 all: $(SUBDIRS)
 
