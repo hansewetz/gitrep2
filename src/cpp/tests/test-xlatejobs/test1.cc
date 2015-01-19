@@ -58,9 +58,9 @@ void usage(std::string const&msg){
 // command line parameters
 namespace{
 vector<string>files;               // files to translate
-size_t maxJobsInParallel{3};       // max #of segements to translate in parallel
+size_t maxJobsInParallel{3};       // max #of jobs to translate in parallel
 size_t maxEngines{1};              // max #of engines to start
-size_t segTmoMs{7000};             // timeout in ms for a segment
+size_t segTmoMs{10000};            // timeout in ms for a segment
 size_t startTmoMs{120000};         // timeout in ms to start an engine
 bool debug{false};                 // debuggging on/off
 }
