@@ -151,7 +151,7 @@ private:
     // client connected - read message
     if(state_==CONNECTED){
       state_=READING;
-      T ret{detail::queue_support::recvwait<T,DESER>(clientsocket_,0,ec1,getMsg,sep_,deser_)};
+      T ret{detail::queue_support::recvwait<T,DESER>(clientsocket_,ms,ec1,getMsg,sep_,deser_)};
       if(ec1!=boost::system::error_code()){
         detail::queue_support::eclose(servsocket_,false);
         state_=IDLE;
