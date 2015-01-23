@@ -1,4 +1,4 @@
-// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014. All rights reserved.
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015. All rights reserved.
 
 #include <iostream>
 
@@ -31,6 +31,7 @@ int main(){
 
   // discount curve (constant contineous rate)
   boost::shared_ptr<YieldTermStructure>yieldStruct{flatRate(today,0.03,Actual360())};
+  //cout<<"zero rate: "<<yieldStruct->zeroRate(today,Actual360(),Continuous)<<endl;
   Handle<YieldTermStructure>discountCurve(flatRate(today,0.03,Actual360()));
 
   // pricing engine for (constant contineous rate)
@@ -39,8 +40,12 @@ int main(){
   // zero coupon bond instrument
   Natural settlementDays = 1;
   Real faceAmount{1000000.0}; // ??? what is this ... no impact ... ???
-  ZeroCouponBond bond1(settlementDays,UnitedStates(UnitedStates::GovernmentBond),faceAmount,
-                       Date(30,November,2008),ModifiedFollowing,100.0,Date(30,November,2004));
+  ZeroCouponBond bond1(settlementDays,           // days for settlement
+                       UnitedStates(UnitedStates::GovernmentBond), // calender
+                       faceAmount,               // ...
+                       Date(30,November,2008),   // maturity date
+                       ModifiedFollowing,100.0,  // business day convention
+                       Date(30,November,2004));  // issue date
 
   // add pricing engine to bond
   bond1.setPricingEngine(bondEngine);

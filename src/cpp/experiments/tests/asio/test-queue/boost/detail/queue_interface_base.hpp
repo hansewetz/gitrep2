@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015. All rights reserved.
+
 #ifndef QUEUE_INTERFACE_BASE_H__
 #define QUEUE_INTERFACE_BASE_H__
 #include "queue_interface_enq.hpp"
