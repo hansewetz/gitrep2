@@ -1,4 +1,4 @@
-SUBDIRS = algorithms tests qlib
+SUBDIRS = test-junk
 
 include $(PROJECT_ROOT)/env/makerules/subdirs.rules
 

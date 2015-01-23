@@ -12,6 +12,9 @@ if [[ ${DEV_ENV} == 'WORK' ]]; then
 
   # oracle stuff
   export ORACLE_HOME=/ec/sw/oracle/client/product/11.2.0.2/
+
+  # quantlib stuff
+  export QLIB_PATH=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/quantlib
 else
   INSTALL_HOME=/home/hans/installs
   INSTALL_EXTRA_HOME=${INSTALL_HOME}
