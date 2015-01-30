@@ -1,7 +1,7 @@
 # To be built
-LOCAL_TARGET    =  test-simple-server
+LOCAL_TARGET    =  test1
 LOCAL_SOTARGET  =
-LOCAL_OBJS      = test-simple-server.o
+LOCAL_OBJS      = test1.o
 
 # Control.
 LOCAL_LIBS      =  -lboost_thread -lboost_system -lboost_date_time -lboost_regex -lboost_program_options -lboost_filesystem -lboost_chrono -lpthread -lssl -lcrypto -lrt
