@@ -20,7 +20,8 @@ test-xml-beans \
 test-libxml-tmx \
 asio \
 occi \
-junk
+junk \
+test-cpp-netlib
 
 
 #test-clucene \

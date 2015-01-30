@@ -22,8 +22,8 @@
 
 # Add some default so users don't have to add them to LOCAL_XXX vars.
 LOCAL_LIBS      += -lrt
-LOCAL_LIBPATH   += -L$(INSTALL_HOME)/lib -L$(INSTALL_EXTRA_HOME)/lib
-LOCAL_INCPATH   += -I. -I$(INSTALL_HOME)/include -I$(INSTALL_EXTRA_HOME)/include
+LOCAL_LIBPATH   += -L$(INSTALL_HOME)/lib -L$(INSTALL_EXTRA_HOME)/lib -L$(INSTALL_TEST_HOME)/lib -L$(INSTALL_TEST_HOME)/lib64
+LOCAL_INCPATH   += -I. -I$(INSTALL_HOME)/include -I$(INSTALL_EXTRA_HOME)/include -I$(INSTALL_TEST_HOME)/include
 LOCAL_DEFINES   +=
 LOCAL_CXXFLAGS  +=
 LOCAL_CPPFLAGS  +=

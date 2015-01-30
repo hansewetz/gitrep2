@@ -7,8 +7,9 @@ if [[ ${DEV_ENV} == 'WORK' ]]; then
   # Shared drive containing C++ tool chain
   export SHAREDDRIVE=/ec/dgt/shared/exodus
 
-  INSTALL_HOME=${SHAREDDRIVE}/local/CppEnv-V1.0					# basic install stuff
-  INSTALL_EXTRA_HOME=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs	# extra packages
+  export INSTALL_HOME=${SHAREDDRIVE}/local/CppEnv-V1.0					# basic install stuff
+  export INSTALL_EXTRA_HOME=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs	# extra packages
+  export INSTALL_TEST_HOME='/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test'	# extra packages
 
   # oracle stuff
   export ORACLE_HOME=/ec/sw/oracle/client/product/11.2.0.2/
@@ -16,9 +17,9 @@ if [[ ${DEV_ENV} == 'WORK' ]]; then
   # quantlib stuff
   export QLIB_PATH=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test/quantlib
 else
-  INSTALL_HOME=/home/hans/installs
-  INSTALL_EXTRA_HOME=${INSTALL_HOME}
-  #INSTALL_TEST=${INSTALL_HOME}
+  export INSTALL_HOME=/home/hans/installs
+  export INSTALL_EXTRA_HOME=${INSTALL_HOME}
+  export INSTALL_TEST_HOME=${INSTALL_HOME}
 fi
 
 # build environment root
