@@ -1,15 +1,12 @@
 >>>>>>>>>>>>>>>>>>>> WORKING ON <<<<<<<<<<<<<<<<<<<<<<<<
-- implement 'socket_queue' (can be used to talk across machines)
 >>>>>>>>>>>>>>>>>>>> WORKING ON <<<<<<<<<<<<<<<<<<<<<<<<
 
 
 === improvements ===
 
- - copy new fd queues to library ones they have been tested
+- change disrectory structure so we have boost/asio instead of boost-extensions/*
 
- - change disrectory structure so we have boost/asio instead of boost-extensions/*
-
- - change std::size_t ms --> chrono time
+- change std::size_t ms --> chrono time
 
 - time for waiting for a message is not done correctly in socket queues. We time to get a connection 
   then start timing again when connection is established
@@ -21,4 +18,5 @@
 
 === new queues ===
 
-- implement 'shareddier_queue' for queues on shared dierctories
+- implement 'sockservdeq_queue; - deq queue handling multiple client connections
+- implement 'shareddir_queue' for queues on shared dierctories

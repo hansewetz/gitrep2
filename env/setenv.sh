@@ -7,7 +7,7 @@ if [[ ${DEV_ENV} == 'WORK' ]]; then
   # Shared drive containing C++ tool chain
   export SHAREDDRIVE=/ec/dgt/shared/exodus
 
-  INSTALL_HOME=${SHAREDDRIVE}/local/CppEnv-V1.0					# basic sintall stuff
+  INSTALL_HOME=${SHAREDDRIVE}/local/CppEnv-V1.0					# basic install stuff
   INSTALL_EXTRA_HOME=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs	# extra packages
 
   # oracle stuff

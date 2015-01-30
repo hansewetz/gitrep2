@@ -31,7 +31,6 @@ int main(){
 
   // discount curve (constant contineous rate)
   boost::shared_ptr<YieldTermStructure>yieldStruct{flatRate(today,0.03,Actual360())};
-  //cout<<"zero rate: "<<yieldStruct->zeroRate(today,Actual360(),Continuous)<<endl;
   Handle<YieldTermStructure>discountCurve(flatRate(today,0.03,Actual360()));
 
   // pricing engine for (constant contineous rate)
