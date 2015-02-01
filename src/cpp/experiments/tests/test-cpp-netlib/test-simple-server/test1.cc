@@ -19,7 +19,8 @@ using http_server=http::server<handler>;
 // http request handler
 struct handler {
   void operator()(http_server::request const&request,http_server::response&response){
-      response=http_server::response::stock_reply(http_server::response::ok,"http server running ...");
+    cout<<"responding on client request ..."<<endl;
+    response=http_server::response::stock_reply(http_server::response::ok,"http server running ...");
   }
   void log(http_server::string_type const &info) {
     cerr<<"ERROR: "<<info<<'\n';
@@ -27,8 +28,8 @@ struct handler {
 };
 // main test program
 int main(int arg, char * argv[]) {
-  handler handler_;
-  http_server::options options(handler_);
-  http_server server_(options.address("0.0.0.0").port("8000"));
-  server_.run();
+  handler handler;
+  http_server::options options(handler);
+  http_server server(options.address("0.0.0.0").port("8000"));
+  server.run();
 }
