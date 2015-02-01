@@ -210,4 +210,15 @@ installed boost 1.57
 
 ------------------------
 
+Sun Feb  1 13:45:00 CET 2015
+	Installed cpp-netlib (cpp-netlib-0.11.1-final.tar) under ~ewetzha/installs-test at HOME
 
+	# building
+	untar
+	cd cpp-netlib-0.11.1-final
+	mkdir build; cd build
+	execute: cmake -DCMAKE_INSTALL_PREFIX=/home/hans/installs -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++  ..
+
+	make && make install
+
+------------------------
