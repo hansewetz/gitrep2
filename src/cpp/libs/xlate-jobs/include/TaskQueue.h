@@ -4,13 +4,13 @@
 #define __TASK_QUEUE_H__
 #include "asio-extensions/queue_listener.hpp"
 #include "asio-extensions/queue_sender.hpp"
-#include "asio-extensions/simple_queue.hpp"
+#include "asio-extensions/detail/queue_interface_base.hpp"
 #include "xlate-jobs/TranslationTask.h"
 #include <memory>
 namespace xlate{
 
 // typedef of a task queue
-using TaskQueue=boost::asio::simple_queue<std::shared_ptr<TranslationTask>>;
+using TaskQueue=boost::asio::detail::base::queue_interface_base<std::shared_ptr<TranslationTask>>;
 
 // typedef of q sender
 using TaskQueueSender=boost::asio::queue_sender<TaskQueue>;

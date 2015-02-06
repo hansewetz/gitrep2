@@ -1,7 +1,7 @@
 # To be built
 LOCAL_TARGET    =  test1
 LOCAL_SOTARGET  =
-LOCAL_OBJS      = test1.o
+LOCAL_OBJS      = test1.o TranslationCt.o
 
 # Control.
 LOCAL_LIBS      = -lxlate-jobs -lxlate-tools -lutils -lpthread \

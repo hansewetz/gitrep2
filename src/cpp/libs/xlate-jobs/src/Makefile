@@ -2,7 +2,7 @@
 LOCAL_TARGET    =
 LOCAL_SOTARGET  = $(PROJECT_ROOT)/lib/libxlate-jobs.so
 LOCAL_OBJS      = LanguageCode.o TranslationTask.o TranslateRequest.o TranslationJob.o TranslationJobRepository.o \
-		  TaskScheduler.o EngineProxy.o TranslationCt.o EngineEnv.o
+		  TaskScheduler.o EngineProxy.o EngineEnv.o
 
 # Control.
 LOCAL_LIBS      = 

@@ -1,7 +1,7 @@
 // (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015. All rights reserved.
 
+#include "TranslationCt.h"
 #include "xlate-jobs/JobQueue.h"
-#include "xlate-jobs/TranslationCt.h"
 #include "xlate-jobs/TranslateRequest.h"
 #include "xlate-jobs/TranslationJob.h"
 #include "xlate-jobs/LanguageCode.h"

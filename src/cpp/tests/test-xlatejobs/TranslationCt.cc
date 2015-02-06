@@ -1,6 +1,6 @@
 // (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015. All rights reserved.
 
-#include "xlate-jobs/TranslationCt.h"
+#include "TranslationCt.h"
 #include "xlate-jobs/TranslateRequest.h"
 #include "xlate-jobs/TranslationJob.h"
 #include "xlate-jobs/TranslationJobRepository.h"
@@ -8,8 +8,13 @@
 #include "xlate-jobs/EngineProxy.h"
 #include "xlate-jobs/EngineEnv.h"
 #include <boost/log/trivial.hpp>
+#include "asio-extensions/detail/queue_interface_base.hpp"
 using namespace std;
 namespace xlate{
+
+// concrete types for queues
+using ConcreteJobQueue=boost::asio::simple_queue<std::shared_ptr<TranslationJob>,JobQueue>;
+using ConcreteTaskQueue=boost::asio::simple_queue<std::shared_ptr<TranslationTask>,TaskQueue>;
 
 // ctor
 TranslationCt::TranslationCt(boost::asio::io_service&ios,size_t maxScheduledJobs,size_t maxEngines,shared_ptr<EngineEnv>enngineenv):
@@ -18,11 +23,11 @@ TranslationCt::TranslationCt(boost::asio::io_service&ios,size_t maxScheduledJobs
     enngineenv_(enngineenv),
     qschedTaskSize_(maxEngines),
     qschedJobSize_(maxScheduledJobs),
-    qnewJob_{make_shared<JobQueue>(qnewJobSize_)},
-    qschedJob_{make_shared<JobQueue>(qschedJobSize_)},
-    qschedTask_{make_shared<TaskQueue>(qschedTaskSize_)},
-    qtransTasks_{make_shared<TaskQueue>(qtransTasksSize_)},
-    qtransJobs_{make_shared<JobQueue>(qtransJobSize_)},
+    qnewJob_{shared_ptr<JobQueue>(new ConcreteJobQueue(qnewJobSize_))},
+    qschedJob_{shared_ptr<JobQueue>(new ConcreteJobQueue(qschedJobSize_))},
+    qschedTask_{shared_ptr<TaskQueue>(new ConcreteTaskQueue(qschedTaskSize_))},
+    qtransTasks_{shared_ptr<TaskQueue>(new ConcreteTaskQueue(qtransTasksSize_))},
+    qtransJobs_{shared_ptr<JobQueue>(new ConcreteJobQueue(qtransJobSize_))},
     jobrep_{make_shared<TranslationJobRepository>(ios_,qnewJob_,qschedJob_,qtransTasks_,qtransJobs_)},
     scheduler_{make_shared<TaskScheduler>(ios_,qschedJob_,qschedTask_)}{
 
