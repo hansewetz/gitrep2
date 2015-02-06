@@ -21,6 +21,7 @@ struct queue_interface_deq:public virtual queue_empty_base<T>{
   virtual std::pair<bool,T>timed_deq(std::size_t ms,boost::system::error_code&ec)=0;
   virtual bool wait_deq(boost::system::error_code&ec)=0;
   virtual bool timed_wait_deq(std::size_t ms,boost::system::error_code&ec)=0;
+  virtual  void disable_deq(bool disable)=0;
 };
 }
 }

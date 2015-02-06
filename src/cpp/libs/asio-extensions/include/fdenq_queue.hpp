@@ -21,6 +21,7 @@ TESTING:
 #include "detail/fdqueue_support.hpp"
 #include <string>
 #include <utility>
+#include <mutex>
 #include <unistd.h>
 #include <boost/asio/error.hpp>
 
@@ -39,9 +40,13 @@ public:
   constexpr static char NEWLINE='\n';
 
   // ctors,assign,dtor
-  fdenq_queue(int fdwrite,SERIAL serial,bool closeOnExit=false,char sep=NEWLINE):fdwrite_(fdwrite),serial_(serial),sep_(sep),closeOnExit_(closeOnExit){}
+  fdenq_queue(int fdwrite,SERIAL serial,bool closeOnExit=false,char sep=NEWLINE):
+      fdwrite_(fdwrite),serial_(serial),sep_(sep),closeOnExit_(closeOnExit),mtx_{std::make_unique<std::mutex>()}{
+  }
   fdenq_queue(fdenq_queue const&)=delete;
-  fdenq_queue(fdenq_queue&&other):fdwrite_(other.fdwrite_),serial_(std::move(other.serial_)),sep_(other.sep_),closeOnExit_(other.closeOnExit_){
+  fdenq_queue(fdenq_queue&&other):
+      fdwrite_(other.fdwrite_),serial_(std::move(other.serial_)),sep_(other.sep_),closeOnExit_(other.closeOnExit_),
+      mtx_(std::move(other.mtx_)),enq_enabled_(other.enq_enabled_){
     other.closeOnExit_=false; // make sure we don't close twice
   }
   fdenq_queue&operator=(fdenq_queue const&)=delete;
@@ -51,24 +56,46 @@ public:
     sep_=other.sep_;
     closeOnExit_=other.closeOnExit_;
     other.closeOnExit_=false; // make sure we don't close twice
+    mtx_=std::move(other.mtx_);
+    enq_enabled_=other.enq_enabled_;
     return*this;
   }
   ~fdenq_queue(){if(closeOnExit_)detail::queue_support::eclose(fdwrite_,false);}
   
   // enqueue a message (return.first == false if enq() was disabled)
   bool enq(T t,boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     return detail::queue_support::sendwait<T,SERIAL>(fdwrite_,&t,0,ec,true,sep_,serial_);
   }
   // enqueue a message (return.first == false if enq() was disabled) - timeout if waiting too long
   bool timed_enq(T t,std::size_t ms,boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     return detail::queue_support::sendwait<T,SERIAL>(fdwrite_,&t,ms,ec,true,sep_,serial_);
   }
   // wait until we can retrieve a message from queue
   bool wait_enq(boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     return detail::queue_support::sendwait<T,SERIAL>(fdwrite_,nullptr,0,ec,false,sep_,serial_);
   }
   // wait until we can retrieve a message from queue -  timeout if waiting too long
   bool timed_wait_enq(std::size_t ms,boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     return detail::queue_support::sendwait<T,SERIAL>(fdwrite_,nullptr,ms,ec,false,sep_,serial_);
   }
   // get underlying file descriptor
@@ -81,6 +108,8 @@ private:
   SERIAL serial_;                        // serialise
   char sep_;                             // message separator
   bool closeOnExit_;                     // close fd on exit
+  mutable std::unique_ptr<std::mutex>mtx_;// must be pointer since not movable
+  bool enq_enabled_=true;                // is enqueing enabled
 };
 }
 }

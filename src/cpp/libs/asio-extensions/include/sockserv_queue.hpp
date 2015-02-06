@@ -49,7 +49,7 @@ public:
 
   // ctor
   sockserv_queue(int port,DESER deser,SERIAL serial,char sep=NEWLINE):
-      port_(port),deser_(deser),serial_(serial),sep_{sep},closeOnExit_(true){
+      port_(port),deser_(deser),serial_(serial),sep_{sep},closeOnExit_(true),mtx_{std::make_unique<std::mutex>()}{
     // start listening on socket
     createListenSocket();
   }
@@ -59,7 +59,8 @@ public:
   // move ctor
   sockserv_queue(sockserv_queue&&other):
       port_(other.port_), deser_(std::move(other.deser_)),serial_(std::move(other.serial_)),sep_(other.sep_),closeOnExit_(other.closeOnExit_),
-      servsocket_(other.servsocket_),yes_(other.yes_)
+      servsocket_(other.servsocket_),yes_(other.yes_),
+      mtx_(std::move(other.mtx_)),deq_enabled_(other.deq_enabled_),enq_enabled_(other.enq_enabled_)
   {
     other.closeOnExit_=false; // make sure we don't close twice
     memcpy(static_cast<void*>(&serveraddr_),static_cast<void*>(&other.serveraddr_),sizeof(serveraddr_));
@@ -82,6 +83,10 @@ public:
     yes_=other.yes_;
     memcpy(static_cast<void*>(&serveraddr_),static_cast<void*>(&other.serveraddr_),sizeof(serveraddr_));
     memcpy(static_cast<void*>(&clientaddr_),static_cast<void*>(&other.clientaddr_),sizeof(clientaddr_));
+
+    mtx_=std::move(other.mtx_);
+    deq_enabled_=other.deq_enabled_;
+    enq_enabled_=other.enq_enabled_;
     return*this;
   }
   // ctor
@@ -95,20 +100,44 @@ public:
   }
   // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(boost::system::error_code&ec){
+    // if deq is disabled we are done
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return std::make_pair(false,T{});
+    }
     return deqAux(0,ec,true);
   }
   // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
   std::pair<bool,T>timed_deq(std::size_t ms,boost::system::error_code&ec){
+    // if deq is disabled we are done
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return std::make_pair(false,T{});
+    }
     return deqAux(ms,ec,true);
   }
   // wait until we can retrieve a message from queue
   bool wait_deq(boost::system::error_code&ec){
+    // if deq is disabled we are done
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     deqAux(0,ec,false);
     if(ec.value()!=0)return false;
     return true;
   }
   // wait until we can retrieve a message from queue -  timeout if waiting too long
   bool timed_wait_deq(std::size_t ms,boost::system::error_code&ec){
+    // if deq is disabled we are done
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     deqAux(ms,ec,false);
     if(ec==boost::asio::error::timed_out)return false;
     if(ec.value()!=0)return false;
@@ -116,19 +145,49 @@ public:
   }
   // put a message into queue
   bool enq(T t,boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     return enqAux(&t,0,ec,true);
   }
   // put a message into queue - timeout if waiting too long
   bool timed_enq(T t,std::size_t ms,boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     return enqAux(&t,ms,ec,true);
   }
   // wait until we can put a message in queue
   bool wait_enq(boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     return enqAux(nullptr,0,ec,false);
   }
   // wait until we can put a message in queue - timeout if waiting too long
   bool timed_wait_enq(std::size_t ms,boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     return enqAux(nullptr,ms,ec,false);
+  }
+  // cancel deq operations
+  void disable_deq(bool disable){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    deq_enabled_=!disable;
+  }
+  // cancel enq operations
+  void disable_enq(bool disable){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    enq_enabled_=!disable;
   }
 private:
   // --------------------------------- state management functions
@@ -286,6 +345,10 @@ private:
   // client stuff
   int clientsocket_=-1;                  // socket for client
   struct sockaddr_in clientaddr_;        // client address
+
+  mutable std::unique_ptr<std::mutex>mtx_;                  // must be pointer since not movable
+  bool deq_enabled_=true;
+  bool enq_enabled_=true;
 };
 }
 }

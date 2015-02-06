@@ -22,6 +22,7 @@ TESTING:
 #include <utility>
 #include <iostream>
 #include <string>
+#include <mutex>
 #include <algorithm>
 #include <string.h>
 
@@ -49,7 +50,7 @@ public:
 
   // ctor
   sockclient_queue(std::string const&serverName,int port,DESER deser,SERIAL serial,char sep=NEWLINE):
-      serverName_(serverName),port_(port),deser_(deser),serial_(serial),sep_{sep},closeOnExit_(true){
+      serverName_(serverName),port_(port),deser_(deser),serial_(serial),sep_{sep},closeOnExit_(true),mtx_{std::make_unique<std::mutex>()}{
     // create socket
     createSocket();
   }
@@ -59,7 +60,8 @@ public:
   // move ctor
   sockclient_queue(sockclient_queue&&other):
       serverName_(other.serverName_),port_(other.port_),deser_(std::move(other.deser_)),serial_(std::move(other.serial_)),sep_(other.sep_),
-      clientsocket_(other.clientsocket_),yes_(other.yes_),closeOnExit_(other.closeOnExit_),server_(other.server_)
+      clientsocket_(other.clientsocket_),yes_(other.yes_),closeOnExit_(other.closeOnExit_),server_(other.server_),
+      mtx_(std::move(other.mtx_)),deq_enabled_(other.deq_enabled_),enq_enabled_(other.enq_enabled_)
   {
     other.closeOnExit_=false; // make sure we don't close twice
     memcpy(static_cast<void*>(&servaddr_),static_cast<void*>(&other.servaddr_),sizeof(servaddr_));
@@ -80,6 +82,9 @@ public:
     server_=other.server_;
     other.closeOnExit_=false; // make sure we don't close twice
     memcpy(static_cast<void*>(&servaddr_),static_cast<void*>(&other.servaddr_),sizeof(servaddr_));
+    mtx_=std::move(other.mtx_);
+    deq_enabled_=other.deq_enabled_;
+    enq_enabled_=other.enq_enabled_;
     return*this;
   }
   // dtor
@@ -93,20 +98,44 @@ public:
   }
   // dequeue a message (return.first == false if deq() was disabled)
   std::pair<bool,T>deq(boost::system::error_code&ec){
+    // if deq is disabled we are done
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return std::make_pair(false,T{});
+    }
     return deqAux(0,ec,true);
   }
   // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
   std::pair<bool,T>timed_deq(std::size_t ms,boost::system::error_code&ec){
+    // if deq is disabled we are done
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return std::make_pair(false,T{});
+    }
     return deqAux(ms,ec,true);
   }
   // wait until we can retrieve a message from queue
   bool wait_deq(boost::system::error_code&ec){
+    // if deq is disabled we are done
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     deqAux(0,ec,false);
     if(ec.value()!=0)return false;
     return true;
   }
   // wait until we can retrieve a message from queue -  timeout if waiting too long
   bool timed_wait_deq(std::size_t ms,boost::system::error_code&ec){
+    // if deq is disabled we are done
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     deqAux(ms,ec,false);
     if(ec==boost::asio::error::timed_out)return false;
     if(ec.value()!=0)return false;
@@ -114,19 +143,49 @@ public:
   }
   // enqueue a message (return.first == false if enq() was disabled)
   bool enq(T t,boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     return enqAux(&t,0,ec,true);
   }
   // enqueue a message (return.first == false if enq() was disabled) - timeout if waiting too long
   bool timed_enq(T t,std::size_t ms,boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     return enqAux(&t,ms,ec,true);
   }
   // wait until we can retrieve a message from queue
   bool wait_enq(boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     return enqAux(nullptr,0,ec,false);
   }
   // wait until we can retrieve a message from queue -  timeout if waiting too long
   bool timed_wait_enq(std::size_t ms,boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    if(!enq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
     return enqAux(nullptr,ms,ec,false);
+  }
+  // cancel deq operations
+  void disable_deq(bool disable){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    deq_enabled_=!disable;
+  }
+  // cancel enq operations
+  void disable_enq(bool disable){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    enq_enabled_=!disable;
   }
 private:
   // --------------------------------- state management functions
@@ -243,6 +302,10 @@ private:
   int yes_=1;                            // used for setting socket options
   bool closeOnExit_;                     // close fd on exit (if we have been moved we don;t close)
   struct hostent*server_;                // server when converting name to host
+
+  mutable std::unique_ptr<std::mutex>mtx_;                  // must be pointer since not movable
+  bool deq_enabled_=true;
+  bool enq_enabled_=true;
 };
 }
 }

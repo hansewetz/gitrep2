@@ -21,6 +21,7 @@ struct queue_interface_enq:public virtual queue_empty_base<T>{
   virtual bool timed_enq(T t,std::size_t ms,boost::system::error_code&ec)=0;
   virtual bool wait_enq(boost::system::error_code&ec)=0;
   virtual bool timed_wait_enq(std::size_t ms,boost::system::error_code&ec)=0;
+  virtual void disable_enq(bool disable)=0;
 };
 }
 }

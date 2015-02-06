@@ -7,6 +7,7 @@
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include <boost/network.hpp>
 #include <boost/network/include/http/server.hpp>
+#include <boost/network/protocol/http/message.hpp>
 #pragma GCC diagnostic pop
 
 using namespace std;
@@ -19,7 +20,9 @@ using http_server=http::server<handler>;
 // http request handler
 struct handler {
   void operator()(http_server::request const&request,http_server::response&response){
-    cout<<"responding on client request ..."<<endl;
+    auto const&p=http::path(request);
+    cout<<"uri: "<<request.method<<" from source: "<<request.source<<":"<<request.source_port<<
+          ", destination: "<<request.destination<<p<<endl;
     response=http_server::response::stock_reply(http_server::response::ok,"http server running ...");
   }
   void log(http_server::string_type const &info) {
