@@ -1,16 +1,12 @@
 // (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015. All rights reserved.
 
 /* TODO
-
-CANCELLATION: it's not clear how cancellation would be implemented - for right now I'll skip it
-
 IMPROVEMENTS:
 	- we should have two timeouts, message timeout, byte timeout
 	- read/write more than one character at a time ... must then buffer what we have read
 
 TESTING:
 	- test with serializing real object and base64 encode them
-
 */
 
 #ifndef __SOCK_CLIENT_QUEUE_H__
