@@ -10,12 +10,13 @@
 namespace xlate{
 
 // typedef of a task queue
-using JobQueue=boost::asio::detail::base::queue_interface_base<std::shared_ptr<TranslationJob>>;
+using JobQueueDeq=boost::asio::detail::base::queue_interface_deq<std::shared_ptr<TranslationJob>>;
+using JobQueueEnq=boost::asio::detail::base::queue_interface_enq<std::shared_ptr<TranslationJob>>;
 
 // typedef of q sender
-using JobQueueSender=boost::asio::queue_sender<JobQueue>;
+using JobQueueSender=boost::asio::queue_sender<JobQueueEnq>;
 
 // typedef of q listener
-using JobQueueListener=boost::asio::queue_listener<JobQueue>;
+using JobQueueListener=boost::asio::queue_listener<JobQueueDeq>;
 }
 #endif

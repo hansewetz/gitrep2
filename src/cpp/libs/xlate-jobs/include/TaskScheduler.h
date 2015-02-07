@@ -15,7 +15,7 @@ class TranslationTask;
 // class scheduling tasks taken from a job repository
 class TaskScheduler{
 public:
-  TaskScheduler(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qjob,std::shared_ptr<TaskQueue>qtask);
+  TaskScheduler(boost::asio::io_service&ios,std::shared_ptr<JobQueueDeq>qjob,std::shared_ptr<TaskQueueEnq>qtask);
   TaskScheduler(TaskScheduler const&)=delete;
   TaskScheduler(TaskScheduler&&)=default;
   TaskScheduler&operator=(TaskScheduler const&)=delete;

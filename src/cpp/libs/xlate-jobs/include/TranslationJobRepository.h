@@ -20,7 +20,7 @@ class TranslationTask;
 class TranslationJobRepository{
 public:
   // ctors, dtor
-  TranslationJobRepository(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qnew,std::shared_ptr<JobQueue>qsched,std::shared_ptr<TaskQueue>qtask,std::shared_ptr<JobQueue>qtranslated);
+  TranslationJobRepository(boost::asio::io_service&ios,std::shared_ptr<JobQueueDeq>qnew,std::shared_ptr<JobQueueEnq>qsched,std::shared_ptr<TaskQueueDeq>qtask,std::shared_ptr<JobQueueEnq>qtranslated);
   TranslationJobRepository(TranslationJobRepository const&)=delete;
   TranslationJobRepository(TranslationJobRepository&&)=default;
   TranslationJobRepository&operator=(TranslationJobRepository const&)=delete;

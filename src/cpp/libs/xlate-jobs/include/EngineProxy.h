@@ -23,7 +23,7 @@ public:
   using qFromEngine_t=boost::asio::fddeq_queue<std::string,std::function<std::string(std::istream&)>>;
 
   // ctors,assign,dtor
-  EngineProxy(boost::asio::io_service&ios,std::shared_ptr<TaskQueue>qin,std::shared_ptr<TaskQueue>qout,std::shared_ptr<EngineEnv>engineenv);
+  EngineProxy(boost::asio::io_service&ios,std::shared_ptr<TaskQueueDeq>qin,std::shared_ptr<TaskQueueEnq>qout,std::shared_ptr<EngineEnv>engineenv);
   EngineProxy(EngineProxy const&)=delete;
   EngineProxy(EngineProxy&&)=default;
   EngineProxy&operator=(EngineProxy const&)=delete;

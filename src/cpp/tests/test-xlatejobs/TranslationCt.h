@@ -4,12 +4,23 @@
 #define __TRANSLATION_CT_H__
 #include "xlate-jobs/JobQueue.h"
 #include "xlate-jobs/TaskQueue.h"
+#include "asio-extensions/simple_queue.hpp"
+#include "asio-extensions/detail/queue_interface_base.hpp"
 #include <boost/asio.hpp>
 #include <cstddef>
 #include <memory>
 #include <vector>
 #include <ratio>
 namespace xlate{
+
+// base classes for queues
+using JobQueueBase=boost::asio::detail::base::queue_interface_base<std::shared_ptr<TranslationJob>>;
+using TaskQueueBase=boost::asio::detail::base::queue_interface_base<std::shared_ptr<TranslationTask>>;
+
+// concrete types for queues
+using ConcreteJobQueue=boost::asio::simple_queue<std::shared_ptr<TranslationJob>,JobQueueBase>;
+using ConcreteTaskQueue=boost::asio::simple_queue<std::shared_ptr<TranslationTask>,TaskQueueBase>;
+
 
 // forward decl
 class TranslationJobRepository;
@@ -36,8 +47,8 @@ public:
   std::size_t size()const;
 
   // queue getters
-  std::shared_ptr<JobQueue>getNewJobQueue()const;
-  std::shared_ptr<JobQueue>getTranslatedJobQueue()const;
+  std::shared_ptr<ConcreteJobQueue>getNewJobQueue()const;
+  std::shared_ptr<ConcreteJobQueue>getTranslatedJobQueue()const;
 private:
   // asio service
   boost::asio::io_service&ios_;
@@ -54,11 +65,11 @@ private:
   std::size_t qtransJobSize_=std::mega::num;                 // translated job size - can be very large
 
   // queues in the system
-  std::shared_ptr<JobQueue>qnewJob_;
-  std::shared_ptr<JobQueue>qschedJob_;
-  std::shared_ptr<TaskQueue>qschedTask_;
-  std::shared_ptr<TaskQueue>qtransTasks_;
-  std::shared_ptr<JobQueue>qtransJobs_;
+  std::shared_ptr<ConcreteJobQueue>qnewJob_;
+  std::shared_ptr<ConcreteJobQueue>qschedJob_;
+  std::shared_ptr<ConcreteTaskQueue>qschedTask_;
+  std::shared_ptr<ConcreteTaskQueue>qtransTasks_;
+  std::shared_ptr<ConcreteJobQueue>qtransJobs_;
 
   // components
   std::shared_ptr<TranslationJobRepository>jobrep_;

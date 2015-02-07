@@ -12,10 +12,6 @@
 using namespace std;
 namespace xlate{
 
-// concrete types for queues
-using ConcreteJobQueue=boost::asio::simple_queue<std::shared_ptr<TranslationJob>,JobQueue>;
-using ConcreteTaskQueue=boost::asio::simple_queue<std::shared_ptr<TranslationTask>,TaskQueue>;
-
 // ctor
 TranslationCt::TranslationCt(boost::asio::io_service&ios,size_t maxScheduledJobs,size_t maxEngines,shared_ptr<EngineEnv>enngineenv):
     ios_(ios),
@@ -23,11 +19,11 @@ TranslationCt::TranslationCt(boost::asio::io_service&ios,size_t maxScheduledJobs
     enngineenv_(enngineenv),
     qschedTaskSize_(maxEngines),
     qschedJobSize_(maxScheduledJobs),
-    qnewJob_{shared_ptr<JobQueue>(new ConcreteJobQueue(qnewJobSize_))},
-    qschedJob_{shared_ptr<JobQueue>(new ConcreteJobQueue(qschedJobSize_))},
-    qschedTask_{shared_ptr<TaskQueue>(new ConcreteTaskQueue(qschedTaskSize_))},
-    qtransTasks_{shared_ptr<TaskQueue>(new ConcreteTaskQueue(qtransTasksSize_))},
-    qtransJobs_{shared_ptr<JobQueue>(new ConcreteJobQueue(qtransJobSize_))},
+    qnewJob_{shared_ptr<ConcreteJobQueue>(new ConcreteJobQueue(qnewJobSize_))},
+    qschedJob_{shared_ptr<ConcreteJobQueue>(new ConcreteJobQueue(qschedJobSize_))},
+    qschedTask_{shared_ptr<ConcreteTaskQueue>(new ConcreteTaskQueue(qschedTaskSize_))},
+    qtransTasks_{shared_ptr<ConcreteTaskQueue>(new ConcreteTaskQueue(qtransTasksSize_))},
+    qtransJobs_{shared_ptr<ConcreteJobQueue>(new ConcreteJobQueue(qtransJobSize_))},
     jobrep_{make_shared<TranslationJobRepository>(ios_,qnewJob_,qschedJob_,qtransTasks_,qtransJobs_)},
     scheduler_{make_shared<TaskScheduler>(ios_,qschedJob_,qschedTask_)}{
 
@@ -80,11 +76,11 @@ size_t TranslationCt::size()const{
   return jobrep_->size();
 }
 // get job queue for new jobs
-std::shared_ptr<JobQueue>TranslationCt::getNewJobQueue()const{
+std::shared_ptr<ConcreteJobQueue>TranslationCt::getNewJobQueue()const{
   return qnewJob_;
 }
 // get queue with translated jobs
-std::shared_ptr<JobQueue>TranslationCt::getTranslatedJobQueue()const{
+std::shared_ptr<ConcreteJobQueue>TranslationCt::getTranslatedJobQueue()const{
   return qtransJobs_;
 }
 }

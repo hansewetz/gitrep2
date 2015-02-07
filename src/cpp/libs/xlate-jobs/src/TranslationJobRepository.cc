@@ -12,9 +12,11 @@ using namespace std::placeholders;
 namespace xlate{
 
 // ctor (setup queue listeners and queue senders)
-TranslationJobRepository::TranslationJobRepository(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qnew,
-                                                   std::shared_ptr<JobQueue>qsched,std::shared_ptr<TaskQueue>qtask,
-                                                   std::shared_ptr<JobQueue>qtranslated):
+TranslationJobRepository::TranslationJobRepository(boost::asio::io_service&ios,
+                                                   std::shared_ptr<JobQueueDeq>qnew,
+                                                   std::shared_ptr<JobQueueEnq>qsched,
+                                                   std::shared_ptr<TaskQueueDeq>qtask,
+                                                   std::shared_ptr<JobQueueEnq>qtranslated):
     ios_(ios),
     qnewListener_(make_shared<JobQueueListener>(ios_,qnew.get())),
     qschedSender_(make_shared<JobQueueSender>(ios_,qsched.get())),

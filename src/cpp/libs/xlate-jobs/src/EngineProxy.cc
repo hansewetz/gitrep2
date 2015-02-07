@@ -32,7 +32,7 @@ namespace{
 }
 
 // ctor
-EngineProxy::EngineProxy(asio::io_service&ios,shared_ptr<TaskQueue>qin,shared_ptr<TaskQueue>qout,shared_ptr<EngineEnv>engineenv):
+EngineProxy::EngineProxy(asio::io_service&ios,shared_ptr<TaskQueueDeq>qin,shared_ptr<TaskQueueEnq>qout,shared_ptr<EngineEnv>engineenv):
     ios_(ios),
     qtaskListener_(make_shared<TaskQueueListener>(ios_,qin.get())),
     qtaskSender_(make_shared<TaskQueueSender>(ios_,qout.get())),

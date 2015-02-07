@@ -10,7 +10,7 @@ using namespace std::placeholders;
 namespace xlate{
 
 // ctor
-TaskScheduler::TaskScheduler(boost::asio::io_service&ios,std::shared_ptr<JobQueue>qjob,std::shared_ptr<TaskQueue>qtask):
+TaskScheduler::TaskScheduler(boost::asio::io_service&ios,std::shared_ptr<JobQueueDeq>qjob,std::shared_ptr<TaskQueueEnq>qtask):
     ios_(ios),
     qjobListener_(make_shared<JobQueueListener>(ios,qjob.get())),
     qtaskSender_(make_shared<TaskQueueSender>(ios,qtask.get())),
