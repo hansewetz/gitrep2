@@ -37,7 +37,7 @@ namespace asio{
 // (the tmo in ms is based on message timeout - if no message starts arriving within timeout, the function times out)
 // (ones we have started to read a message, the message will never timeout)
 // (the class is meant to be used in singele threaded mode and is not thread safe)
-template<typename T,typename DESER,typename SERIAL,typename Base=detail::base::queue_empty_base<T>,typename Container=std::queue<T>>
+template<typename T,typename DESER,typename SERIAL,typename Base=detail::base::queue_empty_base<T>>
 class sockserv_queue:public Base{
 public:
   // default message separaor

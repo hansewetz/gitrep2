@@ -1,16 +1,12 @@
 // (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015. All rights reserved.
 
 /* TODO
-
-CANCELLATION: it's not clear how cancellation would be implemented - for right now I'll skip it
-
 IMPROVEMENTS:
 	- we should have two timeouts, message timeout, byte timeout
 	- read/write more than one character at a time ... must then buffer what we have read
 
 TESTING:
 	- test with serializing real object and base64 encode them
-
 */
 
 #ifndef __SOCK_SERV_QUEUE_H__
@@ -41,7 +37,7 @@ namespace asio{
 // (the tmo in ms is based on message timeout - if no message starts arriving within timeout, the function times out)
 // (ones we have started to read a message, the message will never timeout)
 // (the class is meant to be used in singele threaded mode and is not thread safe)
-template<typename T,typename DESER,typename SERIAL,typename Base=detail::base::queue_empty_base<T>,typename Container=std::queue<T>>
+template<typename T,typename DESER,typename SERIAL,typename Base=detail::base::queue_empty_base<T>>
 class sockserv_queue:public Base{
 public:
   // default message separaor

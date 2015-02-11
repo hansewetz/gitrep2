@@ -38,7 +38,7 @@ namespace pt=boost::posix_time;
 // a simple threadsafe/interprocess-safe queue using directory as queue and files as storage media for queue items
 // (mutex/condition variable names are derived from the queue name)
 // (enq/deq have locks around them so that we cannot read partial messages)
-template<typename T,typename DESER,typename SERIAL,typename Base=detail::base::queue_empty_base<T>,typename Container=std::queue<T>>
+template<typename T,typename DESER,typename SERIAL,typename Base=detail::base::queue_empty_base<T>>
 class polldir_queue:public Base{
 public:
   // ctors,assign,dtor
