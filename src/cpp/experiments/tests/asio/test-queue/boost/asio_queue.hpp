@@ -11,4 +11,5 @@
 #include "fdenq_queue.hpp"
 #include "sockserv_queue.hpp"
 #include "sockclient_queue.hpp"
+#include "sockdeq_serv_queue.hpp"
 #endif

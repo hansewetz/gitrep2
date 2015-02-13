@@ -66,7 +66,7 @@ int waitForClientConnect(int servsocket,struct sockaddr_in&serveraddr,struct soc
   // setup for timeout (ones we get a message we don't timeout)
   struct timeval tmo;
   tmo.tv_sec=ms/1000;
-   tmo.tv_usec=(ms%1000)*1000;
+  tmo.tv_usec=(ms%1000)*1000;
       
   // block on select - timeout if configured
   assert(maxfd!=-1);
@@ -91,6 +91,50 @@ int waitForClientConnect(int servsocket,struct sockaddr_in&serveraddr,struct soc
   // no errors - client is now connected, return client socket
   ec=boost::system::error_code();
   return ret;
+}
+// NOTE! Not yet done
+// read data and accept client connections in a select loop
+template<typename T,typename DESER>
+void acceptClientsAndDequeue(int servsocket){
+  // loop until we have a message (or until we timeout)
+  while(true){
+    // setup to listen on fd descriptor
+    fd_set input;
+    FD_ZERO(&input);
+    FD_SET(servsocket,&input);
+    int maxfd=servsocket;
+
+    // setup for timeout (ones we get a message we don't timeout)
+    // NOTE! Only for debug purpose
+    std::size_t ms{3000};
+    struct timeval tmo;
+    tmo.tv_sec=ms/1000;
+    tmo.tv_usec=(ms%1000)*1000;
+    
+    // block on select - timeout if configured
+    assert(maxfd!=-1);
+    int n=::select(++maxfd,&input,NULL,NULL,&tmo);
+
+    // check for error
+    if(n<0){
+      // NOTE!
+      std::cout<<"<ERROR>: "<<std::strerror(errno)<<std::endl;
+      continue;
+    }
+    // check for tmo
+    if(n==0){
+      // NOTE!
+      std::cout<<"<HEARTBEAT>"<<std::endl;
+      continue;
+    }
+    // check for client connecting
+    if(FD_ISSET(servsocket,&input)){
+      // NOTE! Not yet done
+      std::cout<<"<CLIENT-CONNECT>"<<std::endl;
+    }
+    // check for data on existing client connection
+    // NOTE! Not yet deon
+  }
 }
 }
 }
