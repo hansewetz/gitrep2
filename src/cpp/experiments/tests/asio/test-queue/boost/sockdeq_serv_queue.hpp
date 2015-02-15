@@ -1,5 +1,11 @@
 // (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015. All rights reserved.
 
+/* TODO:
+	- setup a clear line where attributes are used by both select and interface side
+	- design an interupt mechanism for rge select side (tmo+check done, an fd-pipe which select side listens on, ...)
+	- potentially disable queue - not used disable dequeue
+*/
+
 #ifndef __SOCK_DEQ_SERV_QUEU_H__
 #define __SOCK_DEQ_SERV_QUEU_H__
 #include "detail/queue_empty_base.hpp"
