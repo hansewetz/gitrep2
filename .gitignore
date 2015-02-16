@@ -13,4 +13,9 @@ junk
 soapClient.cpp
 soapC.cpp
 soapClientLib.cpp
-
+soapServer.cpp
+soapServerLib.cpp
+test-wsdl-remote/soapServer.cpp
+test-wsdl-remote/soapServerLib.cpp
+test-client
+test-serv
