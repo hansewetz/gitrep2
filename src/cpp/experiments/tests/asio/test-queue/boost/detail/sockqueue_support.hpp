@@ -2,10 +2,21 @@
 
 #ifndef __FSOCK_QUEUE_SUPPPORT_H__
 #define __FSOCK_QUEUE_SUPPPORT_H__
+// support functions
+#include "sockqueue_support.hpp"
+
+// NOTE!
+#include <algorithm>
+#include <iterator>
+
+// standard and boost stuff
+#include <atomic>
 #include <utility>
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <unordered_map>
 #include <unistd.h>
 #include <sys/select.h>
 #include <boost/asio/error.hpp>
@@ -95,18 +106,26 @@ int waitForClientConnect(int servsocket,struct sockaddr_in&serveraddr,struct soc
 // NOTE! Not yet done
 // read data and accept client connections in a select loop
 template<typename T,typename DESER>
-void acceptClientsAndDequeue(int servsocket){
-  // loop until we have a message (or until we timeout)
-  while(true){
-    // setup to listen on fd descriptor
+void acceptClientsAndDequeue(int servsocket,char sep,std::atomic<bool>&stop_server){
+  // data structures tracking client fds and correpsonding data
+  std::unordered_map<int,std::vector<char>>client_data;
+
+  // loop until server 'stop_server' flag is set
+  while(!stop_server.load()){
+    // setup to listen on server descriptor
     fd_set input;
     FD_ZERO(&input);
     FD_SET(servsocket,&input);
     int maxfd=servsocket;
 
+    // setup to listen on client fds
+    for(auto const&p:client_data){
+      FD_SET(p.first,&input);
+      maxfd=std::max(maxfd,p.first);
+    }
     // setup for timeout (ones we get a message we don't timeout)
     // NOTE! Only for debug purpose
-    std::size_t ms{3000};
+    std::size_t ms{1000};
     struct timeval tmo;
     tmo.tv_sec=ms/1000;
     tmo.tv_usec=(ms%1000)*1000;
@@ -131,9 +150,81 @@ void acceptClientsAndDequeue(int servsocket){
     if(FD_ISSET(servsocket,&input)){
       // NOTE! Not yet done
       std::cout<<"<CLIENT-CONNECT>"<<std::endl;
+
+      // accept client connection
+      // (if failure - continue)
+      unsigned int addrlen;
+      struct sockaddr_in clientaddr;
+      int client_fd;
+      if((client_fd=::accept(servsocket,(struct sockaddr*)&clientaddr,&addrlen))==-1){
+        // NOTE!
+        std::cout<<"<ERROR>: accept: "<<std::strerror(errno)<<std::endl;
+        continue;
+      }
+      // set client fd to non blocking
+      auto err=detail::queue_support::setFdNonblock(client_fd);
+      if(err!=0){
+        // NOTE!
+        std::cout<<"<ERROR>: non-block: "<<std::strerror(errno)<<std::endl;
+        detail::queue_support::eclose(client_fd,false);
+        continue;
+      }
+      // add client connection to active clients
+      // NOTE!
+      std::cout<<"<CLIENT-ACCEPT> client_fd: "<<client_fd<<std::endl;
+      client_data.insert(std::make_pair(client_fd,std::vector<char>{}));
     }
     // check for data on existing client connection
-    // NOTE! Not yet deon
+    for(auto&p:client_data){
+      int client_fd(p.first);
+      auto&buf(p.second);
+
+      // if no activity on this fd, skip it
+      if(!FD_ISSET(client_fd,&input))continue;
+
+      // read as much as we can from client_fd
+      // (create objects as we read)
+      bool firstTime{true};
+      while(true){
+        // read next character in message
+        char c;
+        ssize_t stat;
+        while((stat=::read(client_fd,&c,1))==EINTR){}
+
+        // check if there is nothing more to read
+        // (if we have already read characters and we get a read error we'll continue to track the client_fd)
+        if(!firstTime&&stat!=1){
+          break;
+        }
+        // we lost client connection
+        if(stat!=1){
+          // we have a real read error - remove client fd and close it
+          // (no need to check for EWOULDBLOCK since we'll never block on client_fd)
+          // NOTE!
+          std::cout<<"<CLIENT-DISCONNECT> client_fd: "<<client_fd<<std::endl;
+          detail::queue_support::eclose(client_fd,false);
+          client_data.erase(client_fd);
+          break;
+        }
+        // save character just read
+        buf.push_back(c);
+        firstTime=false;
+
+        // if we reached sep, send message including newline)
+        if(c==sep){
+          // NOTE! deserialise data, insert object into container and clear buffer for fd_client
+          std::copy(buf.begin(),buf.end(),std::ostream_iterator<char>(std::cout));
+
+          // clear buffer
+          buf.clear();
+        }
+      }
+    }
+  }
+  // close all client fds
+  // (collected data will be destroyed automatically)
+  for(auto const&p:client_data){
+    detail::queue_support::eclose(p.first,false);
   }
 }
 }

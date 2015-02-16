@@ -4,6 +4,12 @@
 	- setup a clear line where attributes are used by both select and interface side
 	- design an interupt mechanism for rge select side (tmo+check done, an fd-pipe which select side listens on, ...)
 	- potentially disable queue - not used disable dequeue
+
+HACKS:
+------
+	- we set a flag to tell server loop to stop - that is, we must have a timer going in server which checks the flag each time the timer pops
+	- must protect q_ when moving an object
+	- we must have better recovery mechanisms
 */
 
 #ifndef __SOCK_DEQ_SERV_QUEU_H__
@@ -18,6 +24,7 @@
 #include <thread>
 #include <mutex>
 #include <algorithm>
+#include <atomic>
 #include <string.h>
 
 // socket stuff
@@ -39,69 +46,53 @@ public:
 
   // ctor
   sockdeq_serv_queue(int port,DESER deser,std::size_t maxclients,char sep=NEWLINE):
-      port_(port),deser_(deser),maxclients_(maxclients),sep_{sep},closeOnExit_(true),
-      mtx_{std::make_unique<std::mutex>()},cond_{std::make_unique<std::condition_variable>()}{
+      port_(port),deser_(deser),maxclients_(maxclients),sep_{sep},
+      mtx_{std::make_unique<std::mutex>()},cond_{std::make_unique<std::condition_variable>()},stop_server_(false){
     // spawn thread running socket io stuff
-    thr_=std::move(std::thread([&](){run_sock_io();}));
+    serv_thr_=std::move(std::thread([&](){run_sock_serv();}));
   }
-  // copy ctor
+  // copy/move/assign - for simplicity, delete them
   sockdeq_serv_queue(sockdeq_serv_queue const&)=delete;
-
-  // move ctor
-  sockdeq_serv_queue(sockdeq_serv_queue&&other):
-      port_(other.port_),deser_(std::move(other.deser_)),maxclients_(other.maxclients_),sep_(other.sep_),closeOnExit_(other.closeOnExit_),
-      mtx_(std::move(other.mtx_)),cond_(other.cond_),
-      deq_enabled_(other.deq_enabled_)
-  {
-    other.closeOnExit_=false; // make sure we don't close twice
-    memcpy(static_cast<void*>(&serveraddr_),static_cast<void*>(&other.serveraddr_),sizeof(serveraddr_));
-  }
-  // assign
+  sockdeq_serv_queue(sockdeq_serv_queue&&other)=delete;
   sockdeq_serv_queue&operator=(sockdeq_serv_queue const&)=delete;
+  sockdeq_serv_queue&operator=(sockdeq_serv_queue&&other)=delete;
 
-  // move assign
-  sockdeq_serv_queue&operator=(sockdeq_serv_queue&&other){
-    port_=other.port_;
-    deser_=std::move(other.deser_);
-    maxclients_=other.maxclients_;
-    sep_=other.sep_;
-    closeOnExit_=other.closeOnExit_;
-    other.closeOnExit_=false; // make sure we don't close twice
-
-    // server socket stuff
-    servsocket_=other.servsocket_;
-    yes_=other.yes_;
-    memcpy(static_cast<void*>(&serveraddr_),static_cast<void*>(&other.serveraddr_),sizeof(serveraddr_));
-
-    mtx_=std::move(other.mtx_);
-    cond_=std::move(other.cond_);
-    deq_enabled_=other.deq_enabled_;
-    return*this;
-  }
   // ctor
   ~sockdeq_serv_queue(){
-// NOTE! Must stop select loop ...
-// Not yet done
-
-    if(closeOnExit_){
-      // NOTE! Must check if socket is open
-      detail::queue_support::eclose(servsocket_,false);
+    // flag to stop server loop and wait for server to stop, then close server socket
+    stop_server_.store(true);
+    if(serv_thr_.joinable())serv_thr_.join();
+    detail::queue_support::eclose(servsocket_,false);
+  }
+  // dequeue a message
+  std::pair<bool,T>deq(boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    cond_->wait(lock,[&](){return !deq_enabled_||!q_.empty();});
+  
+    // if deq is disabled or timeout
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return std::make_pair(false,T{});
     }
-    // join socket io thread
-    thr_.join();
+    // check if we have a message
+    std::pair<bool,T>ret{std::make_pair(true,q_.front())};
+    q_.pop();
+    cond_->notify_all();
+    ec=boost::system::error_code();
+    return ret;
   }
 
   // NOTE! Not yet done
 
 private:
   // --------------------------------- private helper functions
-  void run_sock_io(){
-    // creating a listening socket (server socket)
+  void run_sock_serv(){
+    // create listening socket (server socket)
     servsocket_=detail::sockqueue_support::createListenSocket(port_,serveraddr_,maxclients_,&yes_);
 
     // accept client connections and dequeue messages
-    // NOTE! Not correct
-    detail::sockqueue_support::acceptClientsAndDequeue<T,DESER>(servsocket_);
+// NOTE! Not yet done
+    detail::sockqueue_support::acceptClientsAndDequeue<T,DESER>(servsocket_,sep_,stop_server_);
   }
   // --------------------------------- private data
   // user specified state for queue
@@ -109,21 +100,21 @@ private:
   DESER const deser_;                    // de-serialiser
   std::size_t const maxclients_;         // max clients that can connect to this queue
   char const sep_;                       // message separator
-  bool const closeOnExit_;               // close fd on exit
 
-  // thread handling socket io stuff
-  std::thread thr_;
+  // state of interface to queue
+  bool deq_enabled_=true;                // is dequing enabled
 
   // server socket stuff
+  std::thread serv_thr_;                 // thread handling dequeing messages
   int servsocket_;                       // socket on which we are listening
   struct sockaddr_in serveraddr_;        // server address
   int yes_=1;                            // used for setting socket options
 
-  // mutex and cond variable managing queue of messages
-  mutable std::unique_ptr<std::mutex>mtx_;               // must be pointer since not movable
-  mutable std::unique_ptr<std::condition_variable>cond_; // must be pointer since not movable
-  bool deq_enabled_=true;                                // is dequing enabled
-
+  // variables shared across select loop and interface
+  Container q_;                                          // queues waiting to be de-queued
+  mutable std::unique_ptr<std::mutex>mtx_;               // protects queue where messages are stored
+  mutable std::unique_ptr<std::condition_variable>cond_; // ...
+  std::atomic<bool>stop_server_;                         // when set to true, then server will stop
 };
 }
 }
