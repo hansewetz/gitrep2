@@ -17,6 +17,7 @@ namespace asio=boost::asio;
 constexpr int listenport=7787;
 string const server{"localhost"};
 constexpr std::size_t maxclients{5};
+constexpr std::size_t tmoPollMs{1000};
 
 // ----- queue types -----
 
@@ -40,7 +41,7 @@ using queue_t=asio::sockdeq_serv_queue<qval_t,decltype(deserialiser)>;
 int main(){
   try{
     // create queues
-    queue_t qserv0(listenport,deserialiser,maxclients);
+    queue_t qserv0(listenport,deserialiser,maxclients,tmoPollMs);
     BOOST_LOG_TRIVIAL(debug)<<"server queue created ...";
 
 // NOTE!

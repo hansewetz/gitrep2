@@ -5,17 +5,13 @@
 // support functions
 #include "sockqueue_support.hpp"
 
-// NOTE!
-#include <algorithm>
-#include <iterator>
-
 // standard and boost stuff
 #include <atomic>
 #include <utility>
 #include <iostream>
 #include <string>
-#include <sstream>
 #include <vector>
+#include <stdexcept>
 #include <unordered_map>
 #include <unistd.h>
 #include <sys/select.h>
@@ -28,6 +24,7 @@
 
 // boost stuff
 #include <boost/lexical_cast.hpp>
+#include <boost/log/trivial.hpp>
 
 namespace boost{
 namespace asio{
@@ -68,7 +65,7 @@ int createListenSocket(int port,struct sockaddr_in&serveraddr,std::size_t maxcli
 int waitForClientConnect(int servsocket,struct sockaddr_in&serveraddr,struct sockaddr_in&clientaddr,std::size_t ms,boost::system::error_code&ec){
   int ret{-1};
 
-  // setup to listen on fd descriptor
+  // setup to listen on server file descriptor
   fd_set input;
   FD_ZERO(&input);
   FD_SET(servsocket,&input);
@@ -105,8 +102,8 @@ int waitForClientConnect(int servsocket,struct sockaddr_in&serveraddr,struct soc
 }
 // NOTE! Not yet done
 // read data and accept client connections in a select loop
-template<typename T,typename DESER>
-void acceptClientsAndDequeue(int servsocket,char sep,std::atomic<bool>&stop_server){
+template<typename F>
+void acceptClientsAndDequeue(int servsocket,char sep,std::size_t tmoPollMs,std::atomic<bool>&stop_server,F fcallback){
   // data structures tracking client fds and correpsonding data
   std::unordered_map<int,std::vector<char>>client_data;
 
@@ -123,12 +120,10 @@ void acceptClientsAndDequeue(int servsocket,char sep,std::atomic<bool>&stop_serv
       FD_SET(p.first,&input);
       maxfd=std::max(maxfd,p.first);
     }
-    // setup for timeout (ones we get a message we don't timeout)
-    // NOTE! Only for debug purpose
-    std::size_t ms{1000};
+    // setup poll intervall to check if we should stop select loop
     struct timeval tmo;
-    tmo.tv_sec=ms/1000;
-    tmo.tv_usec=(ms%1000)*1000;
+    tmo.tv_sec=tmoPollMs/1000;
+    tmo.tv_usec=(tmoPollMs%1000)*1000;
     
     // block on select - timeout if configured
     assert(maxfd!=-1);
@@ -136,42 +131,33 @@ void acceptClientsAndDequeue(int servsocket,char sep,std::atomic<bool>&stop_serv
 
     // check for error
     if(n<0){
-      // NOTE!
-      std::cout<<"<ERROR>: "<<std::strerror(errno)<<std::endl;
-      continue;
+      throw std::runtime_error(std::string("acceptClientsAndDequeue: ")+std::strerror(errno));
     }
     // check for tmo
     if(n==0){
-      // NOTE!
-      std::cout<<"<HEARTBEAT>"<<std::endl;
+      BOOST_LOG_TRIVIAL(trace)<<"acceptClientsAndDequeue: <tmo>";
       continue;
     }
     // check for client connecting
     if(FD_ISSET(servsocket,&input)){
-      // NOTE! Not yet done
-      std::cout<<"<CLIENT-CONNECT>"<<std::endl;
-
       // accept client connection
       // (if failure - continue)
       unsigned int addrlen;
       struct sockaddr_in clientaddr;
       int client_fd;
       if((client_fd=::accept(servsocket,(struct sockaddr*)&clientaddr,&addrlen))==-1){
-        // NOTE!
-        std::cout<<"<ERROR>: accept: "<<std::strerror(errno)<<std::endl;
+        BOOST_LOG_TRIVIAL(debug)<<"acceptClientsAndDequeue: failed accept()ing client connection: "<<std::strerror(errno);
         continue;
       }
       // set client fd to non blocking
       auto err=detail::queue_support::setFdNonblock(client_fd);
       if(err!=0){
-        // NOTE!
-        std::cout<<"<ERROR>: non-block: "<<std::strerror(errno)<<std::endl;
+        BOOST_LOG_TRIVIAL(debug)<<"acceptClientsAndDequeue: failed setting client socket ("<<client_fd<<") to non-blocking mode: "<<std::strerror(errno);
         detail::queue_support::eclose(client_fd,false);
         continue;
       }
       // add client connection to active clients
-      // NOTE!
-      std::cout<<"<CLIENT-ACCEPT> client_fd: "<<client_fd<<std::endl;
+      BOOST_LOG_TRIVIAL(trace)<<"acceptClientsAndDequeue: client socket ("<<client_fd<<") connected ...";
       client_data.insert(std::make_pair(client_fd,std::vector<char>{}));
     }
     // check for data on existing client connection
@@ -200,23 +186,23 @@ void acceptClientsAndDequeue(int servsocket,char sep,std::atomic<bool>&stop_serv
         if(stat!=1){
           // we have a real read error - remove client fd and close it
           // (no need to check for EWOULDBLOCK since we'll never block on client_fd)
-          // NOTE!
-          std::cout<<"<CLIENT-DISCONNECT> client_fd: "<<client_fd<<std::endl;
           detail::queue_support::eclose(client_fd,false);
           client_data.erase(client_fd);
+          BOOST_LOG_TRIVIAL(trace)<<"acceptClientsAndDequeue: client socket ("<<client_fd<<") disconnected ...";
           break;
         }
-        // save character just read
+        // save character just read and remember that we have read at least one character from client_fd this time around
         buf.push_back(c);
         firstTime=false;
 
-        // if we reached sep, send message including newline)
+        // if we reached sep deserialise data into an object and save
         if(c==sep){
-          // NOTE! deserialise data, insert object into container and clear buffer for fd_client
-          std::copy(buf.begin(),buf.end(),std::ostream_iterator<char>(std::cout));
-
-          // clear buffer
+          BOOST_LOG_TRIVIAL(debug)<<"acceptClientsAndDequeue: received queue item from client socket ("<<client_fd<<")";
+          // create stream and call callback function with stream
+          std::stringstream strm;
+          copy(buf.begin(),buf.end(),std::ostream_iterator<char>(strm));
           buf.clear();
+          fcallback(strm);
         }
       }
     }

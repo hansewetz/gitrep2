@@ -2,6 +2,7 @@
 
 #include <boost/asio_queue.hpp>
 #include <boost/log/trivial.hpp>
+#include <boost/lexical_cast.hpp>
 #include <string>
 #include <thread>
 #include <iostream>
@@ -17,6 +18,7 @@ namespace asio=boost::asio;
 constexpr int port=7787;
 string const server{"localhost"};
 constexpr std::size_t maxclients{5};
+constexpr std::size_t nmsg{3};
 
 // ----- queue types -----
 
@@ -48,14 +50,15 @@ int main(){
     BOOST_LOG_TRIVIAL(debug)<<"client queue created ...";
 
     // send a message on queue (will connect to server)
-    boost::system::error_code ec;
-    qclient.enq("Message from client 0",ec);
-    if(ec!=boost::system::error_code()){
-      BOOST_LOG_TRIVIAL(error)<<"failed sending message, ec: "<<ec;
-      exit(1);
+    for(std::size_t i=0;i<nmsg;++i){
+      boost::system::error_code ec;
+      string msg{string("Message from client ")+boost::lexical_cast<string>(i)};
+      qclient.enq(msg,ec);
+      if(ec!=boost::system::error_code()){
+        BOOST_LOG_TRIVIAL(error)<<"failed sending message, ec: "<<ec;
+        exit(1);
+      }
     }
-// NOTE!
-sleep(2);
   }
   catch(exception const&e){
     BOOST_LOG_TRIVIAL(error)<<"cought exception: "<<e.what();

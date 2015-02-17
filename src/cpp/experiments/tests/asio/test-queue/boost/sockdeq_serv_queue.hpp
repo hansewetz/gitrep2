@@ -2,7 +2,7 @@
 
 /* TODO:
 	- setup a clear line where attributes are used by both select and interface side
-	- design an interupt mechanism for rge select side (tmo+check done, an fd-pipe which select side listens on, ...)
+	- design an interupt mechanism for select side (tmo+check done, an fd-pipe which select side listens on, ...)
 	- potentially disable queue - not used disable dequeue
 
 HACKS:
@@ -45,8 +45,8 @@ public:
   constexpr static char NEWLINE='\n';
 
   // ctor
-  sockdeq_serv_queue(int port,DESER deser,std::size_t maxclients,char sep=NEWLINE):
-      port_(port),deser_(deser),maxclients_(maxclients),sep_{sep},
+  sockdeq_serv_queue(int port,DESER deser,std::size_t maxclients,std::size_t tmo_poll_ms,char sep=NEWLINE):
+      port_(port),deser_(deser),maxclients_(maxclients),tmo_poll_ms_(tmo_poll_ms),sep_{sep},
       mtx_{std::make_unique<std::mutex>()},cond_{std::make_unique<std::condition_variable>()},stop_server_(false){
     // spawn thread running socket io stuff
     serv_thr_=std::move(std::thread([&](){run_sock_serv();}));
@@ -86,19 +86,28 @@ public:
 
 private:
   // --------------------------------- private helper functions
+
+  // callback function creating an object from an istream
+  void createItem(std::istream&is){
+    // NOTE! Not yet done
+    std::string line;
+    std::getline(is,line);
+    std::cout<<line<<std::endl;
+  }
+  // function running select loop
   void run_sock_serv(){
     // create listening socket (server socket)
     servsocket_=detail::sockqueue_support::createListenSocket(port_,serveraddr_,maxclients_,&yes_);
 
     // accept client connections and dequeue messages
-// NOTE! Not yet done
-    detail::sockqueue_support::acceptClientsAndDequeue<T,DESER>(servsocket_,sep_,stop_server_);
+    detail::sockqueue_support::acceptClientsAndDequeue(servsocket_,sep_,tmo_poll_ms_,stop_server_,[&](std::istream&is){createItem(is);});
   }
   // --------------------------------- private data
   // user specified state for queue
   int port_;                             // port to listen on
   DESER const deser_;                    // de-serialiser
   std::size_t const maxclients_;         // max clients that can connect to this queue
+  std::size_t const tmo_poll_ms_;        // ms poll intervall for checking if queue should be stopped
   char const sep_;                       // message separator
 
   // state of interface to queue
