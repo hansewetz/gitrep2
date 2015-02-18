@@ -28,6 +28,9 @@ constexpr size_t tmo_between_send{10};
 constexpr int listenport=7787;
 string const server{"localhost"};
 
+// message separator
+constexpr char sep='|';
+
 // ----- queue types -----
 
 // aios io service
@@ -43,7 +46,7 @@ std::function<void(std::ostream&,qval_t const&)>serialiser=[](std::ostream&os,qv
 // de-serialize an object (notice: message boundaries are on '\n' characters)
 std::function<qval_t(istream&)>deserialiser=[](istream&is){
   string line;
-  getline(is,line);
+  getline(is,line,sep);
   return line;
 };
 // queue types
@@ -102,9 +105,9 @@ void qsender_waiter_handler(boost::system::error_code const&ec,asio::queue_sende
 int main(){
   try{
     // create queues
-    asio::sockclient_queue<qval_t,decltype(deserialiser),decltype(serialiser),qbase_t>qclient0(server,listenport,deserialiser,serialiser);
+    asio::sockclient_queue<qval_t,decltype(deserialiser),decltype(serialiser),qbase_t>qclient0(server,listenport,deserialiser,serialiser,sep);
     BOOST_LOG_TRIVIAL(debug)<<"client queue created ...";
-    asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser),qbase_t>qserv0(listenport,deserialiser,serialiser);
+    asio::sockserv_queue<qval_t,decltype(deserialiser),decltype(serialiser),qbase_t>qserv0(listenport,deserialiser,serialiser,sep);
     BOOST_LOG_TRIVIAL(debug)<<"server queue created ...";
 
     // test using base classes
