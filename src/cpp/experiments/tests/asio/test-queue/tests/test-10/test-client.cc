@@ -5,6 +5,7 @@
 #include <boost/lexical_cast.hpp>
 #include <string>
 #include <thread>
+#include <chrono>
 #include <iostream>
 #include <functional>
 #include <memory>
@@ -58,7 +59,8 @@ int main(){
         BOOST_LOG_TRIVIAL(error)<<"failed sending message, ec: "<<ec;
         exit(1);
       }
-      sleep(2);
+      // sleep for a little while
+      this_thread::sleep_for(std::chrono::milliseconds(10));
     }
   }
   catch(exception const&e){

@@ -1,12 +1,7 @@
 // (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015. All rights reserved.
 
-/* TODO:
-	- design an interupt mechanism for select side (tmo+check done, an fd-pipe which select side listens on, ...)
-	- potentially disable queue - not used disable dequeue
-*/
-
-#ifndef __SOCK_DEQ_SERV_QUEU_H__
-#define __SOCK_DEQ_SERV_QUEU_H__
+#ifndef __SOCK_DEQ_SERV_QUEUE_H
+#define __SOCK_DEQ_SERV_QUEUE_H
 #include "detail/queue_empty_base.hpp"
 #include "detail/sockqueue_support.hpp"
 #include <boost/asio/error.hpp>
@@ -31,6 +26,15 @@
 namespace boost{
 namespace asio{
 
+/*
+  The class implements a socket server queue.
+  Ones constructed the server queue runs a separate thread accepting and reading data from clients.
+  The thread terminates when the destructor is executed.
+  Currently there are no methods for stopping/starting the queue - even though it should not be difficult to implement
+
+  The queue is not designed/implemented in a very clever way - it's more of a brute firce implementation
+  Possibly the design and implementation should be re-thought.
+*/
 template<typename T,typename DESER,typename Base=detail::base::queue_empty_base<T>,typename Container=std::queue<T>>
 class sockdeq_serv_queue:public Base{
 public:
