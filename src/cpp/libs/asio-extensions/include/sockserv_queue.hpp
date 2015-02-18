@@ -14,10 +14,12 @@ TESTING:
 #include "detail/queue_empty_base.hpp"
 #include "detail/queue_support.hpp"
 #include "detail/fdqueue_support.hpp"
+#include "detail/sockqueue_support.hpp"
 #include <string>
 #include <utility>
 #include <iostream>
 #include <string>
+#include <mutex>
 #include <algorithm>
 #include <string.h>
 
@@ -25,9 +27,6 @@ TESTING:
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-
-// boost stuff
-#include <boost/lexical_cast.hpp>
 
 namespace boost{
 namespace asio{
@@ -47,7 +46,7 @@ public:
   sockserv_queue(int port,DESER deser,SERIAL serial,char sep=NEWLINE):
       port_(port),deser_(deser),serial_(serial),sep_{sep},closeOnExit_(true),mtx_{std::make_unique<std::mutex>()}{
     // start listening on socket
-    createListenSocket();
+    servsocket_=detail::sockqueue_support::createListenSocket(port_,serveraddr_,maxclients_,&yes_);
   }
   // copy ctor
   sockserv_queue(sockserv_queue const&)=delete;
@@ -195,7 +194,7 @@ private:
 
     // wait for client connection if needed
     if(state_==IDLE){
-      waitForClientConnect(ms,ec1);
+      clientsocket_=detail::sockqueue_support::waitForClientConnect(servsocket_,serveraddr_,clientaddr_,ms,ec1);
       if(ec1!=boost::system::error_code()){
         detail::queue_support::eclose(servsocket_,false);
         ec=ec1;
@@ -225,7 +224,7 @@ private:
 
     // wait for client connection if needed
     if(state_==IDLE){
-      waitForClientConnect(ms,ec1);
+      clientsocket_=detail::sockqueue_support::waitForClientConnect(servsocket_,serveraddr_,clientaddr_,ms,ec1);
       if(ec1!=boost::system::error_code()){
         detail::queue_support::eclose(servsocket_,false);
         ec=ec1;
@@ -249,77 +248,6 @@ private:
     // dummy return - will never reach here
     return false;
   }
-
-  // --------------------------------- helper functions
-  // (no state is managed here)
-
-  // create listen socket (throws exception if failure)
-  void createListenSocket(){
-    // we must be in state IDLE to be here
-    assert(state_==IDLE);
-
-    // get socket to listen on
-    if((servsocket_=socket(AF_INET,SOCK_STREAM,0))==-1){
-      throw std::runtime_error(std::string("sockserv_queue::createListenSocket: failed creating listening socket, errno: ")+boost::lexical_cast<std::string>(errno));
-    }
-    // set socket options for listning socket
-    if(setsockopt(servsocket_,SOL_SOCKET,SO_REUSEADDR,&yes_,sizeof(int))==-1){
-      throw std::runtime_error(std::string("sockserv_queue::createListenSocket: failed setting socket options, errno: ")+boost::lexical_cast<std::string>(errno));
-    }
-    // bind adddr/socket
-    serveraddr_.sin_family=AF_INET;
-    serveraddr_.sin_addr.s_addr=INADDR_ANY;
-    serveraddr_.sin_port=htons(port_);
-    memset(&(serveraddr_.sin_zero),'\0',8);
-    if(bind(servsocket_,(struct sockaddr*)&serveraddr_,sizeof(serveraddr_))==-1){
-      throw std::runtime_error(std::string("sockserv_queue::createListenSocket: failed binding socket to address, errno: ")+boost::lexical_cast<std::string>(errno));
-    }
-    // start listening on socket
-    if(listen(servsocket_,maxclients_)==-1){
-      throw std::runtime_error(std::string("sockserv_queue::createListenSocket: failed listening on socket, errno: ")+boost::lexical_cast<std::string>(errno));
-    }
-  }
-  // wait until a client connects and acept connection
-  // (if ms == 0, no timeout, we must be in state IDLE when being called0
-  void waitForClientConnect(std::size_t ms,boost::system::error_code&ec){
-    // we must be in state IDLE to be here
-    assert(state_==IDLE);
-
-    // setup to listen on fd descriptor
-    fd_set input;
-    FD_ZERO(&input);
-    FD_SET(servsocket_,&input);
-    int maxfd=servsocket_;
-
-    // setup for timeout (ones we get a message we don't timeout)
-    struct timeval tmo;
-    tmo.tv_sec=ms/1000;
-     tmo.tv_usec=(ms%1000)*1000;
-      
-    // block on select - timeout if configured
-    assert(maxfd!=-1);
-    int n=::select(++maxfd,&input,NULL,NULL,ms>0?&tmo:NULL);
-
-    // error
-    if(n<0){
-      ec=boost::system::error_code(errno,boost::system::get_posix_category());
-      return;
-    }
-    // tmo
-    if(n==0){
-      ec=boost::asio::error::timed_out;
-      return;
-    }
-    // client connected
-    unsigned int addrlen;
-    if((clientsocket_=::accept(servsocket_,(struct sockaddr*)&clientaddr_,&addrlen)) == -1){
-      ec=boost::system::error_code(errno,boost::system::get_posix_category());
-      return;
-    }
-    // no errors - client is now connected
-    ec=boost::system::error_code();
-  }
-
   // --------------------------------- private attributes
   // state object is in
   enum state_t{IDLE=0,CONNECTED=1,READING=2,WRITING=3};

@@ -96,6 +96,13 @@ int eclose(int fd,bool throwExcept){
   }
   return errno;
 }
+// set fd to non-blocking
+int setFdNonblock(int fd){
+  int flags=fcntl(fd,F_GETFL,0);
+  if(fcntl(fd, F_SETFL,flags|O_NONBLOCK)<0)return errno;
+  return 0;
+}
+
 }
 }
 }

@@ -21,7 +21,8 @@ test-libxml-tmx \
 asio \
 occi \
 junk \
-test-cpp-netlib
+test-cpp-netlib \
+test-base64
 
 
 #test-clucene \
