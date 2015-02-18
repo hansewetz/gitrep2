@@ -44,9 +44,15 @@ int main(){
     queue_t qserv0(listenport,deserialiser,maxclients,tmoPollMs);
     BOOST_LOG_TRIVIAL(debug)<<"server queue created ...";
 
-// NOTE!
-sleep(100);
-
+    // get items from queue
+    while(true){
+      boost::system::error_code ec;
+      BOOST_LOG_TRIVIAL(info)<<"waiting for message ...";
+      qserv0.wait_deq(ec);
+      BOOST_LOG_TRIVIAL(info)<<"got message ...";
+      auto p=qserv0.deq(ec);
+      BOOST_LOG_TRIVIAL(info)<<"dequed message: "<<p.second;
+    }
   }
   catch(exception const&e){
     BOOST_LOG_TRIVIAL(error)<<"cought exception: "<<e.what();

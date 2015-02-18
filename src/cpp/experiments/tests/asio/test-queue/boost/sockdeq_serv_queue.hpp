@@ -1,15 +1,8 @@
 // (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015. All rights reserved.
 
 /* TODO:
-	- setup a clear line where attributes are used by both select and interface side
 	- design an interupt mechanism for select side (tmo+check done, an fd-pipe which select side listens on, ...)
 	- potentially disable queue - not used disable dequeue
-
-HACKS:
-------
-	- we set a flag to tell server loop to stop - that is, we must have a timer going in server which checks the flag each time the timer pops
-	- must protect q_ when moving an object
-	- we must have better recovery mechanisms
 */
 
 #ifndef __SOCK_DEQ_SERV_QUEU_H__
@@ -81,23 +74,73 @@ public:
     ec=boost::system::error_code();
     return ret;
   }
-
-  // NOTE! Not yet done
-
+  // dequeue a message (return.first == false if deq() was disabled) - timeout if waiting too long
+  std::pair<bool,T>timed_deq(std::size_t ms,boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    bool tmo=!cond_->wait_for(lock,std::chrono::milliseconds(ms),[&](){return !deq_enabled_||!q_.empty();});
+  
+    // if deq is disabled or queue is empty return or timeout
+    if(tmo){
+      ec=boost::asio::error::timed_out;
+       return std::make_pair(false,T{});
+    }
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return std::make_pair(false,T{});
+    }
+    // check if we have a message
+    std::pair<bool,T>ret{std::make_pair(true,q_.front())};
+    q_.pop();
+    cond_->notify_all();
+    ec=boost::system::error_code();
+    return ret;
+  }
+  // wait until we can retrieve a message from queue
+  bool wait_deq(boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    cond_->wait(lock,[&](){return !deq_enabled_||q_.size()>0;});
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
+    cond_->notify_all();
+    ec=boost::system::error_code();
+    return true;
+  }
+  // wait until we can retrieve a message from queue -  timeout if waiting too long
+  bool timed_wait_deq(std::size_t ms,boost::system::error_code&ec){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    bool tmo=!cond_->wait_for(lock,std::chrono::milliseconds(ms),[&](){return !deq_enabled_||q_.size()>0;});
+    if(tmo){
+      ec=boost::asio::error::timed_out;
+      return false;
+    }
+    if(!deq_enabled_){
+      ec=boost::asio::error::operation_aborted;
+      return false;
+    }
+    cond_->notify_all();
+    ec=boost::system::error_code();
+    return true;
+  }
+  // cancel deq operations (will also release blocking threads)
+  void disable_deq(bool disable){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    deq_enabled_=!disable;
+    cond_->notify_all();
+  }
 private:
   // --------------------------------- private helper functions
 
   // callback function creating an object from an istream
   void createItem(std::istream&is){
-    // NOTE! Not yet done
-    std::string line;
-    std::getline(is,line);
-    std::cout<<line<<std::endl;
+    std::unique_lock<std::mutex>lock(*mtx_);
+    q_.push(deser_(is));
+    cond_->notify_all();
   }
   // function running select loop
   void run_sock_serv(){
     // create listening socket (server socket)
-// NOTE! Must make use of maxclients ...
     servsocket_=detail::sockqueue_support::createListenSocket(port_,serveraddr_,maxclients_,&yes_);
 
     // accept client connections and dequeue messages
