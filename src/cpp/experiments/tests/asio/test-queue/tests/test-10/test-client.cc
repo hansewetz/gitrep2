@@ -18,7 +18,7 @@ namespace asio=boost::asio;
 constexpr int port=7787;
 string const server{"localhost"};
 constexpr std::size_t maxclients{5};
-constexpr std::size_t nmsg{3};
+constexpr std::size_t nmsg{100};
 
 // ----- queue types -----
 
@@ -58,6 +58,7 @@ int main(){
         BOOST_LOG_TRIVIAL(error)<<"failed sending message, ec: "<<ec;
         exit(1);
       }
+      sleep(2);
     }
   }
   catch(exception const&e){
