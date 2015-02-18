@@ -97,6 +97,7 @@ private:
   // function running select loop
   void run_sock_serv(){
     // create listening socket (server socket)
+// NOTE! Must make use of maxclients ...
     servsocket_=detail::sockqueue_support::createListenSocket(port_,serveraddr_,maxclients_,&yes_);
 
     // accept client connections and dequeue messages
