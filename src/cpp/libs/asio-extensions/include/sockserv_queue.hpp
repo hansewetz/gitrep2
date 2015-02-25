@@ -235,7 +235,7 @@ private:
     // client connected - write message
     if(state_==CONNECTED){
       state_=WRITING;
-      T ret{detail::queue_support::sendwait<T,SERIAL>(clientsocket_,t,0,ec1,sendMsg,sep_,serial_)};
+      detail::queue_support::sendwait<T,SERIAL>(clientsocket_,t,0,ec1,sendMsg,sep_,serial_);
       if(ec1!=boost::system::error_code()&&ec1!=boost::asio::error::timed_out){
         detail::queue_support::eclose(servsocket_,false);
         state_=IDLE;

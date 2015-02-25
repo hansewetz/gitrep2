@@ -91,6 +91,11 @@ public:
     }
     return detail::queue_support::sendwait<T,SERIAL>(fdwrite_,nullptr,ms,ec,false,sep_,serial_);
   }
+  // cancel enq operations (will also release blocking threads)
+  void disable_enq(bool disable){
+    std::unique_lock<std::mutex>lock(*mtx_);
+    enq_enabled_=!disable;
+  }
   // get underlying file descriptor
   int getfd()const{
     return fdwrite_;

@@ -17,8 +17,6 @@
 #include <string.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/interprocess/sync/named_mutex.hpp>
-#include <boost/interprocess/sync/named_condition.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -31,34 +29,9 @@ namespace detail{
 namespace queue_support{
 
 namespace fs=boost::filesystem;
-namespace ipc=boost::interprocess;
 namespace io=boost::iostreams;
 
 namespace{
-// get all filenames in time sorted order in a dircetory
-std::list<fs::path>getTsOrderedFiles(fs::path const&dir){
-  // need a map with key=time, value=filename
-  typedef std::multimap<time_t,fs::path>time_file_map_t;
-  time_file_map_t time_file_map;
-
-  // insert all files together with time as key into map
-  fs::directory_iterator dir_end_iter;
-  for(fs::directory_iterator it(dir);it!=dir_end_iter;++it){
-    if(!is_regular_file(*it))continue;
-    time_t time_stamp(last_write_time(*it));
-    time_file_map.insert(time_file_map_t::value_type(time_stamp,*it));
-  }
-  // create return list and return
-  std::list<fs::path>ret;
-  for(auto const&f:time_file_map)ret.push_back(f.second);
-  return ret;
-}
-// remove lock variables for queue
-// (name of lock variables are computed from the path to the queue directory)
-void removeLockVariables(std::string const&name){
-  ipc::named_mutex::remove(name.c_str());
-  ipc::named_condition::remove(name.c_str());
-}
 // helper function for serialising an object
 // (lock must be held when calling this function)
 template<typename T,typename SERIAL>

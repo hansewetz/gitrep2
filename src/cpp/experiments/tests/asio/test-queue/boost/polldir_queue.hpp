@@ -276,8 +276,10 @@ public:
     return qname_;
   }
   // remove lock variables for queue
-  static void removeLockVariables(std::string const&qname){
-    detail::queue_support::removeLockVariables(qname);
+  // (name of lock variables are computed from the path to the queue directory)
+  static void removeLockVariables(std::string const&name){
+    ipc::named_mutex::remove(name.c_str());
+    ipc::named_condition::remove(name.c_str());
   }
 private:
   // check if queue is full
@@ -303,7 +305,7 @@ private:
   void fillCacheNolock(bool forceRefill)const{
     // trash cache and re-read if 'forceRefill' is set or if cache is empty
     if(forceRefill||cache_.empty()){
-      std::list<fs::path>sortedFiles{detail::queue_support::getTsOrderedFiles(dir_)};
+      std::list<fs::path>sortedFiles{getTsOrderedFiles()};
       cache_.swap(sortedFiles);
     }
   }
@@ -333,7 +335,24 @@ private:
     cache_.pop_front();
     return ret;
   }
+  // get all filenames in time sorted order in a dircetory
+  std::list<fs::path>getTsOrderedFiles()const{
+    // need a map with key=time, value=filename
+    typedef std::multimap<time_t,fs::path>time_file_map_t;
+    time_file_map_t time_file_map;
 
+    // insert all files together with time as key into map
+    fs::directory_iterator dir_end_iter;
+    for(fs::directory_iterator it(dir_);it!=dir_end_iter;++it){
+      if(!is_regular_file(*it))continue;
+      time_t time_stamp(last_write_time(*it));
+      time_file_map.insert(time_file_map_t::value_type(time_stamp,*it));
+    }
+    // create return list and return
+    std::list<fs::path>ret;
+    for(auto const&f:time_file_map)ret.push_back(f.second);
+    return ret;
+  }
   // user specified characteristics of queue
   std::string qname_;
   std::size_t maxsize_;
