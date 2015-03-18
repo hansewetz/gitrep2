@@ -34,8 +34,10 @@ void siftup(vector<int>&v){
   while(true){
     if(c==0)break;
     int p=c/2;
-    if(v[c]<v[p])swap(v[c],v[p]);
-    c=p;
+    if(v[c]<v[p]){
+      swap(v[c],v[p]);
+      c=p;
+    }else break;
   }
 }
 int main(){

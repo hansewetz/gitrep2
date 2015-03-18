@@ -134,7 +134,7 @@ void acceptClientsAndDequeue(int servsocket,char sep,std::size_t tmoPollMs,std::
     }
     // check for tmo
     if(n==0){
-      BOOST_LOG_TRIVIAL(trace)<<"acceptClientsAndDequeue: <tmo>";
+      //BOOST_LOG_TRIVIAL(trace)<<"acceptClientsAndDequeue: <tmo>";
       continue;
     }
     // check for client connecting
@@ -145,18 +145,18 @@ void acceptClientsAndDequeue(int servsocket,char sep,std::size_t tmoPollMs,std::
       struct sockaddr_in clientaddr;
       int client_fd;
       if((client_fd=::accept(servsocket,(struct sockaddr*)&clientaddr,&addrlen))==-1){
-        BOOST_LOG_TRIVIAL(trace)<<"acceptClientsAndDequeue: failed accept()ing client connection: "<<std::strerror(errno);
+        //BOOST_LOG_TRIVIAL(trace)<<"acceptClientsAndDequeue: failed accept()ing client connection: "<<std::strerror(errno);
         continue;
       }
       // set client fd to non blocking
       auto err=detail::queue_support::setFdNonblock(client_fd);
       if(err!=0){
-        BOOST_LOG_TRIVIAL(error)<<"acceptClientsAndDequeue: failed setting client socket ("<<client_fd<<") to non-blocking mode: "<<std::strerror(errno);
+        //BOOST_LOG_TRIVIAL(error)<<"acceptClientsAndDequeue: failed setting client socket ("<<client_fd<<") to non-blocking mode: "<<std::strerror(errno);
         detail::queue_support::eclose(client_fd,false);
         continue;
       }
       // add client connection to active clients
-      BOOST_LOG_TRIVIAL(trace)<<"acceptClientsAndDequeue: client socket ("<<client_fd<<") connected ...";
+      //BOOST_LOG_TRIVIAL(trace)<<"acceptClientsAndDequeue: client socket ("<<client_fd<<") connected ...";
       client_data.insert(std::make_pair(client_fd,std::vector<char>{}));
     }
     // check for data on existing client connection
@@ -188,7 +188,7 @@ void acceptClientsAndDequeue(int servsocket,char sep,std::size_t tmoPollMs,std::
           // (no need to check for EWOULDBLOCK since we'll never block on client_fd)
           detail::queue_support::eclose(client_fd,false);
           fd2erase.push_back(client_fd);
-          BOOST_LOG_TRIVIAL(trace)<<"acceptClientsAndDequeue: client socket ("<<client_fd<<") disconnected ...";
+          //BOOST_LOG_TRIVIAL(trace)<<"acceptClientsAndDequeue: client socket ("<<client_fd<<") disconnected ...";
           break;
         }
         // save character just read and remember that we have read at least one character from client_fd this time around
@@ -197,7 +197,7 @@ void acceptClientsAndDequeue(int servsocket,char sep,std::size_t tmoPollMs,std::
 
         // if we reached sep deserialise data into an object and save
         if(c==sep){
-          BOOST_LOG_TRIVIAL(trace)<<"acceptClientsAndDequeue: received queue item from client socket ("<<client_fd<<")";
+          //BOOST_LOG_TRIVIAL(trace)<<"acceptClientsAndDequeue: received queue item from client socket ("<<client_fd<<")";
           // create stream and call callback function with stream
           std::stringstream strm;
           copy(buf.begin(),buf.end(),std::ostream_iterator<char>(strm));

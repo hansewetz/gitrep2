@@ -196,7 +196,7 @@ private:
     if(state_==IDLE){
       clientsocket_=detail::sockqueue_support::waitForClientConnect(servsocket_,serveraddr_,clientaddr_,ms,ec1);
       if(ec1!=boost::system::error_code()){
-        detail::queue_support::eclose(servsocket_,false);
+        if(ec1!=boost::asio::error::timed_out)detail::queue_support::eclose(servsocket_,false);
         ec=ec1;
         return std::make_pair(false,T{});
       }
@@ -207,8 +207,12 @@ private:
       state_=READING;
       T ret{detail::queue_support::recvwait<T,DESER>(clientsocket_,ms,ec1,getMsg,sep_,deser_)};
       if(ec1!=boost::system::error_code()){
-        detail::queue_support::eclose(servsocket_,false);
-        state_=IDLE;
+        if(ec1!=boost::asio::error::timed_out){
+          detail::queue_support::eclose(servsocket_,false);
+          state_=IDLE;
+        }else{
+          state_=CONNECTED;
+        }
         ec=ec1;
         return std::make_pair(false,T{});
       }
@@ -226,7 +230,7 @@ private:
     if(state_==IDLE){
       clientsocket_=detail::sockqueue_support::waitForClientConnect(servsocket_,serveraddr_,clientaddr_,ms,ec1);
       if(ec1!=boost::system::error_code()){
-        detail::queue_support::eclose(servsocket_,false);
+        if(ec1!=boost::asio::error::timed_out)detail::queue_support::eclose(servsocket_,false);
         ec=ec1;
         return false;
       }
@@ -237,8 +241,12 @@ private:
       state_=WRITING;
       detail::queue_support::sendwait<T,SERIAL>(clientsocket_,t,0,ec1,sendMsg,sep_,serial_);
       if(ec1!=boost::system::error_code()&&ec1!=boost::asio::error::timed_out){
-        detail::queue_support::eclose(servsocket_,false);
-        state_=IDLE;
+        if(ec1!=boost::asio::error::timed_out){
+          detail::queue_support::eclose(servsocket_,false);
+          state_=IDLE;
+        }else{
+          state_=CONNECTED;
+        }
         ec=ec1;
         return false;
       }

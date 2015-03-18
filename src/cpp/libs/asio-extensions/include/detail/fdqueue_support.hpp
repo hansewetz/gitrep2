@@ -14,11 +14,8 @@ namespace boost{
 namespace asio{
 namespace detail{
 namespace queue_support{
-
 namespace fs=boost::filesystem;
-namespace ipc=boost::interprocess;
 namespace io=boost::iostreams;
-
 namespace{
 
 // deserialise an object from an fd stream
