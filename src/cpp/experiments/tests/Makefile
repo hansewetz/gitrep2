@@ -18,6 +18,7 @@ ibm-task \
 test-boost-regexp \
 test-xml-beans \
 test-libxml-tmx \
+test-strip-xml-tags \
 asio \
 occi \
 junk \
