@@ -17,19 +17,17 @@ bool xmlStringIsEmpty(xmlChar const*str){
   }
   return len==0;
 }
-// We assume the file is correctly formatted so we can run a state machine and not get any invalid state transitions.
-// (that is, we assume the following: <source> ... </source> ... <target> ... </target>)
+// process current node
+// (print node if it is text)
 static void processNode(xmlTextReaderPtr reader){
-  const xmlChar*name,*value;
-
   // tags to look for.
   const xmlChar*text_tag=(unsigned char*)"#text";
 
   // get name of target together with value
-  name=xmlTextReaderConstName(reader);
-  value=xmlTextReaderConstValue(reader);
+  const xmlChar*name=xmlTextReaderConstName(reader);
+  const xmlChar*value=xmlTextReaderConstValue(reader);
 
-  // check what state we are in, and print source/target or target/source separator or new line
+  // if we have a non-empty text node print it
   if(!xmlStrcmp(name,text_tag)&&value!=nullptr&&!xmlStringIsEmpty(value)){
     cout<<value;
   }
