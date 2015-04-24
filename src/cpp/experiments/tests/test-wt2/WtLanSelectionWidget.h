@@ -14,7 +14,7 @@
 class WtLanSelectionWidget:public Wt::WContainerWidget{
 public:
   // ctors etc.
-  WtLanSelectionWidget(std::vector<std::string>const&srclans,std::vector<std::string>const&trglans,Wt::WContainerWidget*parent=0);
+  WtLanSelectionWidget(std::vector<std::pair<std::string,std::string>>const&lanpairs,Wt::WContainerWidget*parent=0);
   WtLanSelectionWidget(WtLanSelectionWidget const&)=delete;
   WtLanSelectionWidget(WtLanSelectionWidget&&)=delete;
   WtLanSelectionWidget&operator=(WtLanSelectionWidget const&)=delete;
@@ -33,18 +33,15 @@ public:
   Wt::Signal<void>&selectionChanged();
 private:
   // state
-  Wt::WComboBox*srcList_;
-  Wt::WComboBox*trgList_;
+  Wt::WComboBox*lanlist_;
 
   // signal
   Wt::Signal<void>selectionChanged_;
 
   // source and target language
-  std::vector<std::string>const srclans_;
-  std::vector<std::string>const trglans_;
+  std::vector<std::pair<std::string,std::string>>lanpairs_;
 
   // event handlers
-  void srcListChanged();
-  void trgListChanged();
+  void lanlistSelectionChanged();
 };
 #endif

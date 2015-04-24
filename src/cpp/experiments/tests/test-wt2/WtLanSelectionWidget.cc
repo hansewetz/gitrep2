@@ -6,14 +6,13 @@
 #include <Wt/WText>
 #include <Wt/WComboBox>
 #include <Wt/WHBoxLayout>
-#include <Wt/WVBoxLayout>
 #pragma GCC diagnostic pop
 using namespace Wt;
 using namespace std;
 
 // ctor
-WtLanSelectionWidget::WtLanSelectionWidget(vector<string>const&srclans,vector<string>const&trglans,Wt::WContainerWidget*parent):
-    WContainerWidget(parent),selectionChanged_(this),srclans_(srclans),trglans_(trglans){
+WtLanSelectionWidget::WtLanSelectionWidget(vector<pair<string,string>>const&lanpairs,Wt::WContainerWidget*parent):
+    WContainerWidget(parent),selectionChanged_(this),lanpairs_(lanpairs){
 
   // wrapper around language selection
   WContainerWidget*lanSelectionContainer=new WContainerWidget(this);
@@ -21,56 +20,37 @@ WtLanSelectionWidget::WtLanSelectionWidget(vector<string>const&srclans,vector<st
   lanSelectionContainer->setLayout(lanSelection);
 
   // setup source selection
-  WContainerWidget*srcContainer=new WContainerWidget();
-  WVBoxLayout*srcbox=new WVBoxLayout();
-  srcContainer->setLayout(srcbox);
-  srcbox->addWidget(new WText("source"));
-  srcList_=new WComboBox();
-  for(auto const&lan:srclans_)srcList_->addItem(lan);
-  srcList_->setCurrentIndex(0);
-  srcList_->changed().connect(this,&WtLanSelectionWidget::srcListChanged);
-  srcbox->addWidget(srcList_);
-  lanSelection->addWidget(srcContainer);
-
-  // setup target selection
-  WContainerWidget*trgContainer=new WContainerWidget();
-  WVBoxLayout*trgbox=new WVBoxLayout();
-  trgContainer->setLayout(trgbox);
-  trgbox->addWidget(new WText("target"));
-  trgList_=new WComboBox();
-  for(auto const&lan:trglans_)trgList_->addItem(lan);
-  trgList_->setCurrentIndex(0);
-  trgList_->changed().connect(this,&WtLanSelectionWidget::trgListChanged);
-  trgbox->addWidget(trgList_);
-  lanSelection->addWidget(trgContainer);
+  WContainerWidget*lanContainer=new WContainerWidget();
+  lanlist_=new WComboBox();
+  for(auto const&lp:lanpairs)lanlist_->addItem(lp.first+"-"+lp.second);
+  lanlist_->setCurrentIndex(0);
+  lanlist_->changed().connect(this,&WtLanSelectionWidget::lanlistSelectionChanged);
+  lanContainer->addWidget(lanlist_);
+  lanSelection->addWidget(lanContainer);
 }
 // get source language
 string WtLanSelectionWidget::srclan()const{
-  return srcList_->currentText().narrow();
+  string lanpair=lanlist_->currentText().narrow();
+  return lanpair.substr(0,2);
 }
 // get target language
 string WtLanSelectionWidget::trglan()const{
-  return trgList_->currentText().narrow();
+  string lanpair=lanlist_->currentText().narrow();
+  return lanpair.substr(3,2);
 }
 // enable widget
 void WtLanSelectionWidget::enable(){
-  srcList_->enable();
-  trgList_->enable();
+  lanlist_->enable();
 }
 // disable widget
 void WtLanSelectionWidget::disable(){
-  srcList_->disable();
-  trgList_->disable();
+  lanlist_->disable();
 }
 // signal emitter when src/target languages changes
 Signal<void>&WtLanSelectionWidget::selectionChanged(){
   return selectionChanged_;
 }
 // source selection changed
-void WtLanSelectionWidget::srcListChanged(){
-  selectionChanged_.emit();
-}
-// target selection changed
-void WtLanSelectionWidget::trgListChanged(){
+void WtLanSelectionWidget::lanlistSelectionChanged(){
   selectionChanged_.emit();
 }

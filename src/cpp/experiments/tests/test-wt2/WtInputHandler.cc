@@ -16,7 +16,7 @@ using namespace Wt;
 using namespace std;
 
 // ctor
-WtInputHandler::WtInputHandler(size_t pollms,vector<string>const&srclans,vector<string>const&trglans,const WEnvironment&env):WApplication(env){
+WtInputHandler::WtInputHandler(size_t pollms,vector<pair<string,string>>const&lanpairs,const WEnvironment&env):WApplication(env){
   setTitle("xlate-web");       
 
   // main container
@@ -24,7 +24,7 @@ WtInputHandler::WtInputHandler(size_t pollms,vector<string>const&srclans,vector<
   pageContainer->resize(400,WLength::Auto);
 
   // create language selection widget
-  lanSelectionWidget_=new WtLanSelectionWidget(srclans,trglans,pageContainer);
+  lanSelectionWidget_=new WtLanSelectionWidget(lanpairs,pageContainer);
   lanSelectionWidget_->selectionChanged().connect(this,&WtInputHandler::lanSelectionChanged);
   
   // create area for text
@@ -105,15 +105,8 @@ void WtInputHandler::processStateChange(){
     lanSelectionWidget_->disable();
     trgTextArea_->setText("");
   }else{
-    // make sure language selection is enabled
+    // make sure language selection and translation button is enabled
     lanSelectionWidget_->enable();
-
-    // check if we have a valid language pair
-    string srclan=lanSelectionWidget_->srclan();
-    string trglan=lanSelectionWidget_->trglan();
-
-    // enable/disable TRANSLATE button
-    if(srclan!=trglan)translateButton_->enable();
-    else translateButton_->disable();
+    translateButton_->enable();
   }
 }

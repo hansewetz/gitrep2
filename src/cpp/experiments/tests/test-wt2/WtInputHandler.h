@@ -13,12 +13,11 @@
 class WtInputHandler:public Wt::WApplication{
 public:
   // ctor
-  WtInputHandler(std::size_t pollms,std::vector<std::string>const&srclans,std::vector<std::string>const&trglans,const Wt::WEnvironment&env);
+  WtInputHandler(std::size_t pollms,std::vector<std::pair<std::string,std::string>>const&lanpairs,const Wt::WEnvironment&env);
 private:
   // widgets
   WtLanSelectionWidget*lanSelectionWidget_;
   Wt::WPushButton*translateButton_;
-  Wt::WFileUpload*fileUploader_;
   Wt::WTextArea*srcTextArea_;
   Wt::WTextArea*trgTextArea_;
   Wt::WTimer*timer_;

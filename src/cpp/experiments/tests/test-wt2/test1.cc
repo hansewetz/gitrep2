@@ -10,13 +10,12 @@ using namespace Wt;
 using namespace std;
 
 // NOTE!
-vector<string>srclans{"en","sv","nb","el"};
-vector<string>trglans{"en","sv","nb","el"};
+vector<pair<string,string>>lanpairs{{"en","sv"},{"sv","en"},{"en","nb"},{"en","el"}};
 size_t pollms{2000};
 
 // create app.
 WApplication *createApplication(const WEnvironment& env){
-  return new WtInputHandler(pollms,srclans,trglans,env);
+  return new WtInputHandler(pollms,lanpairs,env);
 }
 // main.
 int main(int argc,char**argv){
