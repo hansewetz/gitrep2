@@ -6,6 +6,8 @@
 #pragma GCC diagnostic pop
 #include <string>
 #include <vector>
+#include <thread>
+
 using namespace Wt;
 using namespace std;
 
@@ -19,7 +21,6 @@ WApplication *createApplication(const WEnvironment& env){
 }
 // main.
 int main(int argc,char**argv){
-return WRun(argc,argv,&createApplication);
+  std::thread thr([&](){WRun(argc,argv,&createApplication);});
+  thr.join();
 }
-
-
