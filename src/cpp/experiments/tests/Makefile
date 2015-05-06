@@ -8,7 +8,7 @@ thread \
 exceptions \
 memory \
 knuth \
-system-programming test-SFINAE test-atomic test-boost-log test-buffered-fd-channel \
+system-programming test-SFINAE test-atomic test-boost-log test-boost-filelog test-buffered-fd-channel \
 test-callable test-const test-fd-stream test-for test-future test-index-list test-lambda test-lambda-recurse test-libssh-ftp \
 test-list-add-numbers test-numeric-limit test-packaged-task test-param-passing \
 test-readlines test-sqlite test-streambuf test-tuplet-apply test-type-printer \
@@ -23,13 +23,14 @@ asio \
 occi \
 junk \
 test-cpp-netlib \
-test-base64
+test-base64 \
+test-wt1 \
+test-wt2
 
 
 #test-clucene \
 # test-c++1y
 # test-poco-ftp
-# test-wt1
 
 include $(PROJECT_ROOT)/env/makerules/subdirs.rules
 
