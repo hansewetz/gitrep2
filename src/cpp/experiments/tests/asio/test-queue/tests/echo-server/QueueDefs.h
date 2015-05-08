@@ -1,3 +1,5 @@
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015. All rights reserved.
+
 #ifndef __QUEUE_H__
 #define __QUEUE_H__
 #include <boost/asio_queue.hpp>
@@ -8,7 +10,7 @@
 using QueueValueType=std::string;
 
 // message separator
-constexpr char sep='\n';
+constexpr char sep='|';
 
 // serialiser/de-serialiser
 auto msgDeserializer=[](std::istream&is)->QueueValueType{std::string line;getline(is,line,sep);return line;};
