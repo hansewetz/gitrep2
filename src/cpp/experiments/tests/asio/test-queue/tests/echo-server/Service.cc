@@ -15,7 +15,7 @@ Service::Service(asio::io_service&ios,shared_ptr<QueueDeqBase>qserviceReceive,sh
 }
 // handler for receiving message
 void Service::recvHandler(boost::system::error_code const&ec,QueueValueType const&msg){
-  // send message to output queue
+  // echo back message to output queue
   boost::system::error_code ec1;
   serviceSender_->sync_enq(msg,ec1);
 
