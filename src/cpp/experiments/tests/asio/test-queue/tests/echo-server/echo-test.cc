@@ -37,28 +37,28 @@ void timerHandler(boost::system::error_code const&ec,boost::asio::deadline_timer
 }
 // echo test program
 int main(){
-  // create queues
+  // --- create queues
 #ifdef MEM_QUEUES
   queue_struct queues=createMemQueues();
 #else
   queue_struct queues=createIpQueues();
 #endif
 
-  // create client sender/receiver
+  // --- create service
+  Service serv(::ios,queues.qserviceReceive,queues.qserviceReply);
+
+  // --- create client sender/receiver
   clientSender=make_shared<QueueSender>(::ios,queues.qclientRequest.get());
   clientReceiver=make_shared<QueueListener>(::ios,queues.qclientReceive.get());
 
-  // create service
-  Service serv(::ios,queues.qserviceReceive,queues.qserviceReply);
-
-  // setup client event handler
+  // --- setup client event handler
   clientReceiver->async_deq(clientMsgHandler);
 
-  // setup timer for sending messages
+  // --- setup timer for sending messages
   boost::asio::deadline_timer timer(::ios,boost::posix_time::milliseconds(1000));
   timer.async_wait(std::bind(timerHandler,_1,&timer));
 
-  // start asio event loop
+  // --- start asio event loop
   ::ios.run();
 }
 
