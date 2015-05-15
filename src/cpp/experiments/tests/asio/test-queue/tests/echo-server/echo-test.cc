@@ -38,11 +38,9 @@ void timerHandler(boost::system::error_code const&ec,boost::asio::deadline_timer
 // echo test program
 int main(){
   // --- create queues
-#ifdef MEM_QUEUES
-  queue_struct queues=createMemQueues();
-#else
-  queue_struct queues=createIpQueues();
-#endif
+//  queue_struct queues=createMemQueues();
+//  queue_struct queues=createAsymetricIpQueues();
+  queue_struct queues=createSymetricIpQueues();
 
   // --- create service
   Service serv(::ios,queues.qserviceReceive,queues.qserviceReply);

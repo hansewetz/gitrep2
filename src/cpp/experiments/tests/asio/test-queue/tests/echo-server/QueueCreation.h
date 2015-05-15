@@ -26,8 +26,8 @@ queue_struct createMemQueues(){
   ret.qclientReceive=q2;
   return ret;
 }
-// create ip queues
-queue_struct createIpQueues(){
+// create ip queues with Service being both an ip-server and ip-client
+queue_struct createAsymetricQueues(){
   queue_struct ret;
 
   // ip data
@@ -41,6 +41,23 @@ queue_struct createIpQueues(){
 
   ret.qserviceReply=std::make_shared<SockClientQueue>(server,clientListenPort,msgDeserializer,msgSerializer,sep);
   ret.qclientReceive=std::make_shared<SockServQueue>(clientListenPort,msgDeserializer,msgSerializer,sep);
+  return ret;
+}
+// create ip queues with Service being both an ip-server and ip-client
+queue_struct createSymetricIpQueues(){
+  queue_struct ret;
+
+  // ip data
+  constexpr int serverListenPortReceive=7787;
+  constexpr int serverListenPortSend=7788;
+  std::string const server{"localhost"};
+
+  // create 4 queues
+  ret.qserviceReceive=std::make_shared<SockServQueue>(serverListenPortReceive,msgDeserializer,msgSerializer,sep);
+  ret.qserviceReply=std::make_shared<SockServQueue>(serverListenPortSend,msgDeserializer,msgSerializer,sep);
+
+  ret.qclientRequest=std::make_shared<SockClientQueue>(server,serverListenPortReceive,msgDeserializer,msgSerializer,sep);
+  ret.qclientReceive=std::make_shared<SockClientQueue>(server,serverListenPortSend,msgDeserializer,msgSerializer,sep);
   return ret;
 }
 #endif
