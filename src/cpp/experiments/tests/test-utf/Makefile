@@ -1,7 +1,4 @@
-all:
-	make -f Makefile1
-	make -f Makefile2
+SUBDIRS = utf-test1 utf-utils
 
-clean:
-	make -f Makefile1 clean
-	make -f Makefile2 clean
+include $(PROJECT_ROOT)/env/makerules/subdirs.rules
+
