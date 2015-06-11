@@ -26,7 +26,7 @@ static bool utf8_cu_is_trail_byte(utf8_cu_t u){
 }
 // Get length of encoded codepoint.
 // (assumes cp is valid)
-static size_t utf8_cp_encode_length(cp_t cp){
+static std::size_t utf8_cp_encode_length(cp_t cp){
   if(cp<0x80)return 1;
   if(cp<0x0800)return 2;
   if(cp<0x010000)return 3;
@@ -35,7 +35,7 @@ static size_t utf8_cp_encode_length(cp_t cp){
 // Check if cp is overlong.
 template<typename Difference_type>
 static bool utf8_cp_is_overlong(b2::cp_t cp,Difference_type len){
-  if(utf8_cp_encode_length(cp)==static_cast<size_t>(len))return false;
+  if(utf8_cp_encode_length(cp)==static_cast<std::size_t>(len))return false;
   return true;
 }
 // Get length of code units by checking leading byte.

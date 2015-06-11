@@ -12,7 +12,7 @@ struct utf8_tag{};
 template<typename EncodeTag>struct unicode_type_traits;
 template<typename EncodeTag,typename InputIt>struct unicode_function_traits;
 
-// NOTE! Should not delegate in these functions - instead, just iumplement the function here.
+// NOTE! Should not delegate in these functions - instead, just implement the function here.
 //	 move these two structures into utf8_detail.hpp and just iplement them inline
 
 // ----------- (traits) utf8 traits.
@@ -21,11 +21,11 @@ template<>struct unicode_type_traits<utf8_tag>{
   typedef detail::utf8_cu_t cu_t;
 
   // Get maximum number of code units when encoding a codepoint.
-  const static size_t max_cu_encode_length=4;
+  const static std::size_t max_cu_encode_length=4;
 };
 template<typename InputIt>struct unicode_function_traits<utf8_tag,InputIt>{
   // Get number of code units to encode a code point.
-  static size_t cp_encode_length(cp_t cp){return detail::utf8_cp_encode_length(cp);}
+  static std::size_t cp_encode_length(cp_t cp){return detail::utf8_cp_encode_length(cp);}
 
   // Get #code units used to encode code point given first code unit of encoding.
   // (notice that the function returns error_invalid_lead_byte if the byte is not a start byte)

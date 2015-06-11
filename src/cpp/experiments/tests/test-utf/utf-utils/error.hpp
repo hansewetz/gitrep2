@@ -3,6 +3,8 @@
 #ifndef __ERROR_HPP__
 #define __ERROR_HPP__
 #include<iostream>
+#include<string>
+#include<iostream>
 #include<stdexcept>
 namespace b2{
 

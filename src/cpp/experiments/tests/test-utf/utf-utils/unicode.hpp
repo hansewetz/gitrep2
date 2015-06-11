@@ -53,8 +53,8 @@ unicode_encode<EncodeTag,OutputIt>make_unicode_encode(OutputIt it){
 // ---------- (function object) Get #cus to encode a cp.
 // (throws exception)
 template<typename EncodeTag>
-struct unicode_cp_encode_length:std::unary_function<cp_t,size_t>{
-  size_t operator()(cp_t cp)const{
+struct unicode_cp_encode_length:std::unary_function<cp_t,std::size_t>{
+  std::size_t operator()(cp_t cp)const{
     if(!detail::uni_is_valid_cp(cp))throw uni_exception(uni_error(uni_error::error_invalid_cp));
     return unicode_function_traits<EncodeTag,detail::dummy_iterator>::cp_encode_length(cp);
   }
@@ -62,9 +62,9 @@ struct unicode_cp_encode_length:std::unary_function<cp_t,size_t>{
 // ---------- (function object) Get #cus given first cu of encoded cp.
 // (throws exeception)
 template<typename EncodeTag>
-struct unicode_cu_encode_length:std::unary_function<typename unicode_type_traits<EncodeTag>::cu_t,size_t>{
-  size_t operator()(typename unicode_type_traits<EncodeTag>::cu_t val)const{
-    size_t cu_len;
+struct unicode_cu_encode_length:std::unary_function<typename unicode_type_traits<EncodeTag>::cu_t,std::size_t>{
+  std::size_t operator()(typename unicode_type_traits<EncodeTag>::cu_t val)const{
+    std::size_t cu_len;
     uni_error::error_code err=unicode_function_traits<EncodeTag,detail::dummy_iterator>::cu_encode_length(val,cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     return cu_len;
@@ -82,12 +82,12 @@ struct unicode_cp_is_valid:std::unary_function<cp_t,bool>{
 // ------------------------------------------
 
 // NOTE! Testing.
-class reference_proxy{
+class cp_reference_proxy{
 public:
-  explicit reference_proxy():cp_(0){}
-  explicit reference_proxy(cp_t cp):cp_(cp){}
-  explicit reference_proxy(reference_proxy const&other):cp_(other.cp_){}
-  reference_proxy const&operator=(reference_proxy const&other){cp_=other.cp_;return*this;}
+  explicit cp_reference_proxy():cp_(0){}
+  explicit cp_reference_proxy(cp_t cp):cp_(cp){}
+  explicit cp_reference_proxy(cp_reference_proxy const&other):cp_(other.cp_){}
+  cp_reference_proxy const&operator=(cp_reference_proxy const&other){cp_=other.cp_;return*this;}
   operator cp_t const&()const{return cp_;}
 private:
   cp_t cp_;
@@ -99,7 +99,7 @@ private:
 // (if failing to increment the iterator stays at the bad code point and throws an exception)
 // NOTE! Reference type is a cp_t const which is not correct. Probably we should return a proxy instead.
 template<typename EncodeTag,typename BidirectionalIt>
-class const_unicode_iterator:public boost::iterator_facade<const_unicode_iterator<EncodeTag,BidirectionalIt>,cp_t const,boost::bidirectional_traversal_tag,reference_proxy const&>{
+class const_unicode_iterator:public boost::iterator_facade<const_unicode_iterator<EncodeTag,BidirectionalIt>,cp_t const,boost::bidirectional_traversal_tag,cp_reference_proxy const&>{
 public:
   typedef typename std::iterator_traits<BidirectionalIt>::difference_type difference_type;
   BOOST_CONCEPT_ASSERT((boost::BidirectionalIterator<BidirectionalIt>));
@@ -128,7 +128,7 @@ private:
   bool equal(const_unicode_iterator<EncodeTag,BidirectionalIt>const&other)const{
     return cur_==other.cur_;
   }
-  reference_proxy const&dereference()const{
+  cp_reference_proxy const&dereference()const{
     if(!dirty_)return last_cp_;
     difference_type cu_len;
     cp_t tmp_cp;
@@ -136,11 +136,11 @@ private:
     uni_error::error_code err=unicode_function_traits<EncodeTag,BidirectionalIt>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<BidirectionalIt>::type>(0),&cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     dirty_=false;
-    return last_cp_=reference_proxy(tmp_cp);
+    return last_cp_=cp_reference_proxy(tmp_cp);
   }
 private:
   BidirectionalIt cur_;
-  mutable reference_proxy last_cp_;
+  mutable cp_reference_proxy last_cp_;
   mutable bool dirty_;
 };
 // make a unicode const bidirectional iterator.
@@ -173,7 +173,8 @@ private:
     if(!dirty_)return last_cp_;
     cp_t tmp_cp;
     InputIt tmp_it(cur_);
-    uni_error::error_code err=unicode_function_traits<EncodeTag,InputIt>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<InputIt>::type>(0),static_cast<typename std::iterator_traits<InputIt>::difference_type*>(0));
+    uni_error::error_code err=unicode_function_traits<EncodeTag,InputIt>::decode(
+      tmp_it,tmp_cp,static_cast<typename std::add_pointer<InputIt>::type>(0),static_cast<typename std::iterator_traits<InputIt>::difference_type*>(0));
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=tmp_cp;
@@ -248,7 +249,7 @@ public:
   typedef b2::cp_t& reference;
   typedef b2::cp_t const& const_reference;
   typedef typename Container::difference_type difference_type;
-  typedef size_t size_type;
+  typedef std::size_t size_type;
 
   // non standard typedefs.
   typedef EncodeTag encode_type;
@@ -378,13 +379,13 @@ public:
   }
   // remove first codepoint in container.
   void pop_front(){
-    size_t cp_len(unicode_cp_encode_length<EncodeTag>()(front()));
-    for(size_t i=0;i<cp_len;++i)cont_.pop_front();
+    std::size_t cp_len(unicode_cp_encode_length<EncodeTag>()(front()));
+    for(std::size_t i=0;i<cp_len;++i)cont_.pop_front();
   }
   // remove last codepoint from container.
   void pop_back(){
-    size_t cp_len(unicode_cp_encode_length<EncodeTag>()(back()));
-    for(size_t i=0;i<cp_len;++i)cont_.pop_back();
+    std::size_t cp_len(unicode_cp_encode_length<EncodeTag>()(back()));
+    for(std::size_t i=0;i<cp_len;++i)cont_.pop_back();
   }
 
 // NOTE! Implement acess functions.
@@ -416,7 +417,7 @@ public:
   }
   // insert the same codepoint multiple times.
   void insert(const_iterator position,size_type n,value_type const&cp){
-    for(size_t i=0;i<n;++i)position=insert(position,cp);
+    for(std::size_t i=0;i<n;++i)position=insert(position,cp);
   }
   // insert values from a range before - only enable if parameters are input iteratots to avoid overload garbling with
   // insert(iterator,n,cp).
@@ -484,8 +485,9 @@ template <class T, class A = std::allocator<T>>
 std::swap(X<T,A>&, X<T,A>&); //optional
 */
 
-// some typedefs simplifying the code.
-typedef unicode_container<b2::utf8_tag,std::deque<b2::unicode_type_traits<b2::utf8_tag>::cu_t>>utf8string;
+// some UTF8 typedefs simplifying the code.
+using utf8string=unicode_container<b2::utf8_tag,std::deque<b2::unicode_type_traits<b2::utf8_tag>::cu_t>>;
+
 // NOTE! Typedef for other encodings.
 //  ...
 

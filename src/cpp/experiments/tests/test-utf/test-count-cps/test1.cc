@@ -2,27 +2,26 @@
 
 #include "unicode.hpp"
 #include<map>
-#include<algorithm>
-#include<numeric>
-#include<sstream>
+#include<iterator>
+#include<iostream>
 using namespace std;
 using namespace b2;
 
 // Main test program.
 int main(){
-  // create stream iterators iterating
-  istreambuf_iterator<char>sstr_it_begin(cin);
-  istreambuf_iterator<char>sstr_it_end;
+  // create stream iterators reading from stdin
+  istream_iterator<char>begin{cin};
+  istream_iterator<char>end;
 
-  // create utf8 iterators
-  auto uit_begin(make_unicode_input_iterator<utf8_tag>(sstr_it_begin));
-  auto uit_end(make_unicode_input_iterator<utf8_tag>(sstr_it_end));
+  // create utf8 iterators input stream iterators
+  auto uit_begin(make_unicode_input_iterator<utf8_tag>(begin));
+  auto uit_end(make_unicode_input_iterator<utf8_tag>(end));
 
-  // count #of code quotation code points
+  // save count for each unicode code point
   map<cp_t,size_t>count;
   for(auto it=uit_begin;it!=uit_end;++it)count[*it]++;
 
-  // print out quote counts
+  // print unicode code point together with corresponding count
   for(auto const&p:count){
     cout<<"cp: 0x"<<hex<<p.first<<", count: "<<dec<<p.second<<endl;
   }
