@@ -6,7 +6,7 @@
 #include "types.hpp"
 #include "error.hpp"
 #include<iterator>
-#include<boost/type_traits.hpp>
+#include<type_traits>
 namespace b2{
 namespace detail{
 
@@ -60,7 +60,7 @@ inline static bool check_range_error(InputIt&it,InputIt&end){
 }
 // Convert code unit to code point.
 template<typename InputIt>
-static b2::uni_error::error_code utf8_decode(InputIt&it,b2::cp_t&cp,typename boost::add_pointer<InputIt>::type end,typename std::iterator_traits<InputIt>::difference_type*cu_len){
+static b2::uni_error::error_code utf8_decode(InputIt&it,b2::cp_t&cp,typename std::add_pointer<InputIt>::type end,typename std::iterator_traits<InputIt>::difference_type*cu_len){
   typedef typename std::iterator_traits<InputIt>::difference_type difference_type;
   difference_type tmp_len;
   b2::uni_error::error_code err=utf8_cu_encode_length(*it,tmp_len);

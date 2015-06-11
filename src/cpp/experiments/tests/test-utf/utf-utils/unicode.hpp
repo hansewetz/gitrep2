@@ -10,21 +10,18 @@
 #include<iostream>
 #include<iterator>
 #include<functional>
+#include<type_traits>
+#include<deque>
 #include<boost/iterator/iterator_facade.hpp>
 #include<boost/iterator/reverse_iterator.hpp>
 #include<boost/function_output_iterator.hpp>
-#include<boost/type_traits.hpp>
-#include<boost/mpl/assert.hpp>
-#include<boost/utility/enable_if.hpp>
-#include<boost/type_traits.hpp>
 #include<boost/concept_check.hpp>
-#include<boost/container/deque.hpp>
 namespace b2{
 
 // -----------------------------------------------
 //      Forward declarations.
 // -----------------------------------------------
-template<typename EncodeTag,typename Container=boost::container::deque<typename b2::unicode_type_traits<EncodeTag>::cu_t> >
+template<typename EncodeTag,typename Container=std::deque<typename b2::unicode_type_traits<EncodeTag>::cu_t>>
 class unicode_container;
 
 // -----------------------------------------------
@@ -136,7 +133,7 @@ private:
     difference_type cu_len;
     cp_t tmp_cp;
     BidirectionalIt tmp_it(cur_);
-    uni_error::error_code err=unicode_function_traits<EncodeTag,BidirectionalIt>::decode(tmp_it,tmp_cp,static_cast<typename boost::add_pointer<BidirectionalIt>::type>(0),&cu_len);
+    uni_error::error_code err=unicode_function_traits<EncodeTag,BidirectionalIt>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<BidirectionalIt>::type>(0),&cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=reference_proxy(tmp_cp);
@@ -176,7 +173,7 @@ private:
     if(!dirty_)return last_cp_;
     cp_t tmp_cp;
     InputIt tmp_it(cur_);
-    uni_error::error_code err=unicode_function_traits<EncodeTag,InputIt>::decode(tmp_it,tmp_cp,static_cast<typename boost::add_pointer<InputIt>::type>(0),static_cast<typename std::iterator_traits<InputIt>::difference_type*>(0));
+    uni_error::error_code err=unicode_function_traits<EncodeTag,InputIt>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<InputIt>::type>(0),static_cast<typename std::iterator_traits<InputIt>::difference_type*>(0));
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=tmp_cp;
@@ -193,10 +190,10 @@ unicode_input_iterator<EncodeTag,InputIt>make_unicode_input_iterator(InputIt it)
 }
 // ---------- (iterator) output iterator converting code points to code units.
 template<typename EncodeTag,typename OutputIt>
-class unicode_output_iterator:public boost::function_output_iterator<unicode_encode<EncodeTag,OutputIt> >{
+class unicode_output_iterator:public boost::function_output_iterator<unicode_encode<EncodeTag,OutputIt>>{
   BOOST_CONCEPT_ASSERT((boost::OutputIterator<OutputIt,b2::cp_t>));
 public:
-  unicode_output_iterator(OutputIt it):boost::function_output_iterator<unicode_encode<EncodeTag,OutputIt> >(make_unicode_encode<EncodeTag>(it)){}
+  unicode_output_iterator(OutputIt it):boost::function_output_iterator<unicode_encode<EncodeTag,OutputIt>>(make_unicode_encode<EncodeTag>(it)){}
 };
 // make a unicode output iterator.
 template<typename EncodeTag,typename OutputIt>
@@ -215,7 +212,7 @@ template<typename EncodeTag,typename InputIt>
 InputIt unicode_validate_encoding(InputIt first,InputIt last,uni_error*uerr){
   typedef typename std::iterator_traits<InputIt>::value_type value_type;
   typedef typename std::iterator_traits<InputIt>::difference_type difference_type;
-  BOOST_MPL_ASSERT((boost::is_integral<value_type>));
+  BOOST_MPL_ASSERT((std::is_integral<value_type>));
   BOOST_MPL_ASSERT_RELATION(sizeof(value_type),==,sizeof(typename unicode_type_traits<EncodeTag>::cu_t));
   BOOST_CONCEPT_ASSERT((boost::InputIterator<InputIt>));
   
@@ -426,7 +423,7 @@ public:
   // NOTE! Should enable only if iterator, not disable - but don't have an is_input_iterator'.
   //       Need this to avoid overload problems with insert(position, n, cp).
   template<typename InputIt>
-  void insert(const_iterator position,InputIt first,InputIt last,typename boost::disable_if<boost::is_integral<InputIt>,enabler>::type=enabler()){
+  void insert(const_iterator position,InputIt first,InputIt last,typename std::enable_if<!std::is_integral<InputIt>::value,enabler>::type=enabler()){
     for(;first!=last;++first)position=insert(position++,*first);
   }
 // NOTE! For C++0x11
@@ -483,12 +480,12 @@ public:
   container_type const&base_cont()const{return cont_;}
 };
 /*
-template <class T, class A = std::allocator<T> >
+template <class T, class A = std::allocator<T>>
 std::swap(X<T,A>&, X<T,A>&); //optional
 */
 
 // some typedefs simplifying the code.
-typedef unicode_container<b2::utf8_tag,boost::container::deque<b2::unicode_type_traits<b2::utf8_tag>::cu_t> >utf8string;
+typedef unicode_container<b2::utf8_tag,std::deque<b2::unicode_type_traits<b2::utf8_tag>::cu_t>>utf8string;
 // NOTE! Typedef for other encodings.
 //  ...
 
