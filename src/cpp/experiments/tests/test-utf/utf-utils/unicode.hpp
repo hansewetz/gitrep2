@@ -77,6 +77,8 @@ struct unicode_cp_is_valid:std::unary_function<cp_t,bool>{
   }
 };
 
+// NOTE! Add 'unicode_cu_is_valid', bool operator()(typename unicode_type_traits<EncodeTag>::cu_t ???
+
 // ------------------------------------------
 //            Iterators 
 // ------------------------------------------

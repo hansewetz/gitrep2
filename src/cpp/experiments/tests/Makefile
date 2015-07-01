@@ -25,7 +25,8 @@ junk \
 test-cpp-netlib \
 test-base64 \
 test-wt1 \
-test-wt2
+test-wt2 \
+test-icu
 
 
 #test-clucene \

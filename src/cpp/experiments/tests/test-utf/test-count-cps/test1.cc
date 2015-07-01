@@ -13,13 +13,13 @@ int main(){
   istream_iterator<char>begin{cin};
   istream_iterator<char>end;
 
-  // create utf8 iterators input stream iterators
-  auto uit_begin(make_unicode_input_iterator<utf8_tag>(begin));
-  auto uit_end(make_unicode_input_iterator<utf8_tag>(end));
+  // create utf8 iterators from input stream iterators
+  auto it8_begin(make_unicode_input_iterator<utf8_tag>(begin));
+  auto it8_end(make_unicode_input_iterator<utf8_tag>(end));
 
   // save count for each unicode code point
   map<cp_t,size_t>count;
-  for(auto it=uit_begin;it!=uit_end;++it)count[*it]++;
+  for(auto it=it8_begin;it!=it8_end;++it)count[*it]++;
 
   // print unicode code point together with corresponding count
   for(auto const&p:count){

@@ -10,9 +10,9 @@ namespace detail{
 typedef char*dummy_iterator;
 
 // ----------- Internal constants.
-const b2::uint32_t UNI_MAX_CP=0x0010FFFFu;
-const b2::uint32_t UNI_UTF16_LEAD_SURROGATE_MIN=0x0000D800u;
-const b2::uint32_t UNI_UTF16_TRAIL_SURROGATE_MAX=0x0000DFFFu;
+const b2::cp_t UNI_MAX_CP=0x0010FFFFu;
+const b2::cp_t UNI_UTF16_LEAD_SURROGATE_MIN=0x0000D800u;
+const b2::cp_t UNI_UTF16_TRAIL_SURROGATE_MAX=0x0000DFFFu;
 
 // ----------- Internal general utilities.
 // Check if a code point is valid.
