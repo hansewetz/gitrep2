@@ -11,7 +11,7 @@ struct utf8_tag{};
 
 // ----------- (traits) base unicode_traits structure.
 template<typename EncodeTag>struct unicode_type_traits;
-template<typename EncodeTag,typename InputIt>struct unicode_function_traits;
+template<typename EncodeTag>struct unicode_function_traits;
 
 // NOTE! Should not delegate in these functions - instead, just implement the function here.
 //	 move these two structures into utf8_detail.hpp and just iplement them inline
@@ -24,7 +24,7 @@ template<>struct unicode_type_traits<utf8_tag>{
   // Get maximum number of code units when encoding a codepoint.
   const static std::size_t max_cu_encode_length=4;
 };
-template<typename InputIt>struct unicode_function_traits<utf8_tag,InputIt>{
+template<>struct unicode_function_traits<utf8_tag>{
   // Get number of code units to encode a code point.
   static std::size_t cp_encode_length(cp_t cp){return detail::utf8_cp_encode_length(cp);}
 
@@ -34,12 +34,11 @@ template<typename InputIt>struct unicode_function_traits<utf8_tag,InputIt>{
   static uni_error::error_code cu_encode_length(unicode_type_traits<utf8_tag>::cu_t u,DifferenceType&diff){
     return detail::utf8_cu_encode_length(u,diff);
   }
-
   // Convert a seqeuence of code units to a code point.
+  template<typename InputIt>
   static uni_error::error_code decode(InputIt&it,cp_t&cp,typename std::add_pointer<InputIt>::type end,typename std::iterator_traits<InputIt>::difference_type&cu_len){
     return detail::utf8_decode(it,cp,end,cu_len);
   }
-
   // Convert a code point to a sequence of code units.
   template<typename OutputIt>
   static uni_error::error_code encode(cp_t cp,OutputIt&it){

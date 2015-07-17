@@ -6,9 +6,6 @@
 namespace b2{
 namespace detail{
 
-// ----------- Dummy iterator when needed to supply one.
-using dummy_iterator=char*;
-
 // ----------- Internal constants.
 const b2::cp_t UNI_MAX_CP=0x0010FFFFu;
 const b2::cp_t UNI_UTF16_LEAD_SURROGATE_MIN=0x0000D800u;

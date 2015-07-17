@@ -36,7 +36,7 @@ class unicode_encode:public std::unary_function<cp_t,OutputIt>{
 public:
   unicode_encode(OutputIt it):it_(it){}
   OutputIt&operator()(cp_t cp){
-    uni_error::error_code err=unicode_function_traits<EncodeTag,b2::detail::dummy_iterator>::encode(cp,it_);
+    uni_error::error_code err=unicode_function_traits<EncodeTag>::encode(cp,it_);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     return it_;
   }
@@ -55,7 +55,7 @@ template<typename EncodeTag>
 struct unicode_cp_encode_length:std::unary_function<cp_t,std::size_t>{
   std::size_t operator()(cp_t cp)const{
     if(!detail::uni_is_valid_cp(cp))throw uni_exception(uni_error(uni_error::error_invalid_cp));
-    return unicode_function_traits<EncodeTag,detail::dummy_iterator>::cp_encode_length(cp);
+    return unicode_function_traits<EncodeTag>::cp_encode_length(cp);
   }
 };
 // ---------- (function object) Get #cus given first cu of encoded cp.
@@ -64,7 +64,7 @@ template<typename EncodeTag>
 struct unicode_cu_encode_length:std::unary_function<typename unicode_type_traits<EncodeTag>::cu_t,std::size_t>{
   std::size_t operator()(typename unicode_type_traits<EncodeTag>::cu_t val)const{
     std::size_t cu_len;
-    uni_error::error_code err=unicode_function_traits<EncodeTag,detail::dummy_iterator>::cu_encode_length(val,cu_len);
+    uni_error::error_code err=unicode_function_traits<EncodeTag>::cu_encode_length(val,cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     return cu_len;
   }
@@ -116,14 +116,14 @@ private:
   friend class boost::iterator_core_access;
   void increment(){
     difference_type cu_len;
-    uni_error::error_code err=unicode_function_traits<EncodeTag,BidirectionalIt>::cu_encode_length(*cur_,cu_len);
+    uni_error::error_code err=unicode_function_traits<EncodeTag>::cu_encode_length(*cur_,cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     std::advance(cur_,cu_len);
     dirty_=true;
   }
   void decrement(){
     difference_type cu_len;
-    while(unicode_function_traits<EncodeTag,BidirectionalIt>::cu_encode_length(*--cur_,cu_len)==uni_error::error_invalid_lead_byte);
+    while(unicode_function_traits<EncodeTag>::cu_encode_length(*--cur_,cu_len)==uni_error::error_invalid_lead_byte);
     dirty_=true;
   }
   bool equal(const_unicode_iterator<EncodeTag,BidirectionalIt>const&other)const{
@@ -134,7 +134,7 @@ private:
     difference_type cu_len;
     cp_t tmp_cp;
     BidirectionalIt tmp_it(cur_);
-    uni_error::error_code err=unicode_function_traits<EncodeTag,BidirectionalIt>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<BidirectionalIt>::type>(0),cu_len);
+    uni_error::error_code err=unicode_function_traits<EncodeTag>::template decode<BidirectionalIt>(tmp_it,tmp_cp,static_cast<typename std::add_pointer<BidirectionalIt>::type>(0),cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=cp_reference_proxy(tmp_cp);
@@ -175,8 +175,7 @@ private:
     cp_t tmp_cp;
     InputIt tmp_it(cur_);
     typename std::iterator_traits<InputIt>::difference_type cu_len;
-    uni_error::error_code err=unicode_function_traits<EncodeTag,InputIt>::decode(
-      tmp_it,tmp_cp,static_cast<typename std::add_pointer<InputIt>::type>(0),cu_len);
+    uni_error::error_code err=unicode_function_traits<EncodeTag>::template decode<InputIt>(tmp_it,tmp_cp,static_cast<typename std::add_pointer<InputIt>::type>(0),cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=tmp_cp;
@@ -223,7 +222,7 @@ InputIt unicode_validate_encoding(InputIt first,InputIt last,uni_error&uerr){
     cp_t tmp_cp;
     InputIt tmp_it(last);
     difference_type cu_len;
-    uni_error::error_code err=unicode_function_traits<EncodeTag,InputIt>::decode(tmp_it,tmp_cp,&last,cu_len);
+    uni_error::error_code err=unicode_function_traits<EncodeTag>::template decode<InputIt>(tmp_it,tmp_cp,&last,cu_len);
     if(err!=uni_error::no_error){
       uerr=uni_error(err);
       return first;
