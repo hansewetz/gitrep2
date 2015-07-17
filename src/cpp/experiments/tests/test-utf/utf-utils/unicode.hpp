@@ -87,7 +87,7 @@ class cp_reference_proxy{
 public:
   explicit cp_reference_proxy():cp_(0){}
   explicit cp_reference_proxy(cp_t cp):cp_(cp){}
-  explicit cp_reference_proxy(cp_reference_proxy const&other):cp_(other.cp_){}
+  explicit cp_reference_proxy(cp_reference_proxy const&other)=default;
   cp_reference_proxy const&operator=(cp_reference_proxy const&other){cp_=other.cp_;return*this;}
   operator cp_t const&()const{return cp_;}
 private:
@@ -134,7 +134,7 @@ private:
     difference_type cu_len;
     cp_t tmp_cp;
     BidirectionalIt tmp_it(cur_);
-    uni_error::error_code err=unicode_function_traits<EncodeTag>::template decode<BidirectionalIt>(tmp_it,tmp_cp,static_cast<typename std::add_pointer<BidirectionalIt>::type>(0),cu_len);
+    uni_error::error_code err=unicode_function_traits<EncodeTag>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<BidirectionalIt>::type>(0),cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=cp_reference_proxy(tmp_cp);
@@ -175,7 +175,7 @@ private:
     cp_t tmp_cp;
     InputIt tmp_it(cur_);
     typename std::iterator_traits<InputIt>::difference_type cu_len;
-    uni_error::error_code err=unicode_function_traits<EncodeTag>::template decode<InputIt>(tmp_it,tmp_cp,static_cast<typename std::add_pointer<InputIt>::type>(0),cu_len);
+    uni_error::error_code err=unicode_function_traits<EncodeTag>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<InputIt>::type>(0),cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=tmp_cp;
@@ -222,7 +222,7 @@ InputIt unicode_validate_encoding(InputIt first,InputIt last,uni_error&uerr){
     cp_t tmp_cp;
     InputIt tmp_it(last);
     difference_type cu_len;
-    uni_error::error_code err=unicode_function_traits<EncodeTag>::template decode<InputIt>(tmp_it,tmp_cp,&last,cu_len);
+    uni_error::error_code err=unicode_function_traits<EncodeTag>::decode(tmp_it,tmp_cp,&last,cu_len);
     if(err!=uni_error::no_error){
       uerr=uni_error(err);
       return first;
