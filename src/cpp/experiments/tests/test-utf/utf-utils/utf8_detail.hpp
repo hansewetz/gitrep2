@@ -13,7 +13,7 @@ namespace detail{
 // NOTE! Possibly get rid of b2:: everywhere.
 
 // ----------- UTF8 stuff.
-typedef b2::uint8_t utf8_cu_t;
+using utf8_cu_t=b2::uint8_t;
 
 // Check if byte is a trailing byte.
 static bool utf8_cu_is_trail_byte(utf8_cu_t u){
@@ -60,8 +60,8 @@ inline static bool check_range_error(InputIt&it,InputIt&end){
 }
 // Convert code unit to code point.
 template<typename InputIt>
-static b2::uni_error::error_code utf8_decode(InputIt&it,b2::cp_t&cp,typename std::add_pointer<InputIt>::type end,typename std::iterator_traits<InputIt>::difference_type*cu_len){
-  typedef typename std::iterator_traits<InputIt>::difference_type difference_type;
+static b2::uni_error::error_code utf8_decode(InputIt&it,b2::cp_t&cp,typename std::add_pointer<InputIt>::type end,typename std::iterator_traits<InputIt>::difference_type&cu_len){
+  using difference_type=typename std::iterator_traits<InputIt>::difference_type;
   difference_type tmp_len;
   b2::uni_error::error_code err=utf8_cu_encode_length(*it,tmp_len);
   if(err)return err;
@@ -105,7 +105,7 @@ static b2::uni_error::error_code utf8_decode(InputIt&it,b2::cp_t&cp,typename std
   // check that cp is valid and that is not encoded with too many bytes,
   if(uni_is_valid_cp(cp)==false)return b2::uni_error::error_invalid_cp;
   if(utf8_cp_is_overlong(cp,tmp_len))return b2::uni_error::error_overlong_cp;
-  if(cu_len)*cu_len=tmp_len;
+  cu_len=tmp_len;
   return b2::uni_error::no_error;
 }
 

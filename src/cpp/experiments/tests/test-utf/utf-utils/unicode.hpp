@@ -5,7 +5,6 @@
 #include"types.hpp"
 #include"error.hpp"
 #include"detail.hpp"
-#include"utf8_detail.hpp"
 #include"traits.hpp"
 #include<iostream>
 #include<iterator>
@@ -37,7 +36,7 @@ class unicode_encode:public std::unary_function<cp_t,OutputIt>{
 public:
   unicode_encode(OutputIt it):it_(it){}
   OutputIt&operator()(cp_t cp){
-    uni_error::error_code err=unicode_function_traits<EncodeTag,OutputIt>::encode(cp,it_);
+    uni_error::error_code err=unicode_function_traits<EncodeTag,b2::detail::dummy_iterator>::encode(cp,it_);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     return it_;
   }
@@ -103,7 +102,7 @@ private:
 template<typename EncodeTag,typename BidirectionalIt>
 class const_unicode_iterator:public boost::iterator_facade<const_unicode_iterator<EncodeTag,BidirectionalIt>,cp_t const,boost::bidirectional_traversal_tag,cp_reference_proxy const&>{
 public:
-  typedef typename std::iterator_traits<BidirectionalIt>::difference_type difference_type;
+  using difference_type=typename std::iterator_traits<BidirectionalIt>::difference_type;
   BOOST_CONCEPT_ASSERT((boost::BidirectionalIterator<BidirectionalIt>));
 
   // ctor.
@@ -135,7 +134,7 @@ private:
     difference_type cu_len;
     cp_t tmp_cp;
     BidirectionalIt tmp_it(cur_);
-    uni_error::error_code err=unicode_function_traits<EncodeTag,BidirectionalIt>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<BidirectionalIt>::type>(0),&cu_len);
+    uni_error::error_code err=unicode_function_traits<EncodeTag,BidirectionalIt>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<BidirectionalIt>::type>(0),cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=cp_reference_proxy(tmp_cp);
@@ -175,8 +174,9 @@ private:
     if(!dirty_)return last_cp_;
     cp_t tmp_cp;
     InputIt tmp_it(cur_);
+    typename std::iterator_traits<InputIt>::difference_type cu_len;
     uni_error::error_code err=unicode_function_traits<EncodeTag,InputIt>::decode(
-      tmp_it,tmp_cp,static_cast<typename std::add_pointer<InputIt>::type>(0),static_cast<typename std::iterator_traits<InputIt>::difference_type*>(0));
+      tmp_it,tmp_cp,static_cast<typename std::add_pointer<InputIt>::type>(0),cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=tmp_cp;
@@ -212,9 +212,9 @@ unicode_output_iterator<EncodeTag,OutputIt>make_unicode_output_iterator(OutputIt
 // ---------- (algorithm) Validate encoding of a range of cus.
 // (returns iterator pointing to failed code unit or end iterator if no error)
 template<typename EncodeTag,typename InputIt>
-InputIt unicode_validate_encoding(InputIt first,InputIt last,uni_error*uerr){
-  typedef typename std::iterator_traits<InputIt>::value_type value_type;
-  typedef typename std::iterator_traits<InputIt>::difference_type difference_type;
+InputIt unicode_validate_encoding(InputIt first,InputIt last,uni_error&uerr){
+  using value_type=typename std::iterator_traits<InputIt>::value_type;
+  using difference_type=typename std::iterator_traits<InputIt>::difference_type;
   BOOST_MPL_ASSERT((std::is_integral<value_type>));
   BOOST_MPL_ASSERT_RELATION(sizeof(value_type),==,sizeof(typename unicode_type_traits<EncodeTag>::cu_t));
   BOOST_CONCEPT_ASSERT((boost::InputIterator<InputIt>));
@@ -223,9 +223,9 @@ InputIt unicode_validate_encoding(InputIt first,InputIt last,uni_error*uerr){
     cp_t tmp_cp;
     InputIt tmp_it(last);
     difference_type cu_len;
-    uni_error::error_code err=unicode_function_traits<EncodeTag,InputIt>::decode(tmp_it,tmp_cp,&last,&cu_len);
+    uni_error::error_code err=unicode_function_traits<EncodeTag,InputIt>::decode(tmp_it,tmp_cp,&last,cu_len);
     if(err!=uni_error::no_error){
-      if(uerr)*uerr=uni_error(err);
+      uerr=uni_error(err);
       return first;
     }
     std::advance(first,cu_len);
@@ -246,28 +246,28 @@ private:
   struct enabler{};
 public:
   // standard typedefs.
-  typedef typename Container::allocator_type allocator_type;
-  typedef b2::cp_t value_type; 
-  typedef b2::cp_t& reference;
-  typedef b2::cp_t const& const_reference;
-  typedef typename Container::difference_type difference_type;
-  typedef std::size_t size_type;
+  using allocator_type=typename Container::allocator_type;
+  using value_type=b2::cp_t;
+  using reference=b2::cp_t&;
+  using const_reference=b2::cp_t const&;
+  using difference_type=typename Container::difference_type;
+  using size_type=std::size_t;
 
   // non standard typedefs.
-  typedef EncodeTag encode_type;
-  typedef Container container_type;
-  typedef typename Container::iterator base_iterator;
-  typedef typename Container::const_iterator const_base_iterator;
+  using encode_type=EncodeTag;
+  using container_type=Container;
+  using base_iterator=typename Container::iterator;
+  using const_base_iterator=typename Container::const_iterator;
 
   // type traits struct.
-  typedef typename b2::unicode_type_traits<EncodeTag>type_traits;
+  using type_traits=typename b2::unicode_type_traits<EncodeTag>;
 
   // iterators.
   // NOTE! Same typedef for const/non-const iterators since we cannot modify container through iterators.
-  typedef const_unicode_iterator<EncodeTag,typename Container::const_iterator>const_iterator;
-  typedef boost::reverse_iterator<const_iterator>const_reverse_iterator;
-  typedef const_unicode_iterator<EncodeTag,typename Container::const_iterator>iterator;
-  typedef boost::reverse_iterator<const_iterator>reverse_iterator;
+  using const_iterator=const_unicode_iterator<EncodeTag,typename Container::const_iterator>;
+  using const_reverse_iterator=boost::reverse_iterator<const_iterator>;
+  using iterator=const_unicode_iterator<EncodeTag,typename Container::const_iterator>;
+  using reverse_iterator=boost::reverse_iterator<const_iterator>;
 
   // default ctor.
   unicode_container(){}
@@ -280,11 +280,11 @@ public:
   // (throws execpton)
   template<typename OtherEncodeTag,typename OtherContainer>
   unicode_container(OtherEncodeTag other_tag,const OtherContainer&uc){
-    typedef typename OtherContainer::const_iterator other_iterator;
+    using other_iterator=typename OtherContainer::const_iterator;
     BOOST_CONCEPT_ASSERT((boost::InputIterator<other_iterator>));
     std::copy(uc.begin(),uc.end(),std::back_inserter(cont_));
     uni_error uerr;
-    if(b2::unicode_validate_encoding<EncodeTag>(uc.begin(),uc.end(),&uerr)!=uc.end())throw uni_exception(uerr);
+    if(b2::unicode_validate_encoding<EncodeTag>(uc.begin(),uc.end(),uerr)!=uc.end())throw uni_exception(uerr);
   }
   // construct from iterators over code units.
   // (throws execpton)
@@ -293,13 +293,13 @@ public:
     BOOST_CONCEPT_ASSERT((boost::InputIterator<InputIt>));
     std::copy(begin,end,std::back_inserter(cont_));
     uni_error uerr;
-    if(b2::unicode_validate_encoding<EncodeTag>(begin,end,&uerr)!=end)throw uni_exception(uerr);
+    if(b2::unicode_validate_encoding<EncodeTag>(begin,end,uerr)!=end)throw uni_exception(uerr);
   }
   // construct from container holding codepoints.
   // (throws execpton)
   template<typename OtherContainer>
   unicode_container(const OtherContainer&uc){
-    typedef typename OtherContainer::const_iterator other_iterator;
+    using other_iterator=typename OtherContainer::const_iterator;
     other_iterator cp_it_start(uc.cbegin());
     other_iterator cp_it_end(uc.cend());
     for_each(cp_it_start,cp_it_end,b2::make_unicode_encode<EncodeTag>(std::back_inserter(cont_)));

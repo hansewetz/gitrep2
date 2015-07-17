@@ -7,7 +7,7 @@ namespace b2{
 namespace detail{
 
 // ----------- Dummy iterator when needed to supply one.
-typedef char*dummy_iterator;
+using dummy_iterator=char*;
 
 // ----------- Internal constants.
 const b2::cp_t UNI_MAX_CP=0x0010FFFFu;

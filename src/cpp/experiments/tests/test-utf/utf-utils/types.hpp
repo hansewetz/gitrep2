@@ -5,10 +5,10 @@
 #include<cstdint>
 namespace b2{
 
-// (typedefs) Basic typedefs.
-typedef std::uint8_t uint8_t;
-typedef std::uint16_t uint16_t;
-typedef std::uint32_t uint32_t;
-typedef std::uint32_t cp_t;
+// basic typedefs.
+using uint8_t=std::uint8_t;
+using uint16_t=std::uint16_t;
+using uint32_t=std::uint32_t;
+using cp_t=std::uint32_t;
 }
 #endif
