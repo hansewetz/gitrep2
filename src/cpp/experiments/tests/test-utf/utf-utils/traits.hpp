@@ -13,7 +13,7 @@ struct utf8_tag{};
 template<typename EncodeTag>struct unicode_traits;
 
 // NOTE! Should not delegate in these functions - instead, just implement the function here.
-//	 move these two structures into utf8_detail.hpp and just iplement them inline
+//	 move these two structures into utf8_detail.hpp and just implement them inline
 
 // ----------- (traits) utf8 traits.
 template<>struct unicode_traits<utf8_tag>{

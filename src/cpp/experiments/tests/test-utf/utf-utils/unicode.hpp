@@ -36,8 +36,8 @@ class unicode_encode:public std::unary_function<cp_t,OutputIt>{
 public:
   unicode_encode(OutputIt it):it_(it){}
   OutputIt&operator()(cp_t cp){
-    uni_error::error_code err=unicode_traits<EncodeTag>::encode(cp,it_);
-    if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
+    auto err=unicode_traits<EncodeTag>::encode(cp,it_);
+    if(err)throw uni_exception(uni_error(err));
     return it_;
   }
 private:
@@ -64,8 +64,8 @@ template<typename EncodeTag>
 struct unicode_cu_encode_length:std::unary_function<typename unicode_traits<EncodeTag>::cu_t,std::size_t>{
   std::size_t operator()(typename unicode_traits<EncodeTag>::cu_t val)const{
     std::size_t cu_len;
-    uni_error::error_code err=unicode_traits<EncodeTag>::cu_encode_length(val,cu_len);
-    if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
+    auto err=unicode_traits<EncodeTag>::cu_encode_length(val,cu_len);
+    if(err)throw uni_exception(uni_error(err));
     return cu_len;
   }
 };
@@ -116,8 +116,8 @@ private:
   friend class boost::iterator_core_access;
   void increment(){
     difference_type cu_len;
-    uni_error::error_code err=unicode_traits<EncodeTag>::cu_encode_length(*cur_,cu_len);
-    if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
+    auto err=unicode_traits<EncodeTag>::cu_encode_length(*cur_,cu_len);
+    if(err)throw uni_exception(uni_error(err));
     std::advance(cur_,cu_len);
     dirty_=true;
   }
@@ -134,8 +134,8 @@ private:
     difference_type cu_len;
     cp_t tmp_cp;
     BidirectionalIt tmp_it(cur_);
-    uni_error::error_code err=unicode_traits<EncodeTag>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<BidirectionalIt>::type>(0),cu_len);
-    if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
+    auto err=unicode_traits<EncodeTag>::decode(tmp_it,tmp_cp,nullptr,cu_len);
+    if(err)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=cp_reference_proxy(tmp_cp);
   }
@@ -175,8 +175,8 @@ private:
     cp_t tmp_cp;
     InputIt tmp_it(cur_);
     typename std::iterator_traits<InputIt>::difference_type cu_len;
-    uni_error::error_code err=unicode_traits<EncodeTag>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<InputIt>::type>(0),cu_len);
-    if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
+    auto err=unicode_traits<EncodeTag>::decode(tmp_it,tmp_cp,nullptr,cu_len);
+    if(err)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=tmp_cp;
   }
@@ -222,8 +222,8 @@ InputIt unicode_validate_encoding(InputIt first,InputIt last,uni_error&uerr){
     cp_t tmp_cp;
     InputIt tmp_it(last);
     difference_type cu_len;
-    uni_error::error_code err=unicode_traits<EncodeTag>::decode(tmp_it,tmp_cp,&last,cu_len);
-    if(err!=uni_error::no_error){
+    auto err=unicode_traits<EncodeTag>::decode(tmp_it,tmp_cp,&last,cu_len);
+    if(err){
       uerr=uni_error(err);
       return first;
     }
