@@ -268,13 +268,14 @@ public:
   using iterator=const_unicode_iterator<EncodeTag,typename Container::const_iterator>;
   using reverse_iterator=boost::reverse_iterator<const_iterator>;
 
-  // default ctor.
+  // basic ctors, assignments and dtor
   unicode_container(){}
+  unicode_container(unicode_container<EncodeTag,Container>const&)=default;
+  unicode_container(unicode_container<EncodeTag,Container>&&)=default;
+  unicode_container&operator=(unicode_container<EncodeTag,Container>const&)=default;
+  unicode_container&operator=(unicode_container<EncodeTag,Container>&&)=default;
+  ~unicode_container()=default;
 
-  // construct from unicode container of same type.
-  // (faster than generic copy ctor)
-  unicode_container(unicode_container<EncodeTag,Container>const&uc):cont_(uc.cont_){
-  }
   // construct from container holding code units.
   // (throws execpton)
   template<typename OtherEncodeTag,typename OtherContainer>
@@ -297,7 +298,7 @@ public:
   // construct from container holding codepoints.
   // (throws execpton)
   template<typename OtherContainer>
-  unicode_container(const OtherContainer&uc){
+  unicode_container(OtherContainer const&uc){
     using other_iterator=typename OtherContainer::const_iterator;
     other_iterator cp_it_start(uc.cbegin());
     other_iterator cp_it_end(uc.cend());
@@ -318,12 +319,9 @@ public:
     while(*cp_end!=0)++cp_end;
     for_each(cps,cp_end,b2::make_unicode_encode<EncodeTag>(std::back_inserter(cont_)));
   }
-  // dtor.
-  ~unicode_container(){}
-
   // assignment.
   template<typename OtherEncodeTag,typename OtherContainer>
-  unicode_container<EncodeTag,Container>&operator=(const unicode_container<OtherEncodeTag,OtherContainer>&uc){
+  unicode_container<EncodeTag,Container>&operator=(unicode_container<OtherEncodeTag,OtherContainer>const&uc){
     unicode_container<EncodeTag>uc_tmp(uc);
     swap(uc_tmp);
     return*this;
