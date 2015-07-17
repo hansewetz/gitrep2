@@ -20,7 +20,7 @@ namespace b2{
 // -----------------------------------------------
 //      Forward declarations.
 // -----------------------------------------------
-template<typename EncodeTag,typename Container=std::deque<typename b2::unicode_type_traits<EncodeTag>::cu_t>>
+template<typename EncodeTag,typename Container=std::deque<typename b2::unicode_traits<EncodeTag>::cu_t>>
 class unicode_container;
 
 // -----------------------------------------------
@@ -36,7 +36,7 @@ class unicode_encode:public std::unary_function<cp_t,OutputIt>{
 public:
   unicode_encode(OutputIt it):it_(it){}
   OutputIt&operator()(cp_t cp){
-    uni_error::error_code err=unicode_function_traits<EncodeTag>::encode(cp,it_);
+    uni_error::error_code err=unicode_traits<EncodeTag>::encode(cp,it_);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     return it_;
   }
@@ -55,16 +55,16 @@ template<typename EncodeTag>
 struct unicode_cp_encode_length:std::unary_function<cp_t,std::size_t>{
   std::size_t operator()(cp_t cp)const{
     if(!detail::uni_is_valid_cp(cp))throw uni_exception(uni_error(uni_error::error_invalid_cp));
-    return unicode_function_traits<EncodeTag>::cp_encode_length(cp);
+    return unicode_traits<EncodeTag>::cp_encode_length(cp);
   }
 };
 // ---------- (function object) Get #cus given first cu of encoded cp.
 // (throws exeception)
 template<typename EncodeTag>
-struct unicode_cu_encode_length:std::unary_function<typename unicode_type_traits<EncodeTag>::cu_t,std::size_t>{
-  std::size_t operator()(typename unicode_type_traits<EncodeTag>::cu_t val)const{
+struct unicode_cu_encode_length:std::unary_function<typename unicode_traits<EncodeTag>::cu_t,std::size_t>{
+  std::size_t operator()(typename unicode_traits<EncodeTag>::cu_t val)const{
     std::size_t cu_len;
-    uni_error::error_code err=unicode_function_traits<EncodeTag>::cu_encode_length(val,cu_len);
+    uni_error::error_code err=unicode_traits<EncodeTag>::cu_encode_length(val,cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     return cu_len;
   }
@@ -76,7 +76,7 @@ struct unicode_cp_is_valid:std::unary_function<cp_t,bool>{
   }
 };
 
-// NOTE! Add 'unicode_cu_is_valid', bool operator()(typename unicode_type_traits<EncodeTag>::cu_t ???
+// NOTE! Add 'unicode_cu_is_valid', bool operator()(typename unicode_traits<EncodeTag>::cu_t ???
 
 // ------------------------------------------
 //            Iterators 
@@ -116,14 +116,14 @@ private:
   friend class boost::iterator_core_access;
   void increment(){
     difference_type cu_len;
-    uni_error::error_code err=unicode_function_traits<EncodeTag>::cu_encode_length(*cur_,cu_len);
+    uni_error::error_code err=unicode_traits<EncodeTag>::cu_encode_length(*cur_,cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     std::advance(cur_,cu_len);
     dirty_=true;
   }
   void decrement(){
     difference_type cu_len;
-    while(unicode_function_traits<EncodeTag>::cu_encode_length(*--cur_,cu_len)==uni_error::error_invalid_lead_byte);
+    while(unicode_traits<EncodeTag>::cu_encode_length(*--cur_,cu_len)==uni_error::error_invalid_lead_byte);
     dirty_=true;
   }
   bool equal(const_unicode_iterator<EncodeTag,BidirectionalIt>const&other)const{
@@ -134,7 +134,7 @@ private:
     difference_type cu_len;
     cp_t tmp_cp;
     BidirectionalIt tmp_it(cur_);
-    uni_error::error_code err=unicode_function_traits<EncodeTag>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<BidirectionalIt>::type>(0),cu_len);
+    uni_error::error_code err=unicode_traits<EncodeTag>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<BidirectionalIt>::type>(0),cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=cp_reference_proxy(tmp_cp);
@@ -175,7 +175,7 @@ private:
     cp_t tmp_cp;
     InputIt tmp_it(cur_);
     typename std::iterator_traits<InputIt>::difference_type cu_len;
-    uni_error::error_code err=unicode_function_traits<EncodeTag>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<InputIt>::type>(0),cu_len);
+    uni_error::error_code err=unicode_traits<EncodeTag>::decode(tmp_it,tmp_cp,static_cast<typename std::add_pointer<InputIt>::type>(0),cu_len);
     if(err!=uni_error::no_error)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=tmp_cp;
@@ -215,14 +215,14 @@ InputIt unicode_validate_encoding(InputIt first,InputIt last,uni_error&uerr){
   using value_type=typename std::iterator_traits<InputIt>::value_type;
   using difference_type=typename std::iterator_traits<InputIt>::difference_type;
   BOOST_MPL_ASSERT((std::is_integral<value_type>));
-  BOOST_MPL_ASSERT_RELATION(sizeof(value_type),==,sizeof(typename unicode_type_traits<EncodeTag>::cu_t));
+  BOOST_MPL_ASSERT_RELATION(sizeof(value_type),==,sizeof(typename unicode_traits<EncodeTag>::cu_t));
   BOOST_CONCEPT_ASSERT((boost::InputIterator<InputIt>));
   
   while(first!=last){
     cp_t tmp_cp;
     InputIt tmp_it(last);
     difference_type cu_len;
-    uni_error::error_code err=unicode_function_traits<EncodeTag>::decode(tmp_it,tmp_cp,&last,cu_len);
+    uni_error::error_code err=unicode_traits<EncodeTag>::decode(tmp_it,tmp_cp,&last,cu_len);
     if(err!=uni_error::no_error){
       uerr=uni_error(err);
       return first;
@@ -259,7 +259,7 @@ public:
   using const_base_iterator=typename Container::const_iterator;
 
   // type traits struct.
-  using type_traits=typename b2::unicode_type_traits<EncodeTag>;
+  using type_traits=typename b2::unicode_traits<EncodeTag>;
 
   // iterators.
   // NOTE! Same typedef for const/non-const iterators since we cannot modify container through iterators.
@@ -485,7 +485,7 @@ std::swap(X<T,A>&, X<T,A>&); //optional
 */
 
 // some UTF8 typedefs simplifying the code.
-using utf8string=unicode_container<b2::utf8_tag,std::deque<b2::unicode_type_traits<b2::utf8_tag>::cu_t>>;
+using utf8string=unicode_container<b2::utf8_tag,std::deque<b2::unicode_traits<b2::utf8_tag>::cu_t>>;
 
 // NOTE! Typedef for other encodings.
 //  ...

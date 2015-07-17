@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_SUITE(utf8_tests)
 
   // Check number of code units it takes to encode a code point.
   BOOST_AUTO_TEST_CASE(utf8_cp_encode_length){
-    typedef pair<pair<cp_t,cp_t>,size_t>range_len_t;
+    using range_len_t=pair<pair<cp_t,cp_t>,size_t>;
     vector<range_len_t>range_lengths;
 
     // Check calculation of length to encode a code point into utf8 is correct.
@@ -35,13 +35,13 @@ BOOST_AUTO_TEST_SUITE(utf8_tests)
       cp_t end=p.first.second;
       size_t len=p.second;
       for(cp_t cp=start;cp<end;++cp)
-        BOOST_CHECK((unicode_function_traits<utf8_tag>::cp_encode_length(cp)==len));
+        BOOST_CHECK((unicode_traits<utf8_tag>::cp_encode_length(cp)==len));
     }
   }
   // Check number of code units a leading byte represents.
   BOOST_AUTO_TEST_CASE(utf8_encode_length){
-    typedef unicode_type_traits<utf8_tag>::cu_t cu_t;
-    typedef pair<pair<cu_t,cu_t>,size_t>range_len_t;
+    using cu_t=unicode_traits<utf8_tag>::cu_t;
+    using range_len_t=pair<pair<cu_t,cu_t>,size_t>;
     vector<range_len_t>cu_lengths;
 
     // Check correctness encoding length.
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_SUITE(utf8_tests)
       cu_t len=p.second;
       for(cu_t cu=start;cu<=end;++cu){
         size_t cu_len=0;
-        BOOST_CHECK((unicode_function_traits<utf8_tag>::cu_encode_length(cu,cu_len)==uni_error::no_error));
+        BOOST_CHECK((unicode_traits<utf8_tag>::cu_encode_length(cu,cu_len)==uni_error::no_error));
         BOOST_CHECK(cu_len==len);
       }
     }
@@ -63,11 +63,11 @@ BOOST_AUTO_TEST_SUITE(utf8_tests)
     for(size_t cu=0;cu<0x100;++cu){
       if((cu>=0xC2&&cu<=0xF5)||(cu<=0x80))continue;
       size_t cu_len;
-      BOOST_CHECK((unicode_function_traits<utf8_tag>::cu_encode_length(cu,cu_len)==uni_error::error_invalid_lead_byte));
+      BOOST_CHECK((unicode_traits<utf8_tag>::cu_encode_length(cu,cu_len)==uni_error::error_invalid_lead_byte));
     }
   }
   BOOST_AUTO_TEST_CASE(utf8_trailing_byte){
-    typedef unicode_type_traits<utf8_tag>::cu_t cu_t;
+    using cu_t=unicode_traits<utf8_tag>::cu_t;
 
     // Check that we correctly identify trailing bytes as trailing bytes.
     for(cu_t cu=0x80;cu<=0xBF;++cu){
@@ -82,26 +82,26 @@ BOOST_AUTO_TEST_SUITE(utf8_tests)
   // Check that decoding from utf8 to code points works.
   BOOST_AUTO_TEST_CASE(utf8_decode){
     // NOTE! Should check more encodings - this is only a sample test.
-    typedef unicode_type_traits<utf8_tag>::cu_t cu_t;
-    typedef cu_t*iter_t;
+    using cu_t=unicode_traits<utf8_tag>::cu_t;
+    using iter_t=cu_t*;
     cu_t cus_[]={0xE2,0x82,0xAC};
     cu_t*cus=&cus_[0];
     cp_t cp;
     iter_t end=&cus_[0];
     advance(end,3);
     iterator_traits<iter_t>::difference_type cu_len;
-    uni_error::error_code err=unicode_function_traits<utf8_tag>::decode(cus,cp,&end,cu_len);
+    uni_error::error_code err=unicode_traits<utf8_tag>::decode(cus,cp,&end,cu_len);
     BOOST_CHECK(err==uni_error::no_error);
     BOOST_CHECK(cu_len==3);
     BOOST_CHECK(cp=0x20ac);
   }
   BOOST_AUTO_TEST_CASE(utf8_encode){
     // NOTE! Should do more code points - this is only a sample test.
-    typedef unicode_type_traits<utf8_tag>::cu_t cu_t;
+    using cu_t=unicode_traits<utf8_tag>::cu_t;
     cu_t cus[4];
     cu_t*cus_ptr=&cus[0];
     cp_t cp=0x20ac;
-    uni_error::error_code err=unicode_function_traits<utf8_tag>::encode(cp,cus_ptr);
+    uni_error::error_code err=unicode_traits<utf8_tag>::encode(cp,cus_ptr);
     BOOST_CHECK(err==uni_error::no_error);
     BOOST_CHECK(cus_ptr==&cus[0]+3);
     BOOST_CHECK(cus[0]==0xE2&&cus[1]==0x82&&cus[2]==0xAC);
