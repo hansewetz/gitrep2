@@ -28,16 +28,24 @@ class unicode_container;
 // -----------------------------------------------
 
 // ---------- (function object) convert cp to cu.
-// (throws exception)
 // Notice that instances carry state.
 template<typename EncodeTag,typename OutputIt>
-class unicode_encode:public std::unary_function<cp_t,OutputIt>{
+class unicode_encode{
   BOOST_CONCEPT_ASSERT((boost::OutputIterator<OutputIt,cp_t>));
 public:
+  // ctor
   unicode_encode(OutputIt it):it_(it){}
+
+  // function throwing execption
   OutputIt&operator()(cp_t cp){
     auto err=unicode_traits<EncodeTag>::encode(cp,it_);
     if(err)throw uni_exception(uni_error(err));
+    return it_;
+  }
+  // function returning error code
+  OutputIt&operator()(cp_t cp,uni_error&uerr){
+    auto err=unicode_traits<EncodeTag>::encode(cp,it_);
+    uerr=uni_error(err);
     return it_;
   }
 private:
@@ -52,7 +60,7 @@ unicode_encode<EncodeTag,OutputIt>make_unicode_encode(OutputIt it){
 // ---------- (function object) Get #cus to encode a cp.
 // (throws exception)
 template<typename EncodeTag>
-struct unicode_cp_encode_length:std::unary_function<cp_t,std::size_t>{
+struct unicode_cp_encode_length{
   std::size_t operator()(cp_t cp)const{
     if(!detail::uni_is_valid_cp(cp))throw uni_exception(uni_error(uni_error::error_invalid_cp));
     return unicode_traits<EncodeTag>::cp_encode_length(cp);
@@ -61,7 +69,7 @@ struct unicode_cp_encode_length:std::unary_function<cp_t,std::size_t>{
 // ---------- (function object) Get #cus given first cu of encoded cp.
 // (throws exeception)
 template<typename EncodeTag>
-struct unicode_cu_encode_length:std::unary_function<typename unicode_traits<EncodeTag>::cu_t,std::size_t>{
+struct unicode_cu_encode_length{
   std::size_t operator()(typename unicode_traits<EncodeTag>::cu_t val)const{
     std::size_t cu_len;
     auto err=unicode_traits<EncodeTag>::cu_encode_length(val,cu_len);
@@ -70,13 +78,11 @@ struct unicode_cu_encode_length:std::unary_function<typename unicode_traits<Enco
   }
 };
 // ---------- (predicate) Check that code point is a valid unicode code point.
-struct unicode_cp_is_valid:std::unary_function<cp_t,bool>{
+struct unicode_cp_is_valid{
   bool operator()(cp_t cp)const{
     return detail::uni_is_valid_cp(cp);
   }
 };
-
-// NOTE! Add 'unicode_cu_is_valid', bool operator()(typename unicode_traits<EncodeTag>::cu_t ???
 
 // ------------------------------------------
 //            Iterators 
