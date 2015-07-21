@@ -58,22 +58,34 @@ unicode_encode<EncodeTag,OutputIt>make_unicode_encode(OutputIt it){
   return unicode_encode<EncodeTag,OutputIt>(it);
 }
 // ---------- (function object) Get #cus to encode a cp.
-// (throws exception)
 template<typename EncodeTag>
 struct unicode_cp_encode_length{
+  // function throwing exception
   std::size_t operator()(cp_t cp)const{
     if(!detail::uni_is_valid_cp(cp))throw uni_exception(uni_error(uni_error::error_invalid_cp));
     return unicode_traits<EncodeTag>::cp_encode_length(cp);
   }
+  // function returning error code
+  std::size_t operator()(cp_t cp,uni_error&uerr)const{
+    if(!detail::uni_is_valid_cp(cp))uerr=uni_error(uni_error::error_invalid_cp);
+    return unicode_traits<EncodeTag>::cp_encode_length(cp);
+  }
 };
 // ---------- (function object) Get #cus given first cu of encoded cp.
-// (throws exeception)
 template<typename EncodeTag>
 struct unicode_cu_encode_length{
+  // function throwing exception
   std::size_t operator()(typename unicode_traits<EncodeTag>::cu_t val)const{
     std::size_t cu_len;
     auto err=unicode_traits<EncodeTag>::cu_encode_length(val,cu_len);
     if(err)throw uni_exception(uni_error(err));
+    return cu_len;
+  }
+  // function returning error code
+  std::size_t operator()(typename unicode_traits<EncodeTag>::cu_t val,uni_error&uerr)const{
+    std::size_t cu_len;
+    auto err=unicode_traits<EncodeTag>::cu_encode_length(val,cu_len);
+    uerr=uni_error(err);
     return cu_len;
   }
 };
