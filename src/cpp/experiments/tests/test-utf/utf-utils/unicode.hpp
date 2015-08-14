@@ -57,44 +57,66 @@ unicode_encode<EncodeTag,OutputIt>make_unicode_encode(OutputIt it){
   BOOST_CONCEPT_ASSERT((boost::OutputIterator<OutputIt,b2::cp_t>));
   return unicode_encode<EncodeTag,OutputIt>(it);
 }
-// ---------- (function object) Get #cus to encode a cp.
+// ---------- (function) Get #cus to encode a cp.
+// function throwing exception
 template<typename EncodeTag>
-struct unicode_cp_encode_length{
-  // function throwing exception
-  std::size_t operator()(cp_t cp)const{
-    if(!detail::uni_is_valid_cp(cp))throw uni_exception(uni_error(uni_error::error_invalid_cp));
-    return unicode_traits<EncodeTag>::cp_encode_length(cp);
-  }
-  // function returning error code
-  std::size_t operator()(cp_t cp,uni_error&uerr)const{
-    if(!detail::uni_is_valid_cp(cp))uerr=uni_error(uni_error::error_invalid_cp);
-    return unicode_traits<EncodeTag>::cp_encode_length(cp);
-  }
-};
-// ---------- (function object) Get #cus given first cu of encoded cp.
+std::size_t unicode_cp_encode_length(cp_t cp){
+  uni_error uerr;
+  auto ret=unicode_cp_encode_length<EncodeTag>(cp,uerr);
+  if(uerr)throw uni_exception(uerr);
+  return ret;
+}
+// function returning error code
 template<typename EncodeTag>
-struct unicode_cu_encode_length{
-  // function throwing exception
-  std::size_t operator()(typename unicode_traits<EncodeTag>::cu_t val)const{
-    std::size_t cu_len;
-    auto err=unicode_traits<EncodeTag>::cu_encode_length(val,cu_len);
-    if(err)throw uni_exception(uni_error(err));
-    return cu_len;
-  }
-  // function returning error code
-  std::size_t operator()(typename unicode_traits<EncodeTag>::cu_t val,uni_error&uerr)const{
-    std::size_t cu_len;
-    auto err=unicode_traits<EncodeTag>::cu_encode_length(val,cu_len);
-    uerr=uni_error(err);
-    return cu_len;
-  }
-};
+std::size_t unicode_cp_encode_length(cp_t cp,uni_error&uerr){
+  if(!detail::uni_is_valid_cp(cp))uerr=uni_error(uni_error::error_invalid_cp);
+  return unicode_traits<EncodeTag>::cp_encode_length(cp);
+}
+// ---------- (function) Get #cus given first cu of encoded cp.
+// function throwing exception
+template<typename EncodeTag>
+std::size_t unicode_cu_encode_length(typename unicode_traits<EncodeTag>::cu_t val){
+  uni_error uerr;
+  auto ret=unicode_cu_encode_length<EncodeTag>(val,uerr);
+  if(uerr)throw uni_exception(uerr);
+  return ret;
+}
+// function returning error code
+template<typename EncodeTag>
+std::size_t unicode_cu_encode_length(typename unicode_traits<EncodeTag>::cu_t val,uni_error&uerr){
+  std::size_t cu_len;
+  auto err=unicode_traits<EncodeTag>::cu_encode_length(val,cu_len);
+  uerr=uni_error(err);
+  return cu_len;
+}
+// ---------- (function) check if encoding is valid
+// NOTE! Not yet done - should not pass iterator by reference
+
+/*
+// function returning bool
+// (it will point at last cu in code-point after call)
+template<typename EncodeTag,typename InputIt>
+bool unicode_cu_isvalid(InputIt&it,InputIt itend){
+  uni_error uerr;
+  return unicode_cu_isvalid<EncodeTag>(it,itend,uerr);
+}
+// function returning bool
+// (it will point at last cu in code-point after call)
+template<typename EncodeTag,typename InputIt>
+bool unicode_cu_isvalid(InputIt&it,InputIt itend,uni_error&uerr){
+  using difference_type=typename std::iterator_traits<InputIt>::difference_type;
+  cp_t cp;
+  difference_type cu_len;
+  uni_error::error_code err=unicode_traits<EncodeTag>::decode(it,cp,&itend,cu_len);
+  uerr=uni_error(err);
+  return err==uni_error::no_error;
+}
+*/
+
 // ---------- (predicate) Check that code point is a valid unicode code point.
-struct unicode_cp_is_valid{
-  bool operator()(cp_t cp)const{
-    return detail::uni_is_valid_cp(cp);
-  }
-};
+bool unicode_cp_is_valid(cp_t cp){
+  return detail::uni_is_valid_cp(cp);
+}
 
 // ------------------------------------------
 //            Iterators 
@@ -116,7 +138,10 @@ private:
 // (iterator is not dependent on a unicode_container)
 // (traverses encoded codepoints and returns one codepoint at a time)
 // (if failing to increment the iterator stays at the bad code point and throws an exception)
+
 // NOTE! Reference type is a cp_t const which is not correct. Probably we should return a proxy instead.
+// NOTE! Clumsy implementation with two bidirectional iterator - one to beginning of encoding (base_) and one pointing to the current cu in encoding (cur_)
+
 template<typename EncodeTag,typename BidirectionalIt>
 class const_unicode_iterator:public boost::iterator_facade<const_unicode_iterator<EncodeTag,BidirectionalIt>,cp_t const,boost::bidirectional_traversal_tag,cp_reference_proxy const&>{
 public:
@@ -124,25 +149,42 @@ public:
   BOOST_CONCEPT_ASSERT((boost::BidirectionalIterator<BidirectionalIt>));
 
   // ctor.
-  const_unicode_iterator():cur_(),dirty_(true){};
-  explicit const_unicode_iterator(BidirectionalIt it):cur_(it),dirty_(true){}
+  const_unicode_iterator():cur_(),base_(),dirty_(true){};
+  explicit const_unicode_iterator(BidirectionalIt it):cur_(it),base_(it),dirty_(true){}
 
   // get underlying iterator.
-  BidirectionalIt base()const{return cur_;}
+  BidirectionalIt base()const{return base_;}
 private:
   // functions called by base iterator facade.
   friend class boost::iterator_core_access;
   void increment(){
-    difference_type cu_len;
-    auto err=unicode_traits<EncodeTag>::cu_encode_length(*cur_,cu_len);
-    if(err)throw uni_exception(uni_error(err));
-    std::advance(cur_,cu_len);
-    dirty_=true;
+    if(dirty_){
+      difference_type cu_len;
+      auto err=unicode_traits<EncodeTag>::cu_encode_length(*cur_,cu_len);
+      if(err)throw uni_exception(uni_error(err));
+      std::advance(cur_,cu_len);
+    }else{
+      dirty_=true;
+      ++cur_;
+    }
+    base_=cur_;
   }
   void decrement(){
-    difference_type cu_len;
-    while(unicode_traits<EncodeTag>::cu_encode_length(*--cur_,cu_len)==uni_error::error_invalid_lead_byte);
-    dirty_=true;
+    // either we are at the last cu in a code-point or, we are at the first cu in a code-point
+    if(dirty_){
+      // we are at the first cu in code-point
+      difference_type cu_len;
+      while(unicode_traits<EncodeTag>::cu_encode_length(*--cur_,cu_len)==uni_error::error_invalid_lead_byte);
+    }else{
+      // we are at the last cu in code-point
+      // (move to next code-point and go down 2 code-points)
+      difference_type cu_len;
+      ++cur_;
+      while(unicode_traits<EncodeTag>::cu_encode_length(*--cur_,cu_len)==uni_error::error_invalid_lead_byte);
+      while(unicode_traits<EncodeTag>::cu_encode_length(*--cur_,cu_len)==uni_error::error_invalid_lead_byte);
+      dirty_=true;
+    }
+    base_=cur_;
   }
   bool equal(const_unicode_iterator<EncodeTag,BidirectionalIt>const&other)const{
     return cur_==other.cur_;
@@ -151,14 +193,14 @@ private:
     if(!dirty_)return last_cp_;
     difference_type cu_len;
     cp_t tmp_cp;
-    BidirectionalIt tmp_it(cur_);
-    auto err=unicode_traits<EncodeTag>::decode(tmp_it,tmp_cp,nullptr,cu_len);
+    auto err=unicode_traits<EncodeTag>::decode(cur_,tmp_cp,nullptr,cu_len);
     if(err)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=cp_reference_proxy(tmp_cp);
   }
 private:
-  BidirectionalIt cur_;
+  mutable BidirectionalIt cur_;
+  mutable BidirectionalIt base_;
   mutable cp_reference_proxy last_cp_;
   mutable bool dirty_;
 };
@@ -168,11 +210,12 @@ const_unicode_iterator<EncodeTag,BidirectionalIt>make_const_unicode_iterator(Bid
   return const_unicode_iterator<EncodeTag,BidirectionalIt>(it);
 }
 // ---------- (iterator) input iterator converting code units to code points.
-// (cannot use the boost::function_input_iterator since it derefermce in constructor)
+// (cannot use the boost::function_input_iterator since it dereferences in constructor)
 // (making it impossible to create an end iterator)
 // (remarked this on boost user group)
 template<typename EncodeTag,typename InputIt>
 class unicode_input_iterator:public boost::iterator_facade<unicode_input_iterator<EncodeTag,InputIt>,cp_t,boost::single_pass_traversal_tag,cp_t const>{
+  using difference_type=typename std::iterator_traits<InputIt>::difference_type;
   BOOST_CONCEPT_ASSERT((boost::InputIterator<InputIt>));
 public:
   // ctor.
@@ -182,8 +225,18 @@ private:
   // functions called by base iterator facade.
   friend class boost::iterator_core_access;
   void increment(){
-    ++cur_;
-    dirty_=true;
+    // dirty==false --> we have dereferenced iterator at least ones
+    if(dirty_){
+      // we must increment by the length of encoding (we are pointing to first cu of encoded code-point)
+      difference_type cu_len;
+      auto err=unicode_traits<EncodeTag>::cu_encode_length(*cur_,cu_len);
+      if(err)throw uni_exception(uni_error(err));
+      std::advance(cur_,cu_len);
+    }else{
+      // we have not dereferenced iterator (we are pointing to last cu in code-point)
+      dirty_=true;
+      ++cur_;
+    }
   }
   bool equal(unicode_input_iterator<EncodeTag,InputIt>const&other)const{
     return this->cur_==other.cur_;
@@ -191,15 +244,14 @@ private:
   cp_t const dereference()const{
     if(!dirty_)return last_cp_;
     cp_t tmp_cp;
-    InputIt tmp_it(cur_);
     typename std::iterator_traits<InputIt>::difference_type cu_len;
-    auto err=unicode_traits<EncodeTag>::decode(tmp_it,tmp_cp,nullptr,cu_len);
+    auto err=unicode_traits<EncodeTag>::decode(cur_,tmp_cp,nullptr,cu_len);
     if(err)throw uni_exception(uni_error(err));
     dirty_=false;
     return last_cp_=tmp_cp;
   }
 private:
-  InputIt cur_;
+  mutable InputIt cur_;
   mutable cp_t last_cp_;
   mutable bool dirty_;
 };
@@ -396,12 +448,12 @@ public:
   }
   // remove first codepoint in container.
   void pop_front(){
-    std::size_t cp_len(unicode_cp_encode_length<EncodeTag>()(front()));
+    std::size_t cp_len(unicode_cp_encode_length<EncodeTag>(front()));
     for(std::size_t i=0;i<cp_len;++i)cont_.pop_front();
   }
   // remove last codepoint from container.
   void pop_back(){
-    std::size_t cp_len(unicode_cp_encode_length<EncodeTag>()(back()));
+    std::size_t cp_len(unicode_cp_encode_length<EncodeTag>(back()));
     for(std::size_t i=0;i<cp_len;++i)cont_.pop_back();
   }
 
