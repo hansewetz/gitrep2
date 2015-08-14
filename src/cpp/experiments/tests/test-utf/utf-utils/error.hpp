@@ -36,7 +36,7 @@ private:
 std::string const uni_error::err_msgs_[]={"no error","invalid lead byte","invalid trail byte","overlong code point","invalid code point","range error"};
 std::ostream&operator<<(std::ostream&os,uni_error const&uerr){return uerr.print(os);}
 
-// ----------- (execption) Logic exception.
+// ----------- (exception) Logic exception.
 class uni_exception:public std::logic_error{
 public:
   // ctors etc.

@@ -7,13 +7,13 @@ namespace b2{
 namespace detail{
 
 // ----------- Internal constants.
-const b2::cp_t UNI_MAX_CP=0x0010FFFFu;
-const b2::cp_t UNI_UTF16_LEAD_SURROGATE_MIN=0x0000D800u;
-const b2::cp_t UNI_UTF16_TRAIL_SURROGATE_MAX=0x0000DFFFu;
+constexpr b2::cp_t UNI_MAX_CP=0x0010FFFFu;
+constexpr b2::cp_t UNI_UTF16_LEAD_SURROGATE_MIN=0x0000D800u;
+constexpr b2::cp_t UNI_UTF16_TRAIL_SURROGATE_MAX=0x0000DFFFu;
 
 // ----------- Internal general utilities.
 // Check if a code point is valid.
-static bool uni_is_valid_cp(b2::cp_t cp){
+bool uni_is_valid_cp(b2::cp_t cp){
     return // Must be less than max cp.
            cp<=UNI_MAX_CP
            &&
