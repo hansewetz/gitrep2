@@ -12,9 +12,6 @@ int main(){
 
   // select all parameters + executable for a given service
   string service{"dummy1-serv"};
-  db <<"create table if not exists user (id integer primary key autoincrement not null,"
-       "   age int, name text, weight real);";  
-
   db << "select t1.name, t4.name, t3.value, t3.descr from service_definition t1 "
         "join serv_param_intersect t2 on (t1.name = t2.serv_name) "
         "join service_parameter t3 on (t2.param_id = t3.id) "
