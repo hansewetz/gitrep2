@@ -25,4 +25,9 @@ int main(){
   // pop last character
   str1.pop_front();
   printUtf8String(cout,str1);
+
+// NOTE! Prints code points
+  for(auto it=str1.begin();it!=str1.end();++it){
+    cout<<*it<<" ";
+  }
 }

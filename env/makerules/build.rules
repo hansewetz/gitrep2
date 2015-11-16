@@ -40,6 +40,7 @@ INCPATH=-I${BOOST_INC} $(LOCAL_INCPATH)
 DEFINES=$(LOCAL_DEFINES)
 CXXFLAGS=$(LOCAL_CXXFLAGS)
 CCFLAGS=-c -m64 -fPIC -Wall -pedantic -Werror ${STDFLAG} $(LOCAL_CPPFLAGS)
+CFLAGS=-c -m64 -fPIC -Wall -pedantic $(LOCAL_CPPFLAGS)
 LDFLAGS=-m64 $(LOCAL_LDFLAGS)
 LDSOFLAGS=-shared -fPIC -m64 $(LOCAL_LDSOFLAGS)
 
@@ -67,6 +68,9 @@ clean:
 %.o: %.cc
 	@echo "### Building $@"
 	$(CC) $(CXXFLAGS) $(CCFLAGS) $(INCPATH) $(DEFINES) -o $@ $<
+%.o: %.c
+	@echo "### Building $@"
+	$(CC) -x c $(CXXFLAGS) $(CFLAGS) $(INCPATH) $(DEFINES) -o $@ $<
 
 $(LOCAL_TARGET): $(OBJS)
 	@echo "### Building $@"

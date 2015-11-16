@@ -21,12 +21,12 @@ test-libxml-tmx \
 test-strip-xml-tags \
 asio \
 occi \
-junk \
 test-cpp-netlib \
 test-base64 \
 test-wt1 \
 test-wt2 \
-test-icu
+test-icu \
+sqlite-test
 
 
 #test-clucene \
