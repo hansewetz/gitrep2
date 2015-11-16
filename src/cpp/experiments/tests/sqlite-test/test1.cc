@@ -7,13 +7,11 @@ using namespace std;
 
 // main test program
 int main(){
-  // service to select
-  string service{"dummy1-serv"};
-
   // creates a database file 'dbfile.db' if it does not exists.
   database db("test.db");
 
-  // executes the query and creates a 'user' table
+  // select all parameters + executable for a given service
+  string service{"dummy1-serv"};
   db <<"create table if not exists user (id integer primary key autoincrement not null,"
        "   age int, name text, weight real);";  
 
@@ -26,4 +24,8 @@ int main(){
       >>[&](string serv,string exe,string param,string descr){
     cout<<"service: "<<serv<<", exe: "<<exe<<", param: "<<param<<", descr: "<<descr<<endl;
   };
+  // count #of service in schema
+  int count;
+  db<<"select count(1) from service_definition">>count;
+  cout<<"#services: "<<count<<endl;
 }
