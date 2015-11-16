@@ -11,7 +11,7 @@ int main(){
   string service{"dummy1-serv"};
 
   // creates a database file 'dbfile.db' if it does not exists.
-  database db("junk.db");
+  database db("test.db");
 
   // executes the query and creates a 'user' table
   db <<"create table if not exists user (id integer primary key autoincrement not null,"
