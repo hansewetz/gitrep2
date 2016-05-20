@@ -1,4 +1,4 @@
-// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015. All rights reserved.
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015,2016. All rights reserved.
 
 #ifndef __SOCK_DEQ_SERV_QUEUE_H
 #define __SOCK_DEQ_SERV_QUEUE_H

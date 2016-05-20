@@ -50,6 +50,8 @@ for file in ${FILES}; do
   fi
   dos2unix ${file}.tmp
   mv ${file}.tmp ${file}
+
+  ((COUNT++))
 done
 
 # no errors so far

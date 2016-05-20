@@ -1,5 +1,5 @@
-// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015. All rights reserved.
-#ifndef __LAN_SELECTION_WIDGET_H__
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015,2016. All rights reserved.
+
 #define __LAN_SELECTION_WIDGET_H__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"

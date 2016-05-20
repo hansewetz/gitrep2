@@ -1,4 +1,4 @@
-// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015. All rights reserved.
+// (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015,2016. All rights reserved.
 
 #ifndef __TASK_SCHEDULER_H__
 #define __TASK_SCHEDULER_H__
