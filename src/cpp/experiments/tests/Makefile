@@ -21,6 +21,7 @@ test-boost-regexp \
 test-xml-beans \
 test-libxml-tmx \
 test-strip-xml-tags \
+sfinae \
 asio \
 occi \
 test-cpp-netlib \
