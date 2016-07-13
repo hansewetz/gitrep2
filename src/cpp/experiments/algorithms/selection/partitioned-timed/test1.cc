@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <random>
 #include <iterator>
 #include <boost/timer/timer.hpp>
 using namespace std;

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <boost/algorithm/string.hpp>
 #include <boost/timer/timer.hpp>
 

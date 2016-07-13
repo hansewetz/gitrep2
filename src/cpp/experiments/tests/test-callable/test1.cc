@@ -12,6 +12,7 @@ private:
   struct derived:T,fallback{};
 
   // used for checking if derived contains a fallback method
+  // (this will fail to be instantiated if the two template parameters are not the same - SFINAE)
   template<typename U,U>struct check;
 
   // if T does not contain a fallback method, then 'derived::operator() == fallback::operator()' and the first 'test' will be instantiated

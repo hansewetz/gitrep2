@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <exception>
+#include <stdexcept>
 #include <fstream>
 #include <list>
 #include <set>
