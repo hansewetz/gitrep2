@@ -2,12 +2,14 @@
 # (used in some makefiles)
 if [[ ${DEV_ENV} == 'WORK' ]]; then
 # Compilation stuff
-  export STDFLAG='-std=c++17'
+#  export STDFLAG='-std=c++17'
+  export STDFLAG='-std=c++14'
   
   # Shared drive containing C++ tool chain
   export SHAREDDRIVE=/ec/dgt/shared/exodus
 
-  export INSTALL_HOME=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs	# extra packages
+# NOTE!  export INSTALL_HOME=/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs	# extra packages
+  export INSTALL_HOME=${SHAREDDRIVE}/local/CppEnv-V1.0
   export INSTALL_EXTRA_HOME=${SHAREDDRIVE}/local/CppEnv-V1.0					# basic install stuff
   export INSTALL_TEST_HOME='/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs-test'	# extra packages
 

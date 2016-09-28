@@ -40,8 +40,8 @@ INCPATH=-I${BOOST_INC} $(LOCAL_INCPATH)
 
 DEFINES=$(LOCAL_DEFINES) -DBOOST_NO_AUTO_PTR
 CXXFLAGS=$(LOCAL_CXXFLAGS)
-#NOTE! CCFLAGS=-c -m64 -fPIC -Wall -pedantic -Werror ${STDFLAG} $(LOCAL_CPPFLAGS)
-CCFLAGS=-c -m64 -fPIC -Wall -pedantic ${STDFLAG} $(LOCAL_CPPFLAGS) -fconcepts
+CCFLAGS=-c -m64 -fPIC -Wall -pedantic -Werror ${STDFLAG} $(LOCAL_CPPFLAGS)
+#NOTE! CCFLAGS=-c -m64 -fPIC -Wall -pedantic ${STDFLAG} $(LOCAL_CPPFLAGS) -fconcepts
 CFLAGS=-c -m64 -fPIC -Wall -pedantic $(LOCAL_CPPFLAGS)
 LDFLAGS=-m64 $(LOCAL_LDFLAGS)
 LDSOFLAGS=-shared -fPIC -m64 $(LOCAL_LDSOFLAGS)
@@ -80,4 +80,4 @@ $(LOCAL_TARGET): $(OBJS)
 
 $(LOCAL_SOTARGET): $(OBJS)
 	@echo "### Building $@"
-	$(LDSO) $(CXXFLAGS) $(LDSOFLAGS) -o $@ $(OBJS)
+	$(LDSO) $(CXXFLAGS) $(LDSOFLAGS) -o $@ $(OBJS) $(LIBPATH) $(LIBS)
