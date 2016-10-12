@@ -23,3 +23,6 @@ int ns__div(double a, double b, double *result);
 
 //gsoap ns service method-documentation: pow Raises a to b
 int ns__pow(double a, double b, double *result);
+
+//gsoap ns service method-documentation: random
+int ns__rand(double a, double b, double *result);

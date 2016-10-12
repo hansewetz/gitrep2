@@ -66,3 +66,9 @@ int calcService::pow(double a, double b, double *result)
   }
   return SOAP_OK;
 }
+
+int calcService::rand(double a, double b, double *result)
+{ *result = 17;
+  return SOAP_OK;
+} 
+

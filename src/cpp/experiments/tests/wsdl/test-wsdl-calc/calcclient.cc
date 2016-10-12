@@ -8,7 +8,7 @@ const char server[] = "http://localhost:6060";
 
 int main(int argc, char **argv){
    if (argc < 4){
-     fprintf(stderr, "Usage: [add|sub|mul|div|pow] num num\n");
+     fprintf(stderr, "Usage: [add|sub|mul|div|pow|rand] num num\n");
     exit(0);
   }
   double a, b, result;
@@ -31,6 +31,9 @@ int main(int argc, char **argv){
       break;
     case 'p':
       calc.pow(a, b, &result);
+      break;
+    case 'r':
+      calc.rand(a, b, &result);
       break;
     default:
       fprintf(stderr, "Unknown command\n");

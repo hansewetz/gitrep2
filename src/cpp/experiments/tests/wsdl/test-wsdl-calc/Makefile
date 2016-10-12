@@ -22,3 +22,7 @@ ${CAL_DEP}: calc.h
 # clean up
 clean:
 	rm -f soap* calcserver calcclient *.xml *nsmap *.xsd *.o *.wsdl
+
+# run server
+run: all
+	./calcserver 6060&

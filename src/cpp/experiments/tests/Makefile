@@ -1,4 +1,5 @@
 SUBDIRS = \
+test-basics \
 asio \
 wsdl \
 literals \
