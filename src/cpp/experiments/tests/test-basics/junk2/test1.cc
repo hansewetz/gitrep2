@@ -3,19 +3,40 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
-#include <list>
+#include <map>
 using namespace std;
 
-// find max
-int findmax(vector<int>const&v,size_t ind){
-  if(ind==v.size()-1)return v[ind];
-  int lmax=findmax(v,ind+1);
-  if(v[ind]>lmax)return v[ind];
-  return lmax;
+// item to pack
+struct item_t{
+  int size;
+  int value;
+};
+// calculate max value for a sack of size: space
+int knap(int space,vector<item_t>items,map<int,int>&space2value){
+  // for each type of item recurse to see what max we can get
+  int maxval=0;
+  for(auto const&item:items){
+    // get space left if we take this item - if it can't fit then continue
+    int spaceleft=space-item.size;
+    if(spaceleft<0)continue;
+
+    // check if we already have value for this space
+    auto it=space2value.find(spaceleft);
+    if(it!=space2value.end()){
+      maxval=max(maxval,it->second);
+    }else{
+      int tmpmaxval=knap(spaceleft,items,space2value)+item.value;
+      maxval=max(maxval,tmpmaxval);
+      space2value[spaceleft]=maxval;
+    }
+  }
+  return maxval;
 }
 
 // test program
 int main(){
-  vector<int>v{4,7,2,10,77,0,2,40};
-  cout<<findmax(v,0)<<endl;
+  vector<item_t>items{{3,10},{2,20},{5,50},{6,20}};
+  map<int,int>tmpmap;
+  int space=1000;
+  cout<<"size: "<<space<<": "<<knap(space,items,tmpmap)<<endl;
 }
