@@ -1,10 +1,11 @@
 SUBDIRS = \
+test-dynamic-programming-basics \
 test-list-basics \
-test-perm-basics \
-test-recursion \
+test-perm-backtrack-basics \
 test-selection-search-basics \
 test-sorting-basics \
-test-tree-basics
+test-string-basics \
+test-tree-basics 
 
 include $(PROJECT_ROOT)/env/makerules/subdirs.rules
 

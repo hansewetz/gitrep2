@@ -67,6 +67,13 @@ void preorder(node*root){
   preorder(root->left);
   preorder(root->right);
 }
+// print inorder
+void printinorder(node*n){
+  if(n==0)return;
+  printinorder(n->left);
+  cout<<n->val<<" ";
+  printinorder(n->right);
+}
 // find height of a tree
 size_t maxheight(node*n){
   if(n==0)return 0;
@@ -127,6 +134,15 @@ int maxincrpath(node*n){
 void line(string const&s){
   cout<<"----------------------------- "<<s<<endl;
 }
+// create binary tree for sorted array
+node*mkbintree(vector<int>&v,int l,int u){
+  if(l>u)return nullptr;
+  int m=(l+u)/2;
+  node*ln=mkbintree(v,l,m-1);
+  node*rn=mkbintree(v,m+1,u);
+  return new node{ln,rn,v[m]};
+}
+
 // test program
 int main(){
   vector<int>v{0,1,2,3,4,5,6,7,8,9};
@@ -147,4 +163,11 @@ int main(){
   cout<<"maxsum: "<<maxpathsum(root2)<<endl;
   cout<<"minsum: "<<minpathsum(root2)<<endl;
   cout<<"maxincrpath: "<<maxincrpath(root1)<<endl;
+
+  // create binary tree from sorted array
+  line("binary tree");
+  vector<int>vs{0,1,2,3,4,5,6,7,8};
+  node*btree=mkbintree(v,0,v.size()-1);
+  printinorder(btree);
+  cout<<endl;
 }

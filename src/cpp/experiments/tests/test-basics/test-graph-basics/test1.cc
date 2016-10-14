@@ -70,6 +70,35 @@ int dfs_rec(int start,vector<vector<int>>const&g,function<void(int)>fdisc,vector
   }
   return maxdepth+1;
 }
+// do a topological sort of a graph
+void topsort(vector<vector<int>>const&g){
+  // caclulate in-degree for each vertex
+  int nverts=g.size();
+  vector<int>indegree(nverts,0);
+  for(int i=0;i<nverts;++i){
+    vector<int>const&adj=g[i];
+    for(int j:adj)++indegree[j];
+  }
+  // push all vertices with in-dgree==0 into a queue
+  queue<int>q;
+  for(int i=0;i<nverts;++i){
+    if(indegree[i]==0)q.push(i);
+  }
+  // loop until queue is not empty
+  int count=0;
+  while(!q.empty()){
+    int u=q.front();
+    q.pop();
+    cout<<u<<endl;
+    ++count;
+    vector<int>const&adj=g[u];
+    for(int v:adj){
+      if(--indegree[v]==0)q.push(v);
+    }
+  }
+  // check that we got all vertices in graph
+  if(count!=nverts)cout<<"ERROR: graph cannot be sorted topological"<<endl;
+}
 // test program
 int main(){
   // edges: g[0]-->g[0][0]...g[0][n] all edges from node 0
@@ -108,4 +137,8 @@ int main(){
   vector<bool>discovered(g.size(),false);
   int maxdepth=dfs_rec(0,g,[](int u){cout<<u<<endl;},discovered);
   cout<<"maxdepth: "<<maxdepth<<endl;
+
+  // ------------ topsort --------------------
+  cout<<"------------ topsort test --------------------"<<endl;
+  topsort(g);
 }
