@@ -4,6 +4,8 @@
 #include <iterator>
 #include <algorithm>
 #include <list>
+#include <queue>
+#include <stack>
 using namespace std;
 
 // basic tree structure
@@ -42,21 +44,21 @@ node*treefromarraybfs(vector<int>const&v){
   }
   return root;
 }
-// print a tree in bfs level order
+// print in bfs orde - line by line
 void printbfs(node*root){
-  if(root==0)return;
-  list<node*>q;
-  list<node*>q1;
-  q.push_front(root);
+  queue<node*>q;
+  q.push(root);
+  queue<node*>q1;
   while(!q.empty()){
-    node*n=q.back();
-    q.pop_back();
+    auto n=q.front();
+    q.pop();
+    if(n==0)continue;
     cout<<n->val<<" ";
-    if(n->left)q1.push_front(n->left);
-    if(n->right)q1.push_front(n->right);
+    q1.push(n->left);
+    q1.push(n->right);
     if(q.empty()){
+      q.swap(q1);
       cout<<endl;
-      swap(q,q1);
     }
   }
 }
@@ -142,7 +144,42 @@ node*mkbintree(vector<int>&v,int l,int u){
   node*rn=mkbintree(v,m+1,u);
   return new node{ln,rn,v[m]};
 }
-
+// create a sorted vector from a binary tree
+void tree2vector(node*root,vector<int>&v){
+  if(root==0)return;
+  tree2vector(root->left,v);
+  v.push_back(root->val);
+  tree2vector(root->right,v);
+}
+// find max value in  binary search tree
+int maxval(node*tree){
+  if(tree==0)return -1;
+  if(tree->right==0)return tree->val;
+  return maxval(tree->right);
+}
+// traverse tree in-order non-recursivly
+void inorder_nonrecursive(node*root){
+  if(root==0)return;
+  stack<pair<node*,bool>>st;
+  st.push(make_pair(root,false));
+  while(!st.empty()){
+    auto p=st.top();
+    node*n=p.first;
+    bool haspushed=p.second;
+    st.pop();
+    // if we have not pushed childern yet and right node != 0
+    if(!haspushed&&n->right){
+      st.push(make_pair(n->right,false));
+    }
+    // if we have not pushed childern yet and left node != 0
+    if(!haspushed&&n->left){
+      st.push(make_pair(n,true));
+      st.push(make_pair(n->left,false));
+    }else{
+      cout<<n->val<<" ";
+    }
+  }
+}
 // test program
 int main(){
   vector<int>v{0,1,2,3,4,5,6,7,8,9};
@@ -167,7 +204,19 @@ int main(){
   // create binary tree from sorted array
   line("binary tree");
   vector<int>vs{0,1,2,3,4,5,6,7,8};
-  node*btree=mkbintree(v,0,v.size()-1);
+  node*btree=mkbintree(vs,0,vs.size()-1);
   printinorder(btree);
+  cout<<endl;
+
+  // create a sorted vector from  binary search tree
+  vector<int>vt{0,1,2,3,4,5,6,7,8};
+  node*trees=mkbintree(vt,0,vt.size()-1);
+  vector<int>vu;
+  tree2vector(trees,vu);
+  copy(begin(vu),end(vu),ostream_iterator<int>(cout," "));
+  cout<<endl;
+
+  // traverse in inrder order non-recursivly
+  inorder_nonrecursive(trees);
   cout<<endl;
 }

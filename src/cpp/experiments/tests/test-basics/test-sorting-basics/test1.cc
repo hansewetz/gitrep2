@@ -43,6 +43,7 @@ void merge(vector<int>&v,size_t l,size_t m,size_t u){  // merge sections form sa
     if(uind>u)a[i-l]=v[lind++];
     else a[i-l]=(v[lind]<v[uind])?v[lind++]:v[uind++];
   }
+  for(size_t i=l;i<=u;++i)v[i]=a[i-1];
 }
 void mergebitonic(vector<int>&v,size_t l,size_t m,size_t u){  // use bitonic sequence to merge
   vector<int>a(u-l+1);                           // use bitonic sequence
@@ -59,8 +60,8 @@ void msort(vector<int>&v,size_t l,size_t u){      // merge sort (use normal merg
   int m=(l+u)/2;
   msort(v,l,m);
   msort(v,m+1,u);
-  //merge(v,l,m,u);
-  mergebitonic(v,l,m,u);
+  merge(v,l,m,u);
+//  mergebitonic(v,l,m,u);
 }
 // heap stuff
 size_t hparent(size_t c){

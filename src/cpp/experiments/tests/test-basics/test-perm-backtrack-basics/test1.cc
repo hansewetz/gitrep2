@@ -5,6 +5,33 @@
 #include <algorithm>
 using namespace std;
 
+// calculate all valid queen chess positions
+bool allowed(vector<int>const&cols,int row,int col){
+  for(int r=0;r<row;++r){
+    int c=cols[r];
+    if(c==col)return false;
+    if(abs(r-row)==abs(c-col))return false;
+  }
+  return true;
+}
+void q8(vector<int>&cols,int row){
+  if(row==8){
+    for(int r=0;r<8;++r){
+      cout<<"["<<r<<", "<<cols[r]<<"]";
+    }
+    cout<<endl;
+    return;
+  }
+  for(int c=0;c<8;++c){
+    if(!allowed(cols,row,c))continue;
+    cols[row]=c;
+    q8(cols,row+1);
+  }
+}
+void q8(){
+  vector<int>cols(8,-1);
+  q8(cols,0);
+}
 // generate all valid combinations of '(' and ')'
 // (rule: nl >=nr)
 void genparen(int nl,int nr, int maxp,string&res){
@@ -119,6 +146,46 @@ void randperm(vector<int>&v){
   }
   copy(begin(v),end(v),ostream_iterator<int>(cout," "));
   cout<<endl;
+}
+// generate all paths from position [0, 0] --> position [N, M] in a grid
+constexpr int nrows=2,ncols=3;
+void path(bool used[nrows][ncols],int row,int col,vector<pair<int,int>>&v){
+  if(row==nrows-1&&col==ncols-1){
+    for(size_t i=0;i<v.size();++i){
+      cout<<"["<<v[i].first<<", "<<v[i].second<<"]";
+    }
+    cout<<endl;
+    return;
+  }
+  // try walking down
+  if(row!=nrows-1){
+    if(!used[row+1][col]){
+      used[row+1][col]=true;
+      v.push_back(make_pair(row+1,col));
+      path(used,row+1,col,v);
+      v.pop_back();
+      used[row+1][col]=false;
+    }
+  }
+  if(col!=ncols-1){
+    if(!used[row][col+1]){
+      used[row][col+1]=true;
+      v.push_back(make_pair(row,col+1));
+      path(used,row,col+1,v);
+      v.pop_back();
+      used[row][col+1]=false;
+    }
+  }
+}
+void genpaths(){
+  bool used[nrows][ncols];
+  for(int i=0;i<nrows;++i){
+    for(int j=0;j<ncols;++j){
+      used[i][j]=false;
+    }
+  }
+  vector<pair<int,int>>v;
+  path(used,0,0,v);
 }
 // test program
 int main(){

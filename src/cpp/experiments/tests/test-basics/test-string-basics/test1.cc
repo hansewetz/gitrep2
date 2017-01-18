@@ -29,6 +29,31 @@ void remdupl(char*str){
   }
   *dest='\0';
 }
+// replace ' ' with '%20'
+void repl(string&str){
+  int len=str.size();
+
+  // count spaces
+  int nspaces=0;
+  for(int i=0;i<static_cast<int>(str.size());++i){
+    if(str[i]==' ')++nspaces;
+  }
+  // resize string
+  int newlen=len+nspaces*2;
+  str.resize(newlen,'X');
+
+  // loop from back keep src + dest indices
+  int dest=newlen-1;
+  for(int src=len-1;src>=0;--src){
+    if(str[src]==' '){
+      str[dest--]='0';
+      str[dest--]='2';
+      str[dest--]='%';
+    }else{
+      str[dest--]=str[src];
+    }
+  }
+}
 
 // test program
 int main(){
@@ -36,4 +61,8 @@ int main(){
   cout<<str<<endl;
   remdupl(str);
   cout<<str<<endl;
+
+  string str1{"Hello World   Again  "};
+  repl(str1);
+  cout<<str1<<endl;
 }

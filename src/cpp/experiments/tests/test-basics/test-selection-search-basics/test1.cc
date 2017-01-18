@@ -15,15 +15,15 @@ size_t part(vector<int>&v,size_t l,size_t u){
 }
 // find longest increasing sequence
 int longestseq(vector<int>const&v){
-  size_t n=v.size();
-  size_t sofar=1;        // max len so far
-  size_t tilnow=1;       // max len until now
-  for(size_t i=1;i<n;++i){
-    if(v[i]>v[i-1])++tilnow;
-    else tilnow=1;
-    if(tilnow>sofar)sofar=tilnow;
+  int n=v.size();
+  if(n==0)return 0;
+  int max2here=1;
+  int maxsofar=1;
+  for(int i=1;i<n;++i){
+    if(v[i]>v[i-1])maxsofar=max(++max2here,maxsofar);
+    else max2here=1;
   }
-  return sofar;
+  return maxsofar;
 }
 // find lowest bound of an integer in a sorted sequence
 int lowest(vector<int>const&v,int val){
