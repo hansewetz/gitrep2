@@ -6,6 +6,7 @@
 #include <list>
 #include <queue>
 #include <stack>
+#include <map>
 using namespace std;
 
 // basic tree structure
@@ -180,6 +181,36 @@ void inorder_nonrecursive(node*root){
     }
   }
 }
+// print bottom view of a tree
+// (we keep track of the horizontal distance from center)
+// (center is 0, left node: -1, right node +1)
+// (keep pair<horizontal-dis, node*> in queue)
+// (keep map<horizontal-distance, node*> so at the end, the end, the bottom layer of the tree is stored in the map_)
+// (basically, the map will be overwritten by lower layers in tree so that the bottom view will eventially be stored in map)
+void printb(node*root){
+  map<int,node*>m;
+  queue<pair<int,node*>>q;
+  q.push(make_pair(0,root));
+  while(!q.empty()){
+    auto p=q.front();
+    q.pop();
+    int hd=p.first;
+    node*u=p.second;
+    m[hd]=u;
+    if(u->left){
+      q.push(make_pair(hd-1,u->left));
+    }
+    if(u->right){
+      q.push(make_pair(hd+1,u->right));
+    }
+  }
+  // print map
+  for(auto const&p:m){
+    cout<<p.second->val<<" ";
+  }
+  cout<<endl;
+}
+
 // test program
 int main(){
   vector<int>v{0,1,2,3,4,5,6,7,8,9};
@@ -219,4 +250,10 @@ int main(){
   // traverse in inrder order non-recursivly
   inorder_nonrecursive(trees);
   cout<<endl;
+
+  // print bottom view of tree
+  vector<int>v1{0,1,2,3,4,5,6,7,8};
+  node*t1=treefromarraybfs(v1);
+  cout<<"-----"<<endl;
+  printb(t1);
 }

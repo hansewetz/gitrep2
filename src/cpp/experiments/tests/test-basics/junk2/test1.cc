@@ -1,49 +1,41 @@
-#include <cstdio>
-#include <cstring>
+/*
+  - DONE: shortest path (BFS)
+  - DONE: topological sort using DFS 
+  - DONE: shortest path with weights (DIJKSTRA)
+  - Floyd-Warshal alg. - shortest distance between any nodes (i,j)
+  - shortest path with function (DP)
+  - DONE: longest common subsequence (LCS - DP)
+  - longest palindrome which is a subsequence of a string (LCS + LCS-transpose)
+  - Ford-Fulkerson maximum flow algorithm
+*/
 #include <iostream>
 #include <vector>
-#include <map>
-#include <queue>
-#include <stack>
-#include <functional>
-#include <algorithm>
 #include <iterator>
-#include <memory>
-#include <mutex>
-#include <thread>
-#include <future>
-#include <type_traits>
-#include <sstream>
+#include <algorithm>
+#include <queue>
+#include <map>
+#include <set>
+#include <typeinfo>
+#include <climits>
 using namespace std;
 
-// generate all paths from position [0, 0] --> position [N, M] in a grid
-constexpr int nrows=5,ncols=6;
-void path(int row,int col,vector<pair<int,int>>&v){
-  if(row==nrows-1&&col==ncols-1){
-    for(size_t i=0;i<v.size();++i){
-      cout<<"["<<v[i].first<<", "<<v[i].second<<"]";
-    }
-    cout<<endl;
-    return;
+// calculate LCS
+int lcs(vector<int>const&v1,vector<int>const&v2){
+  // initialize
+  size_t n1=v1.size();
+  size_t n2=v2.size();
+  vector<vector<int>>table(n1);
+  for(size_t i=0;i<n1;++i)table<i>=vector<int>(n2,0);
+
+  // evaluate from bottom up
+  for(size_t i=1;i<n1;++i){
+    
   }
-  // try walking down
-  if(row!=nrows-1){
-    v.push_back(make_pair(row+1,col));
-    path(row+1,col,v);
-    v.pop_back();
-  }
-  if(col!=ncols-1){
-    v.push_back(make_pair(row,col+1));
-    path(row,col+1,v);
-    v.pop_back();
-  }
-}
-void genpaths(){
-  vector<pair<int,int>>v;
-  path(0,0,v);
 }
 
 // test program
 int main(){
-  genpaths();
+  vector<int>v1{1,2,3,4,5,6,7,8,9};
+  vector<int>v2{1,3,5,7,18,88,9};
+  cout<<"lcs: "<<lcs(v1,v2)<<endl;
 }
