@@ -14,12 +14,11 @@ test-callable test-const test-fd-stream test-for test-future test-index-list tes
 test-list-add-numbers test-numeric-limit test-packaged-task test-param-passing test-folding \
 test-readlines test-sqlite test-streambuf test-tuplet-apply \
 test-type-printer boost-type-print \
-test-utf test-variadic-count test-variadic-printf test1_db \
+test-utf test-variadic-count test-variadic-printf \
 test-libxml c-strange-index  rvalue-function-qualifiers boost-fd-stream test-func-wrapper test-boost-process \
 lambda_init_capture \
 ibm-task \
 test-boost-regexp \
-test-xml-beans \
 test-libxml-tmx \
 test-strip-xml-tags \
 sfinae \
@@ -27,12 +26,14 @@ asio \
 occi \
 test-cpp-netlib \
 test-base64 \
+test-icu \
+sqlite-test \
 test-wt1 \
 test-wt2 \
-test-icu \
-sqlite-test
 
 
+#test1_db
+#test-xml-beans \
 #test-clucene \
 # test-c++1y
 # test-poco-ftp

@@ -3,6 +3,7 @@
 #include "stopwatch.h"
 #include <iostream>
 #include <thread>
+#include <functional>
 using namespace std;
 using namespace tutils;
 

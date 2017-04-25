@@ -66,7 +66,6 @@ void WtInputHandler::lanSelectionChanged(){
 // translate button pushed
 void WtInputHandler::translatePushed(){
   // start translation
-  WString const&srctxt=srcTextArea_->text();
   translating_=true;
   processStateChange();
   startTimer();

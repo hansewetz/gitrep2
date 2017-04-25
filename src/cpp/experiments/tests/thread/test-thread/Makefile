@@ -4,7 +4,7 @@ LOCAL_SOTARGET  =
 LOCAL_OBJS      = test1.o
 
 # Control.
-LOCAL_LIBS      = -lboost_thread -lpthread 
+LOCAL_LIBS      = -lboost_thread -lpthread
 LOCAL_LIBPATH   = -L$(BOOST_LIB)
 LOCAL_INCPATH   = -I$(BOOST_INC)
 LOCAL_DEFINES   = -DBOOST_ALL_DYN_LINK -DBOOST_IOSTREAMS_NO_LIB

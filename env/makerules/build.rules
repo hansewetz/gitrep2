@@ -22,8 +22,8 @@
 
 # Add some default so users don't have to add them to LOCAL_XXX vars.
 LOCAL_LIBS      += -lrt
-#LOCAL_LIBPATH   += -L$(INSTALL_HOME)/lib -L$(INSTALL_EXTRA_HOME)/lib -L$(INSTALL_TEST_HOME)/lib -L$(INSTALL_TEST_HOME)/lib64
-LOCAL_LIBPATH   += -L/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/lib64 -L$(INSTALL_HOME)/lib -L$(INSTALL_EXTRA_HOME)/lib -L$(INSTALL_TEST_HOME)/lib -L$(INSTALL_TEST_HOME)/lib64
+LOCAL_LIBPATH   += -L$(INSTALL_HOME)/lib64 -L$(INSTALL_HOME)/lib -L$(INSTALL_EXTRA_HOME)/lib -L$(INSTALL_TEST_HOME)/lib -L$(INSTALL_TEST_HOME)/lib64
+# NOTE! LOCAL_LIBPATH   += -L/ec/prod/exodus/dgt/local/exodus/user/ewetzha/installs/lib64 -L$(INSTALL_HOME)/lib64 -L$(INSTALL_HOME)/lib -L$(INSTALL_EXTRA_HOME)/lib -L$(INSTALL_TEST_HOME)/lib -L$(INSTALL_TEST_HOME)/lib64
 LOCAL_INCPATH   += -I. -I$(INSTALL_HOME)/include -I$(INSTALL_EXTRA_HOME)/include -I$(INSTALL_TEST_HOME)/include
 LOCAL_DEFINES   +=
 LOCAL_CXXFLAGS  +=
@@ -35,13 +35,12 @@ LOCAL_LDSOFLAGS +=
 # NOTE! Here we should pick stuff based on useXXX flags set in user Makefile.
 #NOTE! When linking with occi - LIBS=-locci -lclntsh -lociei -lnnz11 $(LOCAL_LIBS) -lboost_system -lboost_filesystem
 LIBS=$(LOCAL_LIBS)
-LIBPATH=-L${BOOST_LIB} $(LOCAL_LIBPATH)
+LIBPATH=-L$(INSTALL_HOME0)/lib64 -L${BOOST_LIB} $(LOCAL_LIBPATH)
 INCPATH=-I${BOOST_INC} $(LOCAL_INCPATH)
 
 DEFINES=$(LOCAL_DEFINES) -DBOOST_NO_AUTO_PTR
 CXXFLAGS=$(LOCAL_CXXFLAGS)
-CCFLAGS=-c -m64 -fPIC -Wall -pedantic -Werror ${STDFLAG} $(LOCAL_CPPFLAGS)
-#NOTE! CCFLAGS=-c -m64 -fPIC -Wall -pedantic ${STDFLAG} $(LOCAL_CPPFLAGS) -fconcepts
+CCFLAGS=-c -m64 -fPIC -Wall -pedantic -Werror ${STDFLAG} $(LOCAL_CPPFLAGS) ${GCC_ERROR_IGNORE} ${GCC_USE_GLIBCXX11_ABI} -fconcepts
 CFLAGS=-c -m64 -fPIC -Wall -pedantic $(LOCAL_CPPFLAGS)
 LDFLAGS=-m64 $(LOCAL_LDFLAGS)
 LDSOFLAGS=-shared -fPIC -m64 $(LOCAL_LDSOFLAGS)

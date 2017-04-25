@@ -20,3 +20,8 @@ test-wsdl-remote/soapServerLib.cpp
 test-client
 test-serv
 echo-test
+
+src/cpp/experiments/tests/wsdl/test-wsdl-calc/calc.rand.req.xml
+src/cpp/experiments/tests/wsdl/test-wsdl-calc/calc.rand.res.xml
+src/cpp/experiments/tests/wsdl/test-wsdl-xlate/xlient
+

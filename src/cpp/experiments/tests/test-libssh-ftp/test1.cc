@@ -1,6 +1,8 @@
 // (C) Copyright Hans Ewetz 2010,2011,2012,2013,2014,2015,2016. All rights reserved.
 
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <libssh/sftp.h>
+#pragma GCC diagnostic pop
 #include "boost/lexical_cast.hpp"
 #include <iostream>
 #include <stdlib.h>

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <list>
 #include <memory>
+#include <functional>
 using namespace std;
 
 int main(){

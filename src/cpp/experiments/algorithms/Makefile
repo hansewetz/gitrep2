@@ -3,7 +3,6 @@ SUBDIRS =  \
 	bits \
 	graph \
 	heap \
-	junk \
 	lists \
 	problems \
 	search \

@@ -17,7 +17,7 @@ int main(){
   auto i1=j;
   auto const&i2=j;
 
-  int k;
+  int k=0;
   decltype(auto)i3=k;
   decltype(auto)i4=(k);
   decltype(auto)i5=std::move(k);

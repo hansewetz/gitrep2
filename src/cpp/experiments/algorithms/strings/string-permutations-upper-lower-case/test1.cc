@@ -55,7 +55,7 @@ void printStrPermAux(ostream&os,string&str,string&res){
       if(isupper(str[i]))++nu;
       else ++nl;
     }
-    if(abs(nl-nu)>1)return;  // return if there are no permutations
+    if(abs(static_cast<int>(nl-nu))>1)return;  // return if there are no permutations
   }
   // (3) loop over remaining characters
   for(std::size_t i=0;i<str.length();++i){

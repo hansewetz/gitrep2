@@ -52,8 +52,8 @@ int main(int argc,char**argv){
 
   // reverse a tuple
   auto tz=make_tuple(1,"two",3,"four",5);
-  cout<<"reverse tuple1: "<<reverse_tuple(tz)<<endl;
-  cout<<"reverse tuple2: "<<transform_tuple<reverse>(tz)<<endl;
+  cout<<"reverse tuple1: "<<tutils::reverse_tuple(tz)<<endl;
+  cout<<"reverse tuple2: "<<tutils::transform_tuple<tutils::reverse>(tz)<<endl;
 
   // transform tuples using an indlist by picking elemnst from the tuples
   auto t1=make_tuple(1,"one","ONE");
@@ -115,12 +115,12 @@ int main(int argc,char**argv){
 
   // reverse tuple elements
   auto ttu1=make_tuple(1,2,3,4,5);
-  cout<<transform_tuple<reverse>(ttu1)<<endl;
+  cout<<tutils::transform_tuple<tutils::reverse>(ttu1)<<endl;
 
   // call a function for each element in a tuple in reverse order
   auto z6=make_tuple(1,2,"three");
   using IL6=make_indlist_from_tuple<decltype(z6)>::type;
-  apply_tuple_ntimes_with_indlist(reverse<IL6>::type(),Print1Value(),z6);
+  apply_tuple_ntimes_with_indlist(tutils::reverse<IL6>::type(),Print1Value(),z6);
 
   // transform each element in a tuple generating a new tuple
   auto z7=make_tuple(1,2,3,4);
@@ -135,7 +135,7 @@ int main(int argc,char**argv){
   // call a function by reversing arguments
   using IL8=make_indlist_from_range<0,5>::type;
   cout<<"apply_with_indlist (reverse) ";
-  apply_with_indlist(reverse<IL8>::type(),PrintNValues(),0,1,2,3,4,5);
+  apply_with_indlist(tutils::reverse<IL8>::type(),PrintNValues(),0,1,2,3,4,5);
   cout<<endl;
 
   // build a tuple by picking the second element from each tuple

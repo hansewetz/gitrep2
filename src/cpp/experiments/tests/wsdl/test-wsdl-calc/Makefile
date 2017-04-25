@@ -9,11 +9,11 @@ all: calcclient calcserver
 
 # client
 calcclient: calc.h calcclient.cc stdsoap2.cpp soapC.cpp soapcalcProxy.cpp ${CALC_DEP}
-	g++ ${STDFLAG} -o calcclient calcclient.cc stdsoap2.cpp soapC.cpp soapcalcProxy.cpp
+	g++ ${STDFLAG} -Wno-deprecated -Wno-register -D_GLIBCXX_USE_CXX11_ABI=0  -o calcclient calcclient.cc stdsoap2.cpp soapC.cpp soapcalcProxy.cpp
 
 # server
 calcserver: calc.h calcserver.cc stdsoap2.cpp soapC.cpp soapcalcProxy.cpp ${CALC_DEP}
-	g++ ${STDFLAG} -o calcserver calcserver.cc stdsoap2.cpp soapC.cpp soapcalcService.cpp -I${BOOST_INC}
+	g++ ${STDFLAG} -Wno-deprecated -Wno-register -D_GLIBCXX_USE_CXX11_ABI=0  -o calcserver calcserver.cc stdsoap2.cpp soapC.cpp soapcalcService.cpp -I${BOOST_INC}
 
 # generate stubs, skeletons, proxies and marchaling code
 ${CAL_DEP}: calc.h

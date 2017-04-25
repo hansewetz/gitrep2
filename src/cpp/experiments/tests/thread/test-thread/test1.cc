@@ -3,6 +3,8 @@
 #include <iostream>
 #include <thread>
 #include <future>
+#include <exception>
+#include <stdexcept>
 #include <functional>
 using namespace std;
 

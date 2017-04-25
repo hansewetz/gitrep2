@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <ratio>
+#include <functional>
 
 // old fashioned stopwatch
 template<typename C,typename R=double>
