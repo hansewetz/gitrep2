@@ -1,6 +1,6 @@
 /*
+  - DONE: dijkstra graph alg.
   - DONE: minsort vector
-  - DONE: qsort vector
   - DONE: mergesort vector
   - DONE: isort vector
   - msort list
@@ -27,9 +27,19 @@
 #include <climits>
 using namespace std;
 
+using graph=vector<vector<pair<int,int>>>;
+
 
 // test program
 int main(){
-  vector<int>v{1,2,3};
-  perm(v);
+  graph g{
+    {{1,1},{2,1}},
+    {{3,1}},
+    {{4,1}},
+    {{3,1}},
+    {}
+  };
+  auto dist=dijk(g,0);
+  copy(begin(dist),end(dist),ostream_iterator<int>(cout," "));
+  cout<<endl;
 }
