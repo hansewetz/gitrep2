@@ -10,11 +10,22 @@
 
 // decode a base64 encoded string
 std::string decode64(const std::string&val) {
+    // must count #of fillers at end of encoded string
+    // (fillers should not be decoded)
+    // (in most online examples, the return condition in the lambda is simple: 'return c=='\0';'
+    // (which is incorrect since we might have binary data including '\0' which should not be trimmed 
+    // (unless it correpsonds to a filler)
+    int nfillers=0;
+    for(auto it=val.rbegin();it!=val.rend();++it){
+      if(*it=='=')++nfillers;
+      else break;
+    }
     using namespace boost::archive::iterators;
     using It=transform_width<binary_from_base64<std::string::const_iterator>,8,6>;
-    return boost::algorithm::trim_right_copy_if(std::string(It(std::begin(val)),It(std::end(val))),[](char c) {
-        return c=='\0';
-    });
+    return boost::algorithm::trim_right_copy_if(std::string(It(std::begin(val)),It(std::end(val))),
+             [&nfillers](char c) {
+               return nfillers==0?false:--nfillers>=0;
+           });
 }
 // encode a string into base64 format
 std::string encode64(const std::string&val) {

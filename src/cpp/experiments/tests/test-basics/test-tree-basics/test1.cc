@@ -15,6 +15,25 @@ struct node{
   struct node*right;
   int val;
 };
+
+// ------------------------
+
+// create a binary tree from a sorted array
+node*array2tree(vector<int>const&v,int l,int u){
+  if(l>u)return nullptr;
+  int m=(u+l)/2;
+  return new node{array2tree(v,l,m-1),array2tree(v,m+1,u),v[m]};
+}
+// print binary tree in sorted order
+void printbintreesorted(node*n){
+  if(n==0)return;
+  printbintreesorted(n->left);
+  cout<<n->val<<" ";
+  printbintreesorted(n->right);
+}
+
+// ------------------------
+
 // create a tree from a packed array
 node*treefromarray(vector<int>const&v,size_t p){
   if(p>=v.size())return 0;
@@ -22,6 +41,9 @@ node*treefromarray(vector<int>const&v,size_t p){
   node*right=treefromarray(v,2*(p+1));
   return new node{left,right,v[p]};
 }
+
+// ------------------------
+
 // create a tree from a packed array
 node*treefromarraybfs(vector<int>const&v){
   size_t ind=0;
@@ -45,6 +67,9 @@ node*treefromarraybfs(vector<int>const&v){
   }
   return root;
 }
+
+// ------------------------
+
 // print in bfs orde - line by line
 void printbfs(node*root){
   queue<node*>q;
@@ -63,6 +88,9 @@ void printbfs(node*root){
     }
   }
 }
+
+// ------------------------
+
 // print tree in pre-order
 void preorder(node*root){
   if(root==0)return;
@@ -96,13 +124,16 @@ int maxpathsum(node*n){
   int rsum=maxpathsum(n->right);
   return n->val+max(lsum,rsum);
 }
-// get minimukm sukm of a full path in tree
+// get min sum of a full path in tree
 int minpathsum(node*n){
   if(n==0)return 0;
   int lsum=minpathsum(n->left);
   int rsum=minpathsum(n->right);
   return n->val+min(lsum,rsum);
 }
+
+// ------------------------
+
 // make a deep copy of a tree
 node*deepcp(node*t){
   if(t==0)return 0;
@@ -111,32 +142,28 @@ node*deepcp(node*t){
   return new node{nl,nr,t->val};
 }
 // find longest increasing path in tree
-int maxincrpath(node*n,node*nprev,int maxsofar,int max2here){
-  // if node null, the max path is 0
-  if(n==0)return maxsofar;
-
-  // update max2here and maxso far for current node
-  if(n->val>nprev->val)++max2here;
-  else max2here=1;
-  if(max2here>maxsofar)maxsofar=max2here;
-
-  // check left/right side
-  int lmax=0;
-  if(n->left)lmax=maxincrpath(n->left,n,maxsofar,max2here);
-  int rmax=0;
-  if(n->right)rmax=maxincrpath(n->right,n,maxsofar,max2here);
-
-  // calculate return value
-  return max(maxsofar,max(lmax,rmax));
+int maxincrpath(node*n,node*parent,int maxsofar,int max2here){
+  if(!n)return maxsofar;
+  if(n->val>parent->val)++max2here;
+  maxsofar=max(maxsofar,max2here);
+  int leftmax=maxincrpath(n->left,n,max2here,maxsofar);
+  int rightmax=maxincrpath(n->right,n,max2here,maxsofar);
+  return max(leftmax,rightmax);
 }
 int maxincrpath(node*n){
   // add a dummy node since we need a previous node
   node ndummy{n,0,-1};
   return maxincrpath(n,&ndummy,0,0);
 }
+
+// ------------------------
+
 void line(string const&s){
   cout<<"----------------------------- "<<s<<endl;
 }
+
+// ------------------------
+
 // create binary tree for sorted array
 node*mkbintree(vector<int>&v,int l,int u){
   if(l>u)return nullptr;
@@ -145,6 +172,9 @@ node*mkbintree(vector<int>&v,int l,int u){
   node*rn=mkbintree(v,m+1,u);
   return new node{ln,rn,v[m]};
 }
+
+// ------------------------
+
 // create a sorted vector from a binary tree
 void tree2vector(node*root,vector<int>&v){
   if(root==0)return;
@@ -152,12 +182,18 @@ void tree2vector(node*root,vector<int>&v){
   v.push_back(root->val);
   tree2vector(root->right,v);
 }
+
+// ------------------------
+
 // find max value in  binary search tree
 int maxval(node*tree){
   if(tree==0)return -1;
   if(tree->right==0)return tree->val;
   return maxval(tree->right);
 }
+
+// ------------------------
+
 // traverse tree in-order non-recursivly
 void inorder_nonrecursive(node*root){
   if(root==0)return;
@@ -181,6 +217,9 @@ void inorder_nonrecursive(node*root){
     }
   }
 }
+
+// ------------------------
+
 // print bottom view of a tree
 // (we keep track of the horizontal distance from center)
 // (center is 0, left node: -1, right node +1)
@@ -210,6 +249,19 @@ void printb(node*root){
   }
   cout<<endl;
 }
+
+// ------------------------
+
+// free all nodes in tree
+void freetree(node*n){
+  if(n==0)return;
+  freetree(n->left);
+  freetree(n->right);
+  delete n;
+}
+
+// ------------------------
+
 
 // test program
 int main(){
@@ -252,8 +304,18 @@ int main(){
   cout<<endl;
 
   // print bottom view of tree
+  line("print bottom view of tree");
   vector<int>v1{0,1,2,3,4,5,6,7,8};
   node*t1=treefromarraybfs(v1);
-  cout<<"-----"<<endl;
   printb(t1);
+
+  // create binary tree from vector and print tree in sorted order
+  line("create binary tree from sorted array");
+  vector<int>v2{0,1,2,3,4,5,6,7,8};
+  node*t2=array2tree(v2,0,v2.size()-1);
+  printbintreesorted(t2);
+  cout<<endl;
+  cout<<"maxheight: "<<maxheight(t2)<<endl;
+  cout<<"minheight: "<<minheight(t2)<<endl;
+  freetree(t2);
 }
