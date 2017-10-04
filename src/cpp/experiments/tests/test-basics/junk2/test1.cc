@@ -1,73 +1,80 @@
 /*
-  - DONE: minsort vector
-  - DONE: mergesort vector
-  - DONE: isort vector
-  - DONE: msort list
-  - DONE: shortest path (BFS)
-  - DONE: longest common subsequence (LCS - DP)
-  - DONE: qsort
-  - DONE: permutation
-  - DONE: subsets
-  - DONE: kth smallest value
-
-HERE-->
-  - DONE: DFS: print layered
-  - DONE: BFS: top sort
-  - DONE: Dijkstra: shortest dist in weighted graph
-  - DONE: BFS shortest distance
-  - DONE: detect cycle in graph
-  - Bellman-Ford shortest distance with negavive weights
-  - DFS find stringly-connected components (groups of vertices that can be reached) (relativly easy)
-  - Transitive closure of graph (http://www.geeksforgeeks.org/transitive-closure-of-a-graph/)
-
-
-  - Floyd-Warshal alg. - shortest distance between any nodes (i,j)
-  - shortest path with function (DP)
-  - longest palindrome which is a subsequence of a string (LCS + LCS-transpose)
-  - Ford-Fulkerson maximum flow algorithm
-  - consequitive sequence with maximum sum
+ - remove a node from a binary tree
+ - find max value in a binary tree
 */
-#include <bits/stdc++.h>
 
+
+#include <bits/stdc++.h>
 using namespace std;
 
-// generate all paths from (0,0) --> (M,N) in a grid by walking right or down
-// (basic backtracking)
-void genpaths(vector<pair<int,int>>&path,int row,int col,vector<vector<bool>>&used,int nrows,int ncols){
-  // check if we are done
-  if(row==nrows-1&&col==ncols-1){
-    for(auto const&p:path){
-     cout<<"("<<p.first<<","<<p.second<<")";
+struct node{
+  node(int v,node*l=0,node*r=0):val(v),left(l),right(r){}
+  int val;
+  node*left;
+  node*right;
+};
+// create a tree from a packed array
+node*vec2tree(vector<int>const&v){
+  size_t n=v.size();
+  if(n==0)return nullptr;
+  size_t ind=0;
+  queue<node*>q;
+  node*ret=new node(v[ind++]);
+  q.push(ret);
+  while(!q.empty()){
+    node*u=q.front();
+    q.pop();
+    if(ind<n){
+      u->left=new node(v[ind++]);
+      q.push(u->left);
     }
-    cout<<endl;
-    return;
-  }
-  // try stepping right
-  if(col!=ncols-1){
-    if(!used[row][col+1]){
-      used[row][col+1]=true;
-      path.push_back(make_pair(row,col+1));
-      genpaths(path,row,col+1,used,nrows,ncols);
-      path.pop_back();
-      used[row][col+1]=false;
-    }
-  }
-  // try stepping down
-  if(row!=nrows-1){
-    if(!used[row+1][col]){
-      used[row+1][col]=true;
-      path.push_back(make_pair(row+1,col));
-      genpaths(path,row+1,col,used,nrows,ncols);
-      path.pop_back();
-      used[row+1][col]=false;
+    if(ind<n){
+      u->right=new node(v[ind++]);
+      q.push(u->right);
     }
   }
+  return ret;
+}
+// deep copy - preorder non-reurse
+node*deepcp(node*t){
+  if(!t)return 0;
+  auto ret=new node(t->val);
+  stack<node*>st;
+  stack<node*>st1;
+  st.push(t);
+  st1.push(ret);
+  while(!st.empty()){
+    auto n=st.top();
+    auto n1=st1.top();
+    st.pop();
+    st1.pop();
+    if(n->right){
+      n1->right=new node(n->right->val);
+      st.push(n->right);
+      st1.push(n1->right);
+    }
+    if(n->left){
+      n1->left=new node(n->left->val);
+      st.push(n->left);
+      st1.push(n1->left);
+    }
+  }
+  return ret;
+}
+// print tree in in-order traversal
+void print(node*t){
+  if(!t)return;
+  print(t->left);
+  cout<<t->val<<" ";
+  print(t->right);
 }
 // test program
 int main(){
-  int nrows=3;
-  int ncols=4;
-  vector<pair<int,int>>path;
-  vector<vector<bool>>used(nrows,vector<bool>(ncols,false));
-  genpaths(path,0,0,used,nrows,ncols);
+  vector<int>v{0,1,2,3,4,5,6,7};
+  auto t=vec2tree(v);
+  auto t1=deepcp(t);
+  print(t);
+  cout<<endl;
+  print(t1);
+  cout<<endl;
 }

@@ -141,6 +141,34 @@ node*deepcp(node*t){
   node*nr=deepcp(t->right);
   return new node{nl,nr,t->val};
 }
+
+// deep copy - preorder non-reurse
+// (preorder is easy since we don't need to track if children were pushed)
+node*deepcp_preorder(node*t){
+  if(!t)return 0;
+  auto ret=new node{0,0,t->val};
+  stack<node*>st;
+  stack<node*>st1;
+  st.push(t);
+  st1.push(ret);
+  while(!st.empty()){
+    auto n=st.top();
+    auto n1=st1.top();
+    st.pop();
+    st1.pop();
+    if(n->right){
+      n1->right=new node{0,0,n->right->val};
+      st.push(n->right);
+      st1.push(n1->right);
+    }
+    if(n->left){
+      n1->left=new node{0,0,n->left->val};
+      st.push(n->left);
+      st1.push(n1->left);
+    }
+  }
+  return ret;
+}
 // find longest increasing path in tree
 int maxincrpath(node*n,node*parent,int maxsofar,int max2here){
   if(!n)return maxsofar;
@@ -215,6 +243,21 @@ void inorder_nonrecursive(node*root){
     }else{
       cout<<n->val<<" ";
     }
+  }
+}
+
+// ------------------------
+// print preorder non-recurse
+void preorder_nonrecurse(node*t){
+  if(!t)return;
+  stack<node*>st;
+  st.push(t);
+  while(!st.empty()){
+    auto u=st.top();
+    st.pop();
+    cout<<u->val<<" ";
+    if(u->right)st.push(u->right);
+    if(u->left)st.push(u->left);
   }
 }
 
@@ -318,4 +361,12 @@ int main(){
   cout<<"maxheight: "<<maxheight(t2)<<endl;
   cout<<"minheight: "<<minheight(t2)<<endl;
   freetree(t2);
+
+  // print preorder-non-recursive
+  preorder_nonrecurse(treefromarraybfs(vector<int>{0,1,2,3,4,5,6,7}));
+  cout<<endl;
+
+  // print preorder-non-recursive
+  preorder_nonrecurse(deepcp_preorder(treefromarraybfs(vector<int>{0,1,2,3,4,5,6,7})));
+  cout<<endl;
 }
