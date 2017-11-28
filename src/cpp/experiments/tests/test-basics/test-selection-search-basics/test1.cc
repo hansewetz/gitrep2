@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <tuple>
 #include <vector>
+#include <set>
 #include <climits>
 using namespace std;
 
@@ -140,6 +141,43 @@ tuple<int,int,int>totmax(vector<int>const&v,int l,int u){
 decltype(auto)maxsubarray(vector<int>const&v){
   return totmax(v,0,v.size()-1);
 }
+// check if 2 elements sum up to x in an unsorted array
+// (x=v1+v2 --> v1=x-v2)
+// set[x-v2]
+bool sum2x(vector<int>const&v,int x){
+  set<int>s;
+  for(int val:v)s.insert(x-val);
+  for(int val:v){
+    if(s.count(val))return true;
+  }
+  return false;
+}
+// rows/cols sorted - find x in matrix
+// (must know if we should dec/inc row OR col --> cannot have a choice of dec/inc either one of them)
+bool findmat(vector<vector<int>>const&m,int x){
+  int nrows=m.size();
+  int ncols=m[0].size();
+  int r=0;
+  int c=ncols-1;
+  while(c>=0&&r<nrows){
+    int val=m[r][c];
+    if(x==val)return true;
+    if(x<val)--c;
+    else ++r;
+  }
+  return false;
+}
+// find lowest index where there is a '1'
+// (the array loosk lie: [0,0,0,0,1,1,1,1,1])
+int lowind(vector<bool>const&v,int l,int u){
+  if(l>u){
+    if(v[l]==1)return l;
+    return -1;
+  }
+  int m=(l+u)/2;
+  if(v[m]==1)return lowind(v,l,m-1);
+  return lowind(v,m+1,u);
+}
 // (end) ---------------- find max sub-array (i.e. sum of array elements) in an array -----------------------------
 // test program
 int main(){
@@ -171,4 +209,22 @@ int main(){
   }
   cout<<endl;
   cout<<"(end) --- max-subarray: ";
+
+  // check if teher are 2 elements summing up to x in an unsorted array
+  int x=7;
+  vector<int>vx{0,1,2,3,4,5,6};
+  cout<<"sum2x(x"<<x<<"): "<<sum2x(vx,x)<<endl;
+
+  // search for a value 'x' in matrix sorted by rows and columns
+  vector<vector<int>>m={
+    {0,2,4,6},
+    {2,6,8,10},
+    {4,7,11,20}
+  };
+  int xx=8;
+  cout<<"found: "<<boolalpha<<findmat(m,xx)<<endl;
+
+  // find lowest '1' recursivly in a binary vector [0,0,0,0,0,1,1,1,1,1]
+  vector<bool>v8{0,0,0,0,0,0,1,1,1,1,1};
+  cout<<"lowind: "<<lowind(v8,0,v8.size()-1)<<endl;
 }
