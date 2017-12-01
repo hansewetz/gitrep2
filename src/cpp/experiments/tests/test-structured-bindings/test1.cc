@@ -1,6 +1,13 @@
+/*
+ to implement structured bindings:
+  (1) tuple_size (structure - meta)
+  (2) tuple_element (structure - meta)
+  (3) get (function)
+*/
 #include <bits/stdc++.h>
 using namespace std;
 
+// ---------------- hack printing tuple -----------------------
 template<typename F,typename T,int...ind>
 void apply(F&&f,T&&tu,integer_sequence<int,ind...>){
   using xxx=int[];
@@ -12,7 +19,10 @@ ostream&operator<<(ostream&os,tuple<Args...>const&tu){
   apply([&os](auto const&t){os<<t<<" ";},tu,make_integer_sequence<int,sizeof...(Args)>());
   return os;
 }
-// test class to map structured bindings to
+
+// ---------------- impl structured bindings on test class Foo -----------------------
+
+// test class for testing structured bindings
 class Foo{
 public:
   // tuple get
@@ -28,18 +38,17 @@ private:
   tuple<int,string>tu_;
   string str_;
 };
-// get tuple size
 namespace std{
-template<>
-struct tuple_size<Foo>:std::integral_constant<size_t,2>{};
+// get tuple size
+template<>struct tuple_size<Foo>:std::integral_constant<size_t,2>{};
 
 // get type of a tuple element
-template<std::size_t N>
-struct tuple_element<N,Foo>{
+template<std::size_t N>struct tuple_element<N,Foo>{
   using type=decltype(declval<Foo>().get<N>());
 };
 }
 
+// ---------------- main test program -----------------------
 
 // test program
 int main(){
