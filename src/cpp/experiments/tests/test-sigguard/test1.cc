@@ -40,19 +40,12 @@ public:
     // signal handler function
     sighandler_t fsig_;
 };
-
-template<int... SIGS>
-NOTE! How to pass list of integeras as parameters
-makesigguard(sighandler_t fsig,SIGS...){
-  return sigguard(fsig,SIGS...);
-}
-
 // test program
 int main(){
   {
     // install a signal handler for signals
     //sigguard<SIGINT,SIGHUP>([](int sig){});
-    auto sg=makesigguard([](int sig){},SIGHUP,SIGINT);
+    auto sg=sigguard<SIGHUP,SIGINT>([](int sig){});
 
     // code, code, code ...
     // ...

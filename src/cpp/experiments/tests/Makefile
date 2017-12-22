@@ -31,9 +31,11 @@ sqlite-test \
 test-wt1 \
 test-wt2 \
 test-sigguard \
+test-sigguard1 \
 test-structured-bindings \
 test-json \
 test-libconfig \
+test-variant \
 
 
 
