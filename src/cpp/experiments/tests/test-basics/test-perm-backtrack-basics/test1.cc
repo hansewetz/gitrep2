@@ -32,7 +32,25 @@ void q8(){
   vector<int>cols(8,-1);
   q8(cols,0);
 }
-// generate all valid combinations of '(' and ')'
+// (1) generate all valid combinations of '(' and ')'
+void genp(int nl,int nr,int maxp,string res){  // rule: nl>=nr
+  if(nl<nr||nl>maxp)return; // invalid comb. of right/left @of paren.
+  if(nl==maxp&&nr==maxp){
+    cout<<res<<endl;
+    return;
+  }
+  res.push_back('(');
+  genp(nl+1,nr,maxp,res);
+  res.pop_back();
+  res.push_back(')');
+  genp(nl,nr+1,maxp,res);
+  res.pop_back();
+}
+void genp(int np){
+  string res;
+  genp(0,0,np,res);
+}
+// (2) generate all valid combinations of '(' and ')'
 // (rule: nl >=nr)
 void genparen(int nl,int nr, int maxp,string&res){
   if(nl==maxp&&nr==maxp){
@@ -189,7 +207,8 @@ void genpaths(){
 }
 // test program
 int main(){
-  genparen(4);
+  genp(4);
+  //genparen(4);
   genperm(vector<int>{1,2,3,4});
   genstrsubsets("1234");
   gensubs(vector<int>{0,1,2,3,4});

@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <tuple>
 #include <vector>
-#include <set>
+#include <map>
 #include <climits>
 using namespace std;
 
@@ -28,6 +28,29 @@ int longestseq(vector<int>const&v){
     else max2here=1;
   }
   return maxsofar;
+}
+// longest inc sequence with start/end indices
+decltype(auto)longestincseq(vector<int>const&v){
+  int n=v.size();
+  if(n==0)return make_tuple(0,-1,-1);
+  int max2here=1,maxsofar=1;
+  int lind=0,uind=0;
+  int lindtmp=0,uindtmp=0;
+  for(int i=1;i<n;++i){
+    if(v[i]>v[i-1]){
+      uindtmp=i;
+      ++max2here;
+    }else{
+      uindtmp=lindtmp=i;
+      max2here=1;
+    }
+    if(max2here>maxsofar){
+      lind=lindtmp;
+      uind=uindtmp;
+      maxsofar=max2here;
+    }
+  }
+  return make_tuple(maxsofar,lind,uind);
 }
 // find lowest bound of an integer in a sorted sequence
 int lowest(vector<int>const&v,int val){
@@ -141,14 +164,32 @@ tuple<int,int,int>totmax(vector<int>const&v,int l,int u){
 decltype(auto)maxsubarray(vector<int>const&v){
   return totmax(v,0,v.size()-1);
 }
+// linear alg to calculate max subarray
+// (O(n))
+int maxsubarrayLinear(vector<int>const&v){
+  int n=v.size();
+  if(n==0)return -INT_MAX;
+
+  // find max sum which is >=0
+  int maxsofar=v[0];
+  int max2here=v[0];
+  for(int i=1;i<n;++i){
+    max2here=max(v[i],max2here+v[i]);
+    maxsofar=max(max2here,maxsofar);
+  }
+  return maxsofar;
+}
 // check if 2 elements sum up to x in an unsorted array
 // (x=v1+v2 --> v1=x-v2)
-// set[x-v2]
+// (must check that if we have a sum==x and 'a'=='b' that 'a' (or 'b') occurs at least 2 times in 'v')
 bool sum2x(vector<int>const&v,int x){
-  set<int>s;
-  for(int val:v)s.insert(x-val);
-  for(int val:v){
-    if(s.count(val))return true;
+  map<int,int>m;
+  for(int a:v)++m[x-a];
+  for(int b:v){
+    if(m.count(b)){
+      int a=x-b;
+      if(a!=b||m[b]>=2)return true;
+    }
   }
   return false;
 }
@@ -208,7 +249,11 @@ int main(){
     cout<<v2[static_cast<size_t>(i)]<<" ";
   }
   cout<<endl;
-  cout<<"(end) --- max-subarray: ";
+  cout<<"(end) --- max-subarray"<<endl;
+
+  cout<<"(begin) --- max-subarray-linear"<<endl;
+  cout<<"max-subarray-linear: "<<maxsubarrayLinear(v2)<<endl;
+  cout<<"(end) --- max-subarray-linear"<<endl;
 
   // check if teher are 2 elements summing up to x in an unsorted array
   int x=7;
@@ -227,4 +272,10 @@ int main(){
   // find lowest '1' recursivly in a binary vector [0,0,0,0,0,1,1,1,1,1]
   vector<bool>v8{0,0,0,0,0,0,1,1,1,1,1};
   cout<<"lowind: "<<lowind(v8,0,v8.size()-1)<<endl;
+
+  cout<<"(begin) --- longest inc sequence with start and end indices"<<endl;
+  vector<int>v3{2,3,4,2,8,9,5,6,7,8,10,2,3,4,0};
+  auto res3=longestincseq(v3);
+  cout<<"longest inc seq: "<<get<0>(res3)<<", ["<<get<1>(res3)<<", "<<get<2>(res3)<<"]"<<endl;
+  cout<<"(end) --- longest inc sequence with start and end indices"<<endl;
 }

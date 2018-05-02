@@ -71,23 +71,7 @@ node*treefromarraybfs(vector<int>const&v){
 // ------------------------
 
 // print in bfs orde - line by line
-void printbfs(node*root){
-  queue<node*>q;
-  q.push(root);
-  queue<node*>q1;
-  while(!q.empty()){
-    auto n=q.front();
-    q.pop();
-    if(n==0)continue;
-    cout<<n->val<<" ";
-    q1.push(n->left);
-    q1.push(n->right);
-    if(q.empty()){
-      q.swap(q1);
-      cout<<endl;
-    }
-  }
-}
+// NOTE! Not yet done
 
 // ------------------------
 
@@ -310,16 +294,22 @@ void freetree(node*n){
 int main(){
   vector<int>v{0,1,2,3,4,5,6,7,8,9};
   node*root1=treefromarray(v,0);
+/*
   line("bfs");
   printbfs(root1);
+*/
   node*root2=treefromarraybfs(v);
+/*
   line("bfs");
   printbfs(root2);
+*/
   line("preorder");
   preorder(root2);
+/*
   node*ncp=deepcp(root2);
   line("copy bfs");
   printbfs(ncp);
+*/
   line("misc");
   cout<<"maxheight: "<<maxheight(root2)<<endl;
   cout<<"minheight: "<<minheight(root2)<<endl;

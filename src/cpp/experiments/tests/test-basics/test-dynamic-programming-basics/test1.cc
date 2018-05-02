@@ -7,6 +7,46 @@
 #include <climits>
 using namespace std;
 
+// reverese graph
+using graph_t=vector<vector<int>>;
+constexpr int MAXINT=1000;
+
+graph_t rgraph(graph_t const&g){
+  int n=g.size();
+  graph_t rg=graph_t(n,vector<int>());
+  for(int u=0;u<n;++u){
+    for(auto v:g[u]){
+      rg[v].push_back(u);
+    }
+  }
+  return rg;
+}
+// shortest path from 'start' --> 'v' of max 'k' length
+int shortest_k_path(graph_t const&g,int start,int v,int k,map<pair<int,int>,int>&res){
+  if(res.count(pair(v,k))){
+    return res[pair(v,k)];
+  }
+  if(start==v){
+    res[pair(v,k)]=0;
+    return 0;
+  }
+  if(k==0){
+    res[pair(v,k)]=MAXINT;
+    return MAXINT;
+  }
+  int minlen=MAXINT;
+  for(int u:g[v]){
+    int len=shortest_k_path(g,start,u,k-1,res)+1;
+    minlen=min(minlen,len);
+  }
+  res[pair(v,k)]=minlen;
+  return minlen;
+}
+int shortest_k_path(graph_t const&g,int start,int end,int k){
+  graph_t rg=rgraph(g);
+  map<pair<int,int>,int>res;
+  return shortest_k_path(rg,start,end,k,res);
+}
 // item to pack
 struct item_t{
   int size;
@@ -137,22 +177,24 @@ int lis(vector<int>const&v){
   }
   return maxlen;
 }
-// implement count of #of ways to give change using coins c[0..n-1] on amount a
-int changecount(vector<int>const&c,int n,int a,vector<vector<int>>&tab){
-  if(n<0)return 0;
+// coin change count
+int cchange(int a,int k,vector<int>const&denom,map<pair<int,int>,int>&res){
+  // check boundary conditions
   if(a<0)return 0;
+  if(k<0)return 0;
   if(a==0)return 1;
-  if(n==0&&a>0)return 0;
-  if(tab[n][a]!=0)return tab[n][a];
-  int res=changecount(c,n-1,a,tab)+changecount(c,n,a-c[n-1],tab);
-  tab[n][a]=res;
-  return res;
-}
-int changecount(vector<int>const&c,int a){
-  int n=c.size();
-  vector<vector<int>>tab(n+1,vector<int>(a+1,0));
-  return changecount(c,n,a,tab);
-}
+
+  // check if we already have it
+  if(res.count(pair(a,k)))return res[pair(a,k)];
+  
+  int ret=cchange(a,k-1,denom,res)+cchange(a-denom[k],k,denom,res);
+  res[pair(a,k)]=ret;
+  return ret;
+}     
+int cchange(int a,vector<int>const&denom){
+  map<pair<int,int>,int>res;
+  return cchange(a,denom.size()-1,denom,res);
+}  
 // find implement longest sub-sequence in x which is a substring in y
 // nx --> length of seq x
 // ny --> length of seq y
@@ -214,6 +256,40 @@ int minss(vector<int>const&v,int k){
   vector<vector<int>>tab(n+1,vector<int>(k+1,1000));
  return minss(v,n,k,tab);
 }
+// knspasack with no duplicates
+int knap_nodup(int volume,int k,vector<int>const&sizes,vector<int>const&values,map<pair<int,int>,int>&dp,map<pair<int,int>,bool>&picked){
+  if(k==0)return 0;
+  if(volume<=0)return 0;
+  if(map<pair<int,int>,int>::iterator it=dp.find(pair(volume,k)); it!=dp.end()){
+    return it->second; 
+  }
+  auto res1=knap_nodup(volume-sizes[k-1],k-1,sizes,values,dp,picked)+values[k-1];
+  auto res2=knap_nodup(volume,k-1,sizes,values,dp,picked);
+
+  // keep track ofif item was chosen
+  if(res1>res2)picked[pair(volume,k-1)]=true;
+  else picked[pair(volume,k-1)]=false;
+
+  auto resmax=max(res1,res2);
+  dp[pair(volume,k)]=resmax;
+  return resmax;
+}
+int knap_nodup(int volume,vector<int>const&sizes,vector<int>const&values,map<pair<int,int>,bool>&picked){
+  map<pair<int,int>,int>dp;
+  return knap_nodup(volume,values.size(),sizes,values,dp,picked);
+}
+void printItems(int volume,vector<int>const&sizes,map<pair<int,int>,bool>const&picked){
+  cout<<boolalpha;
+  int k=sizes.size();
+  while(volume>0){
+    if(picked.count(pair(volume,k-1))){
+      cout<<k<<" ";
+      volume-=sizes[k-1];
+    }
+    --k;
+  }
+  cout<<endl;
+}
 // test program
 int main(){
   vector<item_t>items{{300,10},{200,20},{500,50},{600,20}};
@@ -243,7 +319,7 @@ int main(){
   cout<<"----- count #of ways to give change on an amount ------------------"<<endl;
   vector<int>coins{1,5,10,25,50,100};
   int amount=10;
-  cout<<"#ways to give change: "<<changecount(coins,amount)<<endl;
+  cout<<"#ways to give change: "<<cchange(amount,coins)<<endl;
 
   cout<<"----- rod cutting - recursive ---------------------------------"<<endl;
   vector<int>ppu{0,5,4,3,2,1}; // price per unit, index == length of rod
@@ -262,4 +338,29 @@ int main(){
   int kmss=3;
   int resmss=minss(vmss,kmss);
   cout<<"(3) sum of non-decreasing sub-sequence of length "<<kmss<<": "<<resmss<<endl;
+
+  // find shortest path from 'start' --> 'emd' using max 'k' edges
+  cout<<"----- find shortest path from 'start' --> 'emd' using max 'k' edges"<<endl;
+  graph_t g{
+    {1,2},
+    {3},
+    {4},
+    {4},
+    {},
+  };
+  int start=0;
+  int end=4;
+  int k=2;
+  int lmin=shortest_k_path(g,start,end,k);
+  cout<<"(4) lmin: "<<lmin<<endl;
+
+  // knap with no duplicates
+  vector<int>sizes{3,5,2,8};
+  vector<int>values{100,200,300,400};
+  map<pair<int,int>,bool>picked;
+  int volume=10;
+  cout<<"value: "<<knap_nodup(volume,sizes,values,picked)<<endl;
+
+  // print the items we picked
+  printItems(volume,sizes,picked);
 }
