@@ -1,7 +1,6 @@
 SUBDIRS = \
 test-basics \
 asio \
-wsdl \
 literals \
 resources \
 time \
@@ -23,21 +22,23 @@ test-libxml-tmx \
 test-strip-xml-tags \
 sfinae \
 asio \
-occi \
-test-cpp-netlib \
 test-base64 \
 test-icu \
 sqlite-test \
-test-wt1 \
-test-wt2 \
 test-sigguard \
 test-sigguard1 \
 test-structured-bindings \
 test-json \
 test-libconfig \
 test-variant \
+occi \
 
 
+# commented out - must install gSoap+wt+netlib packages
+#wsdl \
+#test-wt1 \
+#test-wt2
+#test-cpp-netlib \
 
 #test1_db
 #test-xml-beans \

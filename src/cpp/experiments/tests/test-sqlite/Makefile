@@ -1,10 +1,10 @@
 # To be built
 LOCAL_TARGET    =  test1
 LOCAL_SOTARGET  =
-LOCAL_OBJS      = test1.o
+LOCAL_OBJS      = test1.o sqlite3.o
 
 # Control.
-LOCAL_LIBS      =  -lsqlite3
+LOCAL_LIBS      = -lpthread -ldl
 LOCAL_LIBPATH   = -L$(BOOST_LIB)
 LOCAL_INCPATH   = -I$(BOOST_INC)
 LOCAL_DEFINES   = -DBOOST_ALL_DYN_LINK -DBOOST_IOSTREAMS_NO_LIB

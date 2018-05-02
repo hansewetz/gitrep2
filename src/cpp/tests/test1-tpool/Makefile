@@ -4,7 +4,7 @@ LOCAL_SOTARGET  =
 LOCAL_OBJS      = test1-tpool.o
 
 # Control.
-LOCAL_LIBS      = 
+LOCAL_LIBS      = -lpthread
 LOCAL_LIBPATH   = 
 LOCAL_INCPATH   =-I$(PROJECT_ROOT)/src/cpp/include
 LOCAL_DEFINES   = 

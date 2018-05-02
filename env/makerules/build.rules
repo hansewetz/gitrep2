@@ -34,8 +34,8 @@ LOCAL_LDSOFLAGS +=
 # NOTE! Here we should pick stuff based on useXXX flags set in user Makefile.
 #NOTE! When linking with occi - LIBS=-locci -lclntsh -lociei -lnnz11 $(LOCAL_LIBS) -lboost_system -lboost_filesystem
 LIBS=$(LOCAL_LIBS)
-LIBPATH=-L$(INSTALL_HOME0)/lib64 -L${BOOST_LIB} $(LOCAL_LIBPATH)
-INCPATH=-I${BOOST_INC} $(LOCAL_INCPATH)
+LIBPATH=$(LOCAL_LIBPATH)
+INCPATH=$(LOCAL_INCPATH)
 
 DEFINES=$(LOCAL_DEFINES) -DBOOST_NO_AUTO_PTR
 CXXFLAGS=$(LOCAL_CXXFLAGS)
