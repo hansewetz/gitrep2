@@ -183,6 +183,7 @@ int cchange(int a,int k,vector<int>const&denom,map<pair<int,int>,int>&res){
   if(a<0)return 0;
   if(k<0)return 0;
   if(a==0)return 1;
+  if(k==0)return 0;
 
   // check if we already have it
   if(res.count(pair(a,k)))return res[pair(a,k)];
